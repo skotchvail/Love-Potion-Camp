@@ -1,0 +1,27 @@
+diff --git a/Makefile b/Makefile
+index 7276ba8..2183a00 100644
+--- a/Makefile
++++ b/Makefile
+@@ -7,6 +7,7 @@ LDFLAGS    = -lftd2xx
+ ifeq ($(shell uname -s),Darwin)
+   # Mac OS X
+   CFLAGS   = -fast -fomit-frame-pointer -m32
++  LDFLAGS += -L/usr/local/lib
+   SUDO     = sudo
+ endif
+ ifeq ($(shell uname -s),Linux)
+diff --git a/processing/Makefile b/processing/Makefile
+index b3d20fb..185bbc1 100644
+--- a/processing/Makefile
++++ b/processing/Makefile
+@@ -3,8 +3,8 @@ CC = gcc
+ # Platform-specific rules
+ ifeq ($(shell uname -s),Darwin)
+   # Mac OS X
+-  CFLAGS     = -m32 -fast -fomit-frame-pointer
+-  LDFLAGS    = -m32 -framework JavaVM -dynamiclib
++  CFLAGS     = -m32 -fast -fomit-frame-pointer -I..
++  LDFLAGS    = -m32 -framework JavaVM -dynamiclib -L..
+   CLASSPATH  = /Applications/Processing.app/Contents/Resources/Java/core.jar
+   HEADERPATH = /System/Library/Frameworks/JavaVM.framework/Headers
+   DESTPATH   = ~/Documents/Processing/Libraries/TotalControl
