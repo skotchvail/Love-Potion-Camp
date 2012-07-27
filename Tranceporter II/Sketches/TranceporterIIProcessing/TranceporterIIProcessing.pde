@@ -16,6 +16,7 @@ int baud = 0;
 Pixels px;
 SerialPacketWriter spw;
 Console console;
+String iPadIP = "10.99.1.8";
 
 OscP5 oscP5;
 NetAddress oscReceiver;
@@ -133,7 +134,7 @@ void newProgram() {
   modeInd = (modeInd + 1) % modes.length;
   modes[modeInd].setup();
   updateModeName();
-  println("Advancing to next mode");
+  println("Advancing to next mode: " + modes[modeInd].getName());
 }
 
 
@@ -149,13 +150,18 @@ void touchXY(int touchNum, float x, float y) {
   modes[modeInd].setTouch(touchNum, x, y);
 }
 
+void mouseClicked() {
+  println("got click");
+  newProgram();
+}
+
 void tap() {
 }
 
 
 void initOSC() {
   oscP5 = new OscP5(this,8000);
-  oscReceiver = new NetAddress("192.168.1.100",9000);
+  oscReceiver = new NetAddress(iPadIP,9000);
 
   // define param info: name -> OSC control
   controlInfo = new HashMap();
@@ -188,7 +194,12 @@ void initOSC() {
   controlInfo.put("/2/push1", Arrays.asList("tap",new VoidFunction() { public void function() { tap(); } }));
   controlInfo.put("/2/rotary1", Arrays.asList("beatLength", 0.5));
   
-  for (Object controlName : controlInfo.keySet()) {
+  sendFirstInfoToIPad();
+}  
+
+void sendFirstInfoToIPad()
+{
+    for (Object controlName : controlInfo.keySet()) {
     List al = (List) controlInfo.get(controlName);
     if (al.size() > 1) {
       try {
@@ -205,7 +216,16 @@ void initOSC() {
   }
   
   updateModeName();
-}  
+  updatePaletteType();
+}
+
+void detectedNewIPadAddress(String ipAddress)
+{
+    println("detected new iPad address: " + iPadIP + " -> " + ipAddress);
+    iPadIP = ipAddress; //once the iPad contacts us, we can contact them, if the hardcoded IP address is wrong
+    oscReceiver = new NetAddress(iPadIP,9000);
+    sendFirstInfoToIPad();
+}
 
 void updateModeName() {
   String name = modes[modeInd].getName();
@@ -243,7 +263,10 @@ void updatePaletteType() {
 /* unplugged OSC messages */
 void oscEvent(OscMessage msg) {
   String addr = msg.addrPattern();
-
+  String ipAddress = msg.netAddress().address();
+  if (ipAddress != null && ipAddress.length() > 0 && !ipAddress.equals(iPadIP)) {
+    detectedNewIPadAddress(ipAddress);
+  }
   for (Object controlName : controlInfo.keySet()) {
     String s = (String) controlName;
     List al = (List) controlInfo.get(controlName);
