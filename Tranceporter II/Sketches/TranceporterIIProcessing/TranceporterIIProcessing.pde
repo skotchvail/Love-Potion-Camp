@@ -127,13 +127,13 @@ void newPalette() {
 void newPaletteType() {
   pm.nextPaletteType();
   newPalette();
-  updatePaletteType();
+  updateIPadGUI();
 }
 
 void newProgram() {
   modeInd = (modeInd + 1) % modes.length;
   modes[modeInd].setup();
-  updateModeName();
+  updateIPadGUI();
   println("Advancing to next mode: " + modes[modeInd].getName());
 }
 
@@ -143,6 +143,7 @@ interface FunctionFloatFloat { void function(float x, float y); }
 
 void reset() {
   modes[modeInd].reset();
+  updateIPadGUI();
 }
 
 void touchXY(int touchNum, float x, float y) {
@@ -193,13 +194,10 @@ void initOSC() {
   controlInfo.put("/2/multifader4/3", Arrays.asList("audioSensitivity3", 0.0));
   controlInfo.put("/2/push1", Arrays.asList("tap",new VoidFunction() { public void function() { tap(); } }));
   controlInfo.put("/2/rotary1", Arrays.asList("beatLength", 0.5));
-  
-  sendFirstInfoToIPad();
-}  
-
-void sendFirstInfoToIPad()
-{
-    for (Object controlName : controlInfo.keySet()) {
+ 
+  //Skotch: this seems suspect. The defaults that are being sent to the iPad should be the same as the settings, 
+ //and this should be sent in upodateIPadGui() on each change.  
+  for (Object controlName : controlInfo.keySet()) {
     List al = (List) controlInfo.get(controlName);
     if (al.size() > 1) {
       try {
@@ -214,7 +212,11 @@ void sendFirstInfoToIPad()
       }
     }
   }
-  
+  updateIPadGUI();
+}  
+
+void updateIPadGUI()
+{
   updateModeName();
   updatePaletteType();
 }
@@ -224,7 +226,7 @@ void detectedNewIPadAddress(String ipAddress)
     println("detected new iPad address: " + iPadIP + " -> " + ipAddress);
     iPadIP = ipAddress; //once the iPad contacts us, we can contact them, if the hardcoded IP address is wrong
     oscReceiver = new NetAddress(iPadIP,9000);
-    sendFirstInfoToIPad();
+    updateIPadGUI();
 }
 
 void updateModeName() {
