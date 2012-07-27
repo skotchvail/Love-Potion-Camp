@@ -28,11 +28,14 @@ class Paint extends Drawer {
   }
 
   void reset() {
+    println("Paint clear()");
     clear();
   }  
   
   void draw() { 
+    pg.beginDraw();
     //if (int(getParam(2) + 0.5) == 1) clear();
+    
     pg.background(0);
     int tailLength = round(settings.getParam("custom1")*MAX_TAIL_LENGTH);
     
@@ -71,6 +74,7 @@ class Paint extends Drawer {
       }
     }
     tailInd = (tailInd + 1) % MAX_TAIL_LENGTH;
+    pg.endDraw();
   }
 
   void clear() {
