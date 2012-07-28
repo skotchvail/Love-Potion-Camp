@@ -6,19 +6,19 @@ int LOC_BYTES = 1; // how many bytes to use to store the index at the beginning 
 int MAX_RGB = 255;
 
 class Pixels {
-  int w, h, pixelSize;
+  int ledWidth, ledHeight, pixelSize;
   color[][] px;
   SerialPacketWriter spw;
   byte txData[];
   
   Pixels(PApplet p, int wi, int he, int pSize, int baud) {
-    w = wi; 
-    h = he;
+    ledWidth = wi; 
+    ledHeight = he;
     pixelSize = pSize;
-    px = new color[w][h];
+    px = new color[ledWidth][ledHeight];
     
     if (baud > 0) {
-      int npkts = ceil(w*h*3.0/(PACKET_SIZE-LOC_BYTES));
+      int npkts = ceil(ledWidth*ledHeight*3.0/(PACKET_SIZE-LOC_BYTES));
       txData = new byte[npkts*PACKET_SIZE];
       
       spw = new SerialPacketWriter();
@@ -31,45 +31,46 @@ class Pixels {
   }
 
   void setAll(color c) {
-    for (int x=0; x<w; x++) {
-      for (int y=0; y<h; y++) {
+    for (int x=0; x<ledWidth; x++) {
+      for (int y=0; y<ledHeight; y++) {
         setPixel(x, y, c);
       }
     }
   }
   
-  void drawToScreen() {
-    //println(red(px[0][0]) + " " + green(px[0][0]) + " " + blue(px[0][0]));
-    background(0);
-    loadPixels();
-    for (int x=0; x<w; x++) {
-      for (int y=0; y<h; y++) {
-        color col = px[x][y];
-        for (int i=x*pixelSize; i<(x+1)*pixelSize; i++) {
-          for (int j=y*pixelSize; j<(y+1)*pixelSize; j++) {
-            pixels[j*w*pixelSize + i] = col;
-          }
-        }
-        //rect(x*pixelSize, y*pixelSize, pixelSize, pixelSize); 
+void drawToScreen() {
+  
+    int xOffset = 10;
+    int yOffset = 10;
+
+    noStroke();
+    background(color(12,49,81));
+    for (int x=0; x<ledWidth; x++) {
+      for (int y=0; y<ledHeight; y++) {
+        color pixelColor = px[x][y];
+        fill(pixelColor);
+        rect(xOffset + x*pixelSize, yOffset + y*pixelSize, pixelSize, pixelSize);
       }
     }    
-    updatePixels();
   }
   
   void drawToLedWall() {
     // r, g, b for 1,1 then 1,2; etc.
+    
+    //TODO: WE NEED TO PUT IN OUR ALGORITHM FOR DRAWING HERE
+
     int ti=0;
-     for (int y=h-1; y>=0; y--) {
+     for (int y=ledHeight-1; y>=0; y--) {
       int dx, x;
       if (y%2 == 0) {
         dx = -1;
-        x = w-1;
+        x = ledWidth-1;
       } else {
         dx = 1;
         x = 0;
       }
       
-      while (x >= 0 && x < w) {
+      while (x >= 0 && x < ledWidth) {
         byte[] rgb = new byte[3];
         rgb[2] = (byte) constrain(px[x][y] & 0xFF, 0, MAX_RGB);
         rgb[1] = (byte) constrain((px[x][y] >> 8) & 0xFF, 0, MAX_RGB);
@@ -91,8 +92,8 @@ class Pixels {
     spw.send(txData);
   }
   
-  int getHeight() { return h; }
-  int getWidth() { return w; }
+  int getHeight() { return ledHeight; }
+  int getWidth() { return ledWidth; }
   int getPixelSize() { return pixelSize; }
 }
 

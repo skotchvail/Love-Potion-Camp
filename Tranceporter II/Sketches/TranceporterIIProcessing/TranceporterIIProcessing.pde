@@ -8,15 +8,20 @@ import java.util.Arrays;
 import java.lang.reflect.Method;
 import java.util.List;
 
-int W = 32;
-int H = 17;
-int S = 5;
-//int baud = 921600;
-int baud = 0;
+
+//ADJUSTABLE PARAMS
+int baud = 921600;
+//int baud = 0;
+String iPadIP = "10.99.1.8";
+int ledWidth = 32;
+int ledHeight = 17;
+int screenPixelSize = 8;
+int screenWidth = 800;
+int screenHeight = 400; 
+
 Pixels px;
 SerialPacketWriter spw;
 Console console;
-String iPadIP = "10.99.1.8";
 
 OscP5 oscP5;
 NetAddress oscReceiver;
@@ -47,7 +52,7 @@ PaletteManager pm = new PaletteManager();
 Settings settings = new Settings(NUM_BANDS);
 
 void setup() {
-  size(W*S, H*S);
+  size(screenWidth, screenHeight);
   
   // redirect stdout/err
   try {
@@ -57,11 +62,11 @@ void setup() {
   }
   
   try {
-    px = new Pixels(this, W, H, S, baud); 
+    px = new Pixels(this, ledWidth, ledHeight, screenPixelSize, baud);
     println("### Started at " + baud);
   } catch (Exception e) {
     baud = 0;
-    px = new Pixels(this, W, H, S, baud);
+    px = new Pixels(this, ledWidth, ledHeight, screenPixelSize, baud);
     println("### Started in standalone mode");
   }
   
