@@ -1,6 +1,8 @@
 // Class to abstract out interfacing with the microcontroller (which in turn sends signals to the wall) and
 // to the processing display.
 
+import saito.objloader.*;
+
 int PACKET_SIZE = 100;
 int LOC_BYTES = 1; // how many bytes to use to store the index at the beginning of each packet
 int MAX_RGB = 255;
@@ -13,8 +15,10 @@ class Pixels {
   
   int xOffset = 10;
   int yOffset = 10;
-  int rotationY = 0;
+  int rotation = 0;
 
+  OBJModel objModel;
+  PGraphics pg3D;
 
   // 3D version
   int tubeRes = 32;
@@ -40,6 +44,20 @@ class Pixels {
       tubeX[i] = cos(radians(i * angle));
       tubeY[i] = sin(radians(i * angle));
     }
+    
+    int width3d = 360;
+    int height3d = 360;
+
+    pg3D = createGraphics(width3d, height3d, P3D);
+    
+    objModel = new OBJModel(p, "tranceporter.obj");
+    // turning on the debug output (it's all the stuff that spews out in the black box down the bottom)
+    objModel.enableDebug();
+    
+    objModel.scale(3);
+    
+    //noStroke();
+
 
   }
 
@@ -86,10 +104,93 @@ class Pixels {
     pg.updatePixels();
     return pg; 
   }
-  
+
+  void drawModel(PImage texture) {
+    try {
+      PVector v = null, vt = null, vn = null;
+      
+      //			Material tmpMaterial = null;
+      
+      Segment tmpModelSegment;
+      Face tmpModelElement;
+      
+      // render all triangles
+      for (int s = 0; s < objModel.getSegmentCount(); s++) {
+        
+        tmpModelSegment = objModel.getSegment(s);
+        
+        //				tmpMaterial = objModel.materials.get(tmpModelSegment.materialName);
+        
+        // if the material is not assigned for some
+        // reason, it uses the default material setting
+        //				if (tmpMaterial == null) {
+        //					tmpMaterial = objModel.materials.get(defaultMaterialName);
+        //
+        //					debug.println("Material '" + tmpModelSegment.materialName + "' not defined");
+        //				}
+        
+        //				if (useMaterial) {
+        //					pg3D.ambient(255.0f * tmpMaterial.Ka[0], 255.0f * tmpMaterial.Ka[1], 255.0f * tmpMaterial.Ka[2]);
+        //					pg3D.specular(255.0f * tmpMaterial.Ks[0], 255.0f * tmpMaterial.Ks[1], 255.0f * tmpMaterial.Ks[2]);
+        //					pg3D.fill(255.0f * tmpMaterial.Kd[0], 255.0f * tmpMaterial.Kd[1], 255.0f * tmpMaterial.Kd[2], 255.0f * tmpMaterial.d);
+        //				}
+        
+        for (int f = 0; f < tmpModelSegment.getFaceCount(); f++) {
+          tmpModelElement = (tmpModelSegment.getFace(f));
+          
+          if (tmpModelElement.getVertIndexCount() > 0) {
+            
+            //pg3D.textureMode(PConstants.NORMAL);
+            pg3D.beginShape(objModel.getDrawMode()); // specify render mode
+            boolean useTexture = false;
+            //						if (useTexture == false || tmpMate rial.map_Kd == null)
+            //							useTexture = false;
+            //
+            //						if (useTexture) {
+            //							if (texture != null)
+            //								pg3D.texture(texture);
+            //							else
+            //								pg3D.texture(tmpMaterial.map_Kd);
+            //						}
+            pg3D.texture(texture);
+            
+            for (int fp = 0;  fp < tmpModelElement.getVertIndexCount(); fp++) {
+              //v = vertices.get(tmpModelElement.getVertexIndex(fp));
+              v = objModel.getVertex(tmpModelElement.getVertexIndex(fp));
+              
+              if (v != null) {
+                try {
+                  if (tmpModelElement.normalIndices.size() > 0) {
+                    vn = objModel.getNormal(tmpModelElement.getNormalIndex(fp));
+                    pg3D.normal(vn.x, vn.y, vn.z);
+                  }
+                  
+                  if (useTexture) {
+                    vt = objModel.getUV(tmpModelElement.getTextureIndex(fp));
+                    pg3D.vertex(v.x, v.y, v.z, vt.x, vt.y);
+                  } else
+                    pg3D.vertex(v.x, v.y, v.z);
+                } catch (Exception e) {
+                  e.printStackTrace();
+                }
+              } else
+                pg3D.vertex(v.x, v.y, v.z);
+            }
+            
+            pg3D.endShape();
+            
+            //pg3D.textureMode(PConstants.IMAGE);
+          }
+        }
+      }
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+  }
+
+
+    
   void drawMappedOntoBottle(PGraphics pg) {
-    int width3d = 360;
-    int height3d = 360;
     
     // create image version of the 2d map
     PImage img = createImage(pg.width, pg.height, RGB);
@@ -101,36 +202,60 @@ class Pixels {
     img.updatePixels();
     pg.updatePixels();
 
-    PGraphics pg3D = createGraphics(width3d, height3d, P3D);
     pg3D.beginDraw();
     pg3D.noStroke();
     pg3D.background(color(6,25,41));
-    pg3D.translate(pg3D.width / 2, pg3D.height / 2);
-    
-    int fullRevolution = 30*5; //5 seconds
-    rotationY = (rotationY  + 1) % fullRevolution;
-    pg3D.rotateY(map(rotationY, 0, fullRevolution, -PI, PI));
-    
-//    pg3D.rotateX(map(mouseY, 0, height, -PI, PI));
-//    pg3D.rotateY(map(mouseX, 0, width, -PI, PI));
-    pg3D.beginShape(QUAD_STRIP);
-    pg3D.texture(img);
-    for (int i = 0; i < tubeRes; i++) {
-      float x = tubeX[i] * 100;
-      float z = tubeY[i] * 100;
-      float u = img.width / tubeRes * i;
-      pg3D.vertex(x, -100, z, u, 0);
-      pg3D.vertex(x, 100, z, u, img.height);
+    pg3D.lights();
+        
+    if (false) {
+      pg3D.translate(pg3D.width / 2, pg3D.height / 2);
+      
+      int fullRevolution = 30*5; //5 seconds
+      rotation = (rotation  + 1) % fullRevolution;
+      pg3D.rotateY(map(rotation, 0, fullRevolution, -PI, PI));
+
+      pg3D.beginShape(QUAD_STRIP);
+      pg3D.texture(img);
+      for (int i = 0; i < tubeRes; i++) {
+        float x = tubeX[i] * 100;
+        float z = tubeY[i] * 100;
+        float u = img.width / tubeRes * i;
+        pg3D.vertex(x, -100, z, u, 0);
+        pg3D.vertex(x, 100, z, u, img.height);
+      }
+      pg3D.endShape();
+      pg3D.beginShape(QUADS);
+      pg3D.texture(img);
+      pg3D.vertex(0, -100, 0, 0, 0);
+      pg3D.vertex(100, -100, 0, 100, 0);
+      pg3D.vertex(100, 100, 0, 100, 100);
+      pg3D.vertex(0, 100, 0, 0, 100);
+      pg3D.endShape();
+      pg3D.endDraw();
     }
-    pg3D.endShape();
-    pg3D.beginShape(QUADS);
-    pg3D.texture(img);
-    pg3D.vertex(0, -100, 0, 0, 0);
-    pg3D.vertex(100, -100, 0, 100, 0);
-    pg3D.vertex(100, 100, 0, 100, 100);
-    pg3D.vertex(0, 100, 0, 0, 100);
-    pg3D.endShape();
-    pg3D.endDraw();
+    else {
+      pg3D.pushMatrix();
+
+      float rX = map(mouseY, 0, height, -PI, PI);
+      float rY = map(mouseX, 0, width, -PI, PI);
+      //println("rX = " + rX + " rY = " + rY);
+      rX = PI/2;
+      
+      int fullRevolution = 30*5; //5 seconds
+      rotation = (rotation  + 1) % fullRevolution;
+      rY = map(rotation, 0, fullRevolution, -PI, PI);
+
+      //pg3D.translate(pg3D.width * 1., pg3D.height * -5.5, pg3D.height * -1.5);
+      pg3D.translate(0,pg3D.height * 2, pg3D.height * -4);
+      
+      pg3D.rotateY(rY);
+      pg3D.rotateX(rX);
+     
+      pg3D.translate(pg3D.height * 0,pg3D.height * 1, pg3D.height * 0);
+
+      drawModel(img);
+      pg3D.popMatrix();
+    }
     
     // copy onto the display window
     pg3D.loadPixels();
@@ -143,9 +268,6 @@ class Pixels {
     }
     updatePixels();
     pg3D.updatePixels(); // is it necessary to call updatePixels when nothing changed?
-  
-
-    
   }
   
   void drawToScreen() {
