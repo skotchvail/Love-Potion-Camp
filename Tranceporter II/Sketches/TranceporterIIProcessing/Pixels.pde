@@ -112,107 +112,82 @@ class Pixels {
 
       PVector lowest = new PVector(10000000,10000000,10000000);
       PVector highest = new PVector(-10000000,-10000000,-10000000);
-      
-      //			Material tmpMaterial = null;
-      
       Segment tmpModelSegment;
       Face tmpModelElement;
       
       // render all triangles
       for (int s = 0; s < objModel.getSegmentCount(); s++) {
-        
         tmpModelSegment = objModel.getSegment(s);
-        
-        //				tmpMaterial = objModel.materials.get(tmpModelSegment.materialName);
-        
-        // if the material is not assigned for some
-        // reason, it uses the default material setting
-        //				if (tmpMaterial == null) {
-        //					tmpMaterial = objModel.materials.get(defaultMaterialName);
-        //
-        //					debug.println("Material '" + tmpModelSegment.materialName + "' not defined");
-        //				}
-        
-        //				if (useMaterial) {
-        //					pg3D.ambient(255.0f * tmpMaterial.Ka[0], 255.0f * tmpMaterial.Ka[1], 255.0f * tmpMaterial.Ka[2]);
-        //					pg3D.specular(255.0f * tmpMaterial.Ks[0], 255.0f * tmpMaterial.Ks[1], 255.0f * tmpMaterial.Ks[2]);
-        //					pg3D.fill(255.0f * tmpMaterial.Kd[0], 255.0f * tmpMaterial.Kd[1], 255.0f * tmpMaterial.Kd[2], 255.0f * tmpMaterial.d);
-        //				}
-        
         for (int f = 0; f < tmpModelSegment.getFaceCount(); f++) {
           tmpModelElement = (tmpModelSegment.getFace(f));
-          
           if (tmpModelElement.getVertIndexCount() > 0) {
-            
             pg3D.textureMode(NORMALIZED);
             //println("face=" + f + " drawMode = " + objModel.getDrawMode());
-
             pg3D.beginShape(objModel.getDrawMode()); // specify render mode
             boolean useTexture = false;
-            //						if (useTexture == false || tmpMaterial.map_Kd == null)
-            //							useTexture = false;
-            //
-            //						if (useTexture) {
-            //							if (texture != null)
-            //								pg3D.texture(texture);
-            //							else
-            //								pg3D.texture(tmpMaterial.map_Kd);
-            //						}
             pg3D.texture(texture);
             
+            boolean mirrorImage = false;
             for (int fp = 0;  fp < tmpModelElement.getVertIndexCount(); fp++) {
-              //v = vertices.get(tmpModelElement.getVertexIndex(fp));
               v = objModel.getVertex(tmpModelElement.getVertexIndex(fp));
               // println("a"); //This is the line that gets execute
               if (v != null) {
-                try {
-                  if (tmpModelElement.normalIndices.size() > 0) {
-                    //println("b");
-                    vn = objModel.getNormal(tmpModelElement.getNormalIndex(fp));
-                    pg3D.normal(vn.x, vn.y, vn.z);
-                  }
-                  
-                  if (useTexture) {
-                    //println("c");
-                    vt = objModel.getUV(tmpModelElement.getTextureIndex(fp));
-                    pg3D.vertex(v.x, v.y, v.z, vt.x, vt.y);
+                  float textureX = map(v.x,-224,-24,0,1);
+                  float textureY;
+                  if (mirrorImage) {
+                    textureY = map(v.y,-1124,99,0,1);
                   } else {
-                    //println("d");  //This is the line that gets execute
-                    //pg3D.vertex(v.x, v.y, v.z);
-                    
-                    float textureX = map(v.x,-224,-24,0,1);
-                    float textureY = map(v.y,-1124,99,0,1);
-                    float textureZ = map(v.z,47,844,0,1);
-                    
-                    pg3D.vertex(v.x, v.y, v.z,textureY,textureZ);
-                    if (v.x < lowest.x)
-                      lowest.x = v.x;
-                    if (v.y < lowest.y)
-                      lowest.y = v.y;
-                    if (v.z < lowest.z)
-                      lowest.z = v.z;
-                    
-                    if (v.x > highest.x)
-                      highest.x = v.x;
-                    if (v.y > highest.y)
-                      highest.y = v.y;
-                    if (v.z > highest.z)
-                      highest.z = v.z;
-
-                  
+                    textureY = map(v.y,-1124,99,0,0.5);
                   }
-
-                } catch (Exception e) {
-                  e.printStackTrace();
-                }
-              } else
-                // println("e");
-                pg3D.vertex(v.x, v.y, v.z);
+                    
+                  float textureZ = map(v.z,47,844,1,0);
+                  
+                  pg3D.vertex(v.x, v.y, v.z, textureY, textureZ);
+                  if (v.x < lowest.x)
+                    lowest.x = v.x;
+                  if (v.y < lowest.y)
+                    lowest.y = v.y;
+                  if (v.z < lowest.z)
+                    lowest.z = v.z;
+                  
+                  if (v.x > highest.x)
+                    highest.x = v.x;
+                  if (v.y > highest.y)
+                    highest.y = v.y;
+                  if (v.z > highest.z)
+                    highest.z = v.z;
+              }
             }
-            
             pg3D.endShape();
             
-            //pg3D.textureMode(PConstants.IMAGE);
+            //mirror image to have a 2 sided piece
+            pg3D.beginShape(objModel.getDrawMode()); // specify render mode
+            pg3D.texture(texture);
+            
+            for (int fp = 0;  fp < tmpModelElement.getVertIndexCount(); fp++) {
+              v = objModel.getVertex(tmpModelElement.getVertexIndex(fp));
+              // println("a"); //This is the line that gets execute
+              if (v != null) {
+                float textureX = map(v.x,-224,-24,0,1);
+                float textureY;
+                if (mirrorImage) {
+                  textureY = map(v.y,-1124,99,0,1);
+                } else {
+                  textureY = map(v.y,-1124,99,0.5,1.0);
+                }
+                
+                float textureZ = map(v.z,47,844,1,0);
+                float x = v.x;
+                float y = v.y;
+                float z = v.z;
+                
+                x *= -1;
+                x -= 51; 
+
+                pg3D.vertex(x, y, z, textureY, textureZ);
+              }
+            }
+            pg3D.endShape();
           }
         }
       }
@@ -276,12 +251,11 @@ class Pixels {
       //println("rX = " + rX + " rY = " + rY);
       rX = PI/2;
       
-      int fullRevolution = 30*5; //5 seconds
+      int fullRevolution = 30*5; //X seconds
       rotation = (rotation  + 1) % fullRevolution;
       rY = map(rotation, 0, fullRevolution, -PI, PI);
 
-      //pg3D.translate(pg3D.width * 1., pg3D.height * -5.5, pg3D.height * -1.5);
-      pg3D.translate(0,pg3D.height * 2, pg3D.height * -4);
+      pg3D.translate(pg3D.height * 0.5, pg3D.height * 2, pg3D.height * -3.5);
       
       pg3D.rotateY(rY);
       pg3D.rotateX(rX);
