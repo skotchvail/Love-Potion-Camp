@@ -57,8 +57,9 @@ class Pixels {
     objModel.scale(3);
     
     //noStroke();
-
-
+    println("drawModes POINTS=" + POINTS + " LINES=" + LINES + " TRIANGLES=" + TRIANGLES + " TRIANGLE_FAN=" + TRIANGLE_FAN
+            + " TRIANGLE_STRIP=" + TRIANGLE_STRIP + " QUADS=" + QUADS + " QUAD_STRIP=" + QUAD_STRIP);
+  
   }
 
   void setPixel(int x, int y, color c) {
@@ -108,6 +109,9 @@ class Pixels {
   void drawModel(PImage texture) {
     try {
       PVector v = null, vt = null, vn = null;
+
+      PVector lowest = new PVector(10000000,10000000,10000000);
+      PVector highest = new PVector(-10000000,-10000000,-10000000);
       
       //			Material tmpMaterial = null;
       
@@ -140,10 +144,12 @@ class Pixels {
           
           if (tmpModelElement.getVertIndexCount() > 0) {
             
-            //pg3D.textureMode(PConstants.NORMAL);
+            pg3D.textureMode(NORMALIZED);
+            //println("face=" + f + " drawMode = " + objModel.getDrawMode());
+
             pg3D.beginShape(objModel.getDrawMode()); // specify render mode
             boolean useTexture = false;
-            //						if (useTexture == false || tmpMate rial.map_Kd == null)
+            //						if (useTexture == false || tmpMaterial.map_Kd == null)
             //							useTexture = false;
             //
             //						if (useTexture) {
@@ -157,23 +163,50 @@ class Pixels {
             for (int fp = 0;  fp < tmpModelElement.getVertIndexCount(); fp++) {
               //v = vertices.get(tmpModelElement.getVertexIndex(fp));
               v = objModel.getVertex(tmpModelElement.getVertexIndex(fp));
-              
+              // println("a"); //This is the line that gets execute
               if (v != null) {
                 try {
                   if (tmpModelElement.normalIndices.size() > 0) {
+                    //println("b");
                     vn = objModel.getNormal(tmpModelElement.getNormalIndex(fp));
                     pg3D.normal(vn.x, vn.y, vn.z);
                   }
                   
                   if (useTexture) {
+                    //println("c");
                     vt = objModel.getUV(tmpModelElement.getTextureIndex(fp));
                     pg3D.vertex(v.x, v.y, v.z, vt.x, vt.y);
-                  } else
-                    pg3D.vertex(v.x, v.y, v.z);
+                  } else {
+                    //println("d");  //This is the line that gets execute
+                    //pg3D.vertex(v.x, v.y, v.z);
+                    
+                    float textureX = map(v.x,-224,-24,0,1);
+                    float textureY = map(v.y,-1124,99,0,1);
+                    float textureZ = map(v.z,47,844,0,1);
+                    
+                    pg3D.vertex(v.x, v.y, v.z,textureY,textureZ);
+                    if (v.x < lowest.x)
+                      lowest.x = v.x;
+                    if (v.y < lowest.y)
+                      lowest.y = v.y;
+                    if (v.z < lowest.z)
+                      lowest.z = v.z;
+                    
+                    if (v.x > highest.x)
+                      highest.x = v.x;
+                    if (v.y > highest.y)
+                      highest.y = v.y;
+                    if (v.z > highest.z)
+                      highest.z = v.z;
+
+                  
+                  }
+
                 } catch (Exception e) {
                   e.printStackTrace();
                 }
               } else
+                // println("e");
                 pg3D.vertex(v.x, v.y, v.z);
             }
             
@@ -183,6 +216,8 @@ class Pixels {
           }
         }
       }
+     // println("lowest=" + lowest + " highest=" + highest);
+
     } catch (Exception e) {
       e.printStackTrace();
     }
@@ -255,6 +290,7 @@ class Pixels {
 
       drawModel(img);
       pg3D.popMatrix();
+      pg3D.endDraw();
     }
     
     // copy onto the display window
@@ -282,7 +318,7 @@ class Pixels {
     // TODO: WE NEED TO PUT IN OUR ALGORITHM FOR DRAWING HERE
 
     int ti=0;
-     for (int y=ledHeight-1; y>=0; y--) {
+    for (int y=ledHeight-1; y>=0; y--) {
       int dx, x;
       if (y%2 == 0) {
         dx = -1;
