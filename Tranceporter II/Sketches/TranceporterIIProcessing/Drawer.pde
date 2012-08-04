@@ -96,10 +96,10 @@ class Drawer {
   
   color getColor(int index) {
     int numColors = settings.palette.length;
-    float bright = settings.getParam("brightness");    
-    int cyclingOffset = int(settings.getParam("colorCyclingSpeed")*numColors/40)*frameCount;
+    float bright = settings.getParam(settings.keyBrightness);
+    int cyclingOffset = int(settings.getParam(settings.keyColorCyclingSpeed)*numColors/40)*frameCount;
     index = (index + cyclingOffset) % numColors;
-
+    
     // calculate brightness and index offsets for audio beats
     float brightAdjust = 0;
     int audioOffset = 0;
@@ -107,9 +107,9 @@ class Drawer {
       float indRange = numColors/settings.numBands; //basePaletteColors;
       //float indStart = (i-0.5)*indRange
       //if (settings.isBeat(i) && index >= i*indRange && index < (i+1)*indRange) {
-        float smooth = sin((index - i*indRange) / indRange * PI / 2);  // 1% cpu
-        brightAdjust += /*settings.beatPos(i) */ (1-bright) * settings.getParam("audioBrightnessChange" + (i+1));
-        audioOffset += smooth * int(settings.beatPos(i) * MAX_AUDIO_COLOR_OFFSET * settings.getParam("audioColorChange" + (i+1)));
+      float smooth = sin((index - i*indRange) / indRange * PI / 2);  // 1% cpu
+      brightAdjust += /*settings.beatPos(i) */ (1-bright) * settings.getParam(settings.getKeyAudioBrightnessChange(i));
+      audioOffset += smooth * int(settings.beatPos(i) * MAX_AUDIO_COLOR_OFFSET * settings.getParam(settings.getKeyAudioColorChange(i)));
       //}
     }
 

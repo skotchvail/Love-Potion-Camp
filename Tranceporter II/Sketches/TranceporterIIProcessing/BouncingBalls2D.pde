@@ -44,11 +44,11 @@ class BouncingBalls2D extends Drawer {
   }    
   
   void draw() {
-    float speed = settings.getParam("speed");
+    float speed = settings.getParam(settings.keySpeed);
     int frameSkip = int(10 - speed*9);
     if (frameCount % frameSkip != 0) return;
     
-    int numBalls = (int) (settings.getParam("custom1") * 20);
+    int numBalls = (int) (settings.getParam(settings.keyCustom1) * 20);
     while (numBalls < balls.size()) balls.remove(balls.size()-1);
     while (numBalls > balls.size()) addBall();
     

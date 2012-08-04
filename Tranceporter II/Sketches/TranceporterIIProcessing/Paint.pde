@@ -23,8 +23,8 @@ class Paint extends Drawer {
   String getName() { return "Paint"; }
   
   void setup() {
-     settings.setParam("brightness", 0.8); // set brightness to 80%    
-     settings.setParam("custom1", 0);
+     settings.setParam(settings.keyBrightness, 0.8); // set brightness to 80%    
+     settings.setParam(settings.keyCustom1, 0);
   }
 
   void reset() {
@@ -37,7 +37,7 @@ class Paint extends Drawer {
     //if (int(getParam(2) + 0.5) == 1) clear();
     
     pg.background(0);
-    int tailLength = round(settings.getParam("custom1")*MAX_TAIL_LENGTH);
+    int tailLength = round(settings.getParam(settings.keyCustom1)*MAX_TAIL_LENGTH);
     
     for (int i=0; i<MAX_TOUCHES; i++) {
       tailX[tailInd][i] = -1;

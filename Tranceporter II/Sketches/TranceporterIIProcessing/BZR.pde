@@ -19,8 +19,8 @@ class Bzr3 extends Drawer {
   
   void setup () {
     randomDots(0,0,w,h);
-    settings.setParam("brightness", 0.5); // set brightness to 50%    
-    settings.setParam("custom1", 0.3);
+    settings.setParam(settings.keyBrightness, 0.5); // set brightness to 50%    
+    settings.setParam(settings.keyCustom1, 0.3);
   }
   
   void reset() {
@@ -28,7 +28,7 @@ class Bzr3 extends Drawer {
   }
   
   void draw () {
-    int numStates = 20 - int(settings.getParam("speed")*9);    
+    int numStates = 20 - int(settings.getParam(settings.keySpeed)*9);
     
     if (state == 0) {
       for (int x = 0; x < w; x ++) {
@@ -71,7 +71,7 @@ class Bzr3 extends Drawer {
     for (int x=0; x<width; x++) {
       for (int y=0; y<height; y++) {
         float a2 = a[x][y][p]*state/float(numStates) + a[x][y][q]*(numStates-state)/float(numStates);
-        color c = getColor(int(a2*(getNumColors()-1)*settings.getParam("custom1"))); // 2% cpu
+        color c = getColor(int(a2*(getNumColors()-1)*settings.getParam(settings.keyCustom1))); // 2% cpu
         pg.pixels[y*width + x] = c;
       }
     }

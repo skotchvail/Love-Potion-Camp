@@ -51,17 +51,17 @@ class Fire extends Drawer {
       calc5[y] = (y + 2) % height2;
     }
     
-    settings.setParam("speed", 0.6); // set speed to 60%
-    settings.setParam("brightness", 0.6); // set brightness to 60%    
+    settings.setParam(settings.keySpeed, 0.6); // set speed to 60%
+    settings.setParam(settings.keyBrightness, 0.6); // set brightness to 60%    
   }
   
   void draw() {  
     // speed of 0: we skip 2/3 of the time; speed of 1; we skip 0 of the time
-    int frameSkip = 3 - round(settings.getParam("speed")*2);
+    int frameSkip = 3 - round(settings.getParam(settings.keySpeed)*2);
     if (frameCount % frameSkip != 0) return;
 
     // Randomize the bottom row of the fire buffer
-    int clusterSize = round(settings.getParam("custom2")*10);
+    int clusterSize = round(settings.getParam(settings.keyCustom2)*10);
     for(int x = 0; x < width; x+=clusterSize) {
       int i = int(random(0,190));
       for (int x2=x; x2<min(x+clusterSize, width); x2++) { 
@@ -86,7 +86,7 @@ class Fire extends Drawer {
         
         // Output everything to screen using our palette colors
         if (counter >= height*width) continue;
-        if (int(settings.getParam("custom1") + 0.5) == 1) {
+        if (int(settings.getParam(settings.keyCustom1) + 0.5) == 1) {
           pg.pixels[counter++] = getColor(fireVal*(getNumColors()-1)/256); 
         } else {
           pg.pixels[counter++] = palette[fireVal];

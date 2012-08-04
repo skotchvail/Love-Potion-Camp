@@ -25,7 +25,7 @@ class AlienBlob extends Drawer {
     zoffIncr = 0.1;
     noiseMult = 5; //3   
     
-    settings.setParam("brightness", 0.5); // set brightness to 50%    
+    settings.setParam(settings.keyBrightness, 0.5); // set brightness to 50%    
   }
  
   void reset() {
@@ -40,8 +40,8 @@ class AlienBlob extends Drawer {
     int h2 = getHeight() / 2;
     int offset = 0;
 
-    int nd = ceil(10.0*settings.getParam("custom1"));
-    float multiplier = settings.getParam("custom2") * 10;
+    int nd = ceil(10.0 * settings.getParam(settings.keyCustom1));
+    float multiplier = settings.getParam(settings.keyCustom2) * 10;
     noiseDetail(nd);
     pg.loadPixels();
      
@@ -70,7 +70,7 @@ class AlienBlob extends Drawer {
     // move through noise space -> animation
     //xoff += xoffIncr * pow(2, getSpeed() * 2 - 1);
     //yoff += yoffIncr * pow(2, getSpeed() * 2 - 1);
-    zoff += zoffIncr * settings.getParam("speed");
+    zoff += zoffIncr * settings.getParam(settings.keySpeed);
      
     pg.updatePixels();
   }
