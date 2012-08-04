@@ -5,7 +5,6 @@ import netP5.*;
 import ddf.minim.analysis.*;
 import ddf.minim.*;
 import java.util.Arrays;
-import java.lang.reflect.Method;
 import java.util.List;
 
 
@@ -27,7 +26,7 @@ Console console;
 int NUM_COLORS = 512;
 //int FRAME_RATE = 100;
 
-HashMap controlInfo;
+//HashMap controlInfo;
 float DEFAULT_GAMMA = 2.5;
 
 // Audio
@@ -108,6 +107,7 @@ void draw() {
   
   Drawer d = modes[modeInd];
 
+  assert(settings.palette != null);
   if (settings.palette == null) return;
 
   d.setMousePressed(mousePressed);
@@ -117,7 +117,7 @@ void draw() {
   }
   
 //  sendParamsOSC();
-  d.update();                        
+  d.update();
   px.drawToScreen();                 
   if (baud != 0) px.drawToLedWall(); 
   
@@ -185,10 +185,12 @@ class Settings {
   private boolean[] isBeat;
   private HashMap paramMap;
   private HashMap controlMap;
+  private HashMap actions;
   private int numBands;
   private int basePaletteColors = 1;
   private OscP5 oscP5;
   private NetAddress oscReceiver;
+  List<String> keyNames;
   
   final String keySpeed="/1/fader1";
   final String keyColorCyclingSpeed="/1/fader2";
@@ -214,10 +216,80 @@ class Settings {
   
   
   Settings(int numBands) {
+    
+    //TODO: Skotch: I tried to do this with reflection, but gave up when I got permission errors
+    keyNames = Arrays.asList(
+      keySpeed, keyColorCyclingSpeed,keyCustom1,keyCustom2, keyBrightness,
+      keyAudioSpeedChange1, keyAudioSpeedChange2, keyAudioSpeedChange3,
+      keyAudioColorChange1, keyAudioColorChange2, keyAudioColorChange3,
+      keyAudioBrightnessChange1, keyAudioBrightnessChange2, keyAudioBrightnessChange3,
+      keyAudioSensitivity1, keyAudioSensitivity2, keyAudioSensitivity3,
+      keyBeatLength);
+
+    //    keyNames =  new ArrayList();
+    //    Class cls = this.getClass();
+    //
+    //    Field fieldlist[] = cls.getDeclaredFields();
+    //    for (int i = 0; i < fieldlist.length; i++) {
+    //      Field fld = fieldlist[i];
+    //      String name = fld.getName();
+    //      if (name.startsWith("key")
+    //          && fld.getType() == String.class
+    //          && Modifier.isFinal(fld.getModifiers(this))) {
+    //
+    //        fld.setAccessible(true);
+    //        println("Field name=" + name);
+    //        println("Field value=" + fld.get(null));
+    //        keyNames.add(name);
+    //      }
+    //    }
+
     this.numBands = numBands;
     isBeat = new boolean[numBands];
     paramMap = new HashMap();
-  }
+    
+    actions = new HashMap();
+    actions.put("/1/multixy1/1",  new FunctionFloatFloat() {
+              public void function(float x, float y) {
+                touchXY(1, x, y);
+              }});
+    actions.put("/1/multixy1/2",  new FunctionFloatFloat() {
+              public void function(float x, float y) {
+                touchXY(2, x, y);
+              }});
+    actions.put("/1/multixy1/3",  new FunctionFloatFloat() {
+            public void function(float x, float y) {
+              touchXY(3, x, y);
+            }});
+    actions.put("/1/multixy1/4",  new FunctionFloatFloat() {
+            public void function(float x, float y) {
+              touchXY(4, x, y);
+            }});
+    actions.put("/1/multixy1/5",  new FunctionFloatFloat() {
+            public void function(float x, float y) {
+              touchXY(5, x, y);
+            }});
+    actions.put("/1/push1",       new VoidFunction() {
+            public void function() {
+              newProgram();
+            }});
+    actions.put("/1/push2",       new VoidFunction() {
+            public void function() {
+              newPaletteType();
+            }});
+    actions.put("/1/push3",       new VoidFunction() {
+            public void function() {
+              newPalette();
+            }});
+    actions.put("/1/push4",       new VoidFunction() {
+            public void function() {
+              reset();
+            }});
+    actions.put("/2/push1",       new VoidFunction() {
+            public void function() {
+              tap();
+            }});
+   }
   
   int numBands() {
     return numBands;
@@ -230,6 +302,19 @@ class Settings {
   //float getParam(String paramName) { println(paramMap.keySet()); println(paramName); return (Float) paramMap.get(paramName); }
   
   float getParam(String paramName) {
+
+    if (false) {
+      println("*** getParam(" + paramName + ")");
+      
+      Object rawValue = paramMap.get(paramName);
+      if (rawValue == null) {
+        if (keyNames.contains(paramName)) {
+          paramMap.put(paramName, 0.0);
+        }
+        else
+          assert(false);
+      }
+    }
     if (paramName.equals(settings.keySpeed)) {
       float speed = (Float) paramMap.get(paramName);
       for (int i=0; i<NUM_BANDS; i++) {
@@ -344,60 +429,35 @@ class Settings {
     oscP5 = new OscP5(this,8000);
     oscReceiver = new NetAddress(iPadIP,9000);
 
-    // define param info: name -> OSC control
-    controlInfo = new HashMap();
-    controlInfo.put("/1/fader1", Arrays.asList("speed", 0.3));
-    controlInfo.put("/1/fader2", Arrays.asList("colorCyclingSpeed", 0.3));
-    controlInfo.put("/1/fader3", Arrays.asList("custom1", 0.3));
-    controlInfo.put("/1/fader4", Arrays.asList("custom2", 0.3));
-    controlInfo.put("/1/multixy1/1", Arrays.asList("touchxy", new FunctionFloatFloat() { public void function(float x, float y) { touchXY(1, x, y); }}));
-    controlInfo.put("/1/multixy1/2", Arrays.asList("touchxy", new FunctionFloatFloat() { public void function(float x, float y) { touchXY(2, x, y); }}));
-    controlInfo.put("/1/multixy1/3", Arrays.asList("touchxy", new FunctionFloatFloat() { public void function(float x, float y) { touchXY(3, x, y); }}));
-    controlInfo.put("/1/multixy1/4", Arrays.asList("touchxy", new FunctionFloatFloat() { public void function(float x, float y) { touchXY(4, x, y); }}));
-    controlInfo.put("/1/multixy1/5", Arrays.asList("touchxy", new FunctionFloatFloat() { public void function(float x, float y) { touchXY(5, x, y); }}));
-    controlInfo.put("/1/rotary1", Arrays.asList("brightness", 0.5));
-    controlInfo.put("/1/push1", Arrays.asList("newProgram", new VoidFunction() { public void function() { newProgram(); } }));
-    
-    controlInfo.put("/1/push2", Arrays.asList("newPaletteType", new VoidFunction() { public void function() { newPaletteType(); } }));
-    controlInfo.put("/1/push3", Arrays.asList("newPalette", new VoidFunction() { public void function() { newPalette(); } }));
-    controlInfo.put("/1/push4", Arrays.asList("reset", new VoidFunction() { public void function() { reset(); } }));
-    controlInfo.put("/2/multifader1/1", Arrays.asList("audioSpeedChange1", 0.0));
-    controlInfo.put("/2/multifader1/2", Arrays.asList("audioSpeedChange2", 0.0));
-    controlInfo.put("/2/multifader1/3", Arrays.asList("audioSpeedChange3", 0.0));
-    controlInfo.put("/2/multifader2/1", Arrays.asList("audioColorChange1", 0.0));
-    controlInfo.put("/2/multifader2/2", Arrays.asList("audioColorChange2", 0.0));
-    controlInfo.put("/2/multifader2/3", Arrays.asList("audioColorChange3", 0.0));
-    controlInfo.put("/2/multifader3/1", Arrays.asList("audioBrightnessChange1", 0.0));
-    controlInfo.put("/2/multifader3/2", Arrays.asList("audioBrightnessChange2", 0.0));
-    controlInfo.put("/2/multifader3/3", Arrays.asList("audioBrightnessChange3", 0.0));
-    controlInfo.put("/2/multifader4/1", Arrays.asList("audioSensitivity1", 0.0));
-    controlInfo.put("/2/multifader4/2", Arrays.asList("audioSensitivity2", 0.0));
-    controlInfo.put("/2/multifader4/3", Arrays.asList("audioSensitivity3", 0.0));
-    controlInfo.put("/2/push1", Arrays.asList("tap",new VoidFunction() { public void function() { tap(); } }));
-    controlInfo.put("/2/rotary1", Arrays.asList("beatLength", 0.5));
-    
-    //Skotch: this seems suspect. The defaults that are being sent to the iPad should be the same as the settings,
-    //and this should be sent in upodateIPadGui() on each change.
-    for (Object controlName : controlInfo.keySet()) {
-      List al = (List) controlInfo.get(controlName);
-      if (al.size() > 1) {
-        try {
-          String name = (String) al.get(0);
-          float val = ((Float)(al.get(1))).floatValue();
-          setParam((String)controlName, val);
-          
-//          OscMessage myMessage = new OscMessage((String)controlName);
-//          myMessage.add(val);
-//          oscP5.send(myMessage, oscReceiver);
-          temp_SendMessage((String)controlName,val);
-        } catch (java.lang.ClassCastException e) {
-        }
-      }
-    }
+    setAndSendParam(keySpeed,0.3);
+    setAndSendParam(keyColorCyclingSpeed,0.3);
+    setAndSendParam(keyCustom1,0.3);
+    setAndSendParam(keyCustom2,0.3);
+    setAndSendParam(keyBrightness,0.5);
+    setAndSendParam(keyAudioSpeedChange1,0.0);
+    setAndSendParam(keyAudioSpeedChange2,0.0);
+    setAndSendParam(keyAudioSpeedChange3,0.0);
+    setAndSendParam(keyAudioColorChange1,0.0);
+    setAndSendParam(keyAudioColorChange2,0.0);
+    setAndSendParam(keyAudioColorChange3,0.0);
+    setAndSendParam(keyAudioBrightnessChange1,0.0);
+    setAndSendParam(keyAudioBrightnessChange2,0.0);
+    setAndSendParam(keyAudioBrightnessChange3,0.0);
+    setAndSendParam(keyAudioSensitivity1,0.0);
+    setAndSendParam(keyAudioSensitivity2,0.0);
+    setAndSendParam(keyAudioSensitivity3,0.0);
+    setAndSendParam(keyBeatLength,0.5);
     updateIPadGUI();
     enableControl(keySpeed, false);
   }
 
+  
+  void setAndSendParam(String paramName, float value) {
+    setParam(paramName,value);
+    temp_SendMessage(paramName,value);
+  }
+
+  
   private void enableControl(String controlKey, boolean enabled) {
     temp_SendMessage(controlKey + "/visible",enabled?"1":"0");
   }
@@ -430,30 +490,27 @@ class Settings {
     if (ipAddress != null && ipAddress.length() > 0 && !ipAddress.equals(iPadIP)) {
       detectedNewIPadAddress(ipAddress);
     }
-    for (Object controlName : controlInfo.keySet()) {
-      String s = (String) controlName;
-      List al = (List) controlInfo.get(controlName);
-      String paramName = (String) al.get(0);
-      //println(addr + " " + s);
-      if (addr.equals(s)) {
-        if (s.indexOf("fader") >= 0 || s.indexOf("rotary") >= 0) {
-          setParam((String)controlName, msg.get(0).floatValue());
-          println("Set " + paramName + " to " + msg.get(0).floatValue());
-          return;
-        } else if (s.indexOf("push") >= 0) {
-          if (msg.get(0).floatValue() != 1.0) {
-            VoidFunction fun = (VoidFunction) al.get(1);
-            fun.function();
-          }
-          return;
-        } else if (s.indexOf("multixy") >= 0) {
-          FunctionFloatFloat fun = (FunctionFloatFloat) al.get(1);
-          fun.function(msg.get(0).floatValue(), msg.get(1).floatValue());
-          return;
+
+    Object func = actions.get(addr);
+    if (func != null) {
+      if (addr.indexOf("push") >= 0) {
+        if (msg.get(0).floatValue() != 1.0) {
+          ((VoidFunction)func).function();
         }
       }
+      else if (addr.indexOf("multixy") >= 0) {
+        ((FunctionFloatFloat)func).function(msg.get(0).floatValue(), msg.get(1).floatValue());
+      }
+      return;
     }
-    
+
+    if (keyNames.contains(addr)) {
+      float value = msg.get(0).floatValue();
+      setParam(addr, value);
+      println("Set " + addr + " to " + value);
+      return;
+    }
+
     print("### Received an unhandled osc message: " + msg.addrPattern() + " " + msg.typetag() + " ");
     Object[] args = msg.arguments();
     for (int i=0; i<args.length; i++) {
