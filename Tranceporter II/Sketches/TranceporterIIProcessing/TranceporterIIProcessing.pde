@@ -98,7 +98,8 @@ void draw() {
     return;
   
   for (int i=0; i<NUM_BANDS; i++) {
-    bd.setSensitivity(i, settings.getParam(settings.getKeyAudioSensitivity(i)) * MAX_AUDIO_SENSITIVITY, (int)(settings.getParam(settings.keyBeatLength)*MAX_BEAT_LENGTH));
+    float audioSensitivity = 1 - settings.getParam(settings.getKeyAudioSensitivity(i));
+    bd.setSensitivity(i, audioSensitivity * MAX_AUDIO_SENSITIVITY, (int)(settings.getParam(settings.keyBeatLength)*MAX_BEAT_LENGTH));
   }
   bd.update(in.mix);
   for (int i=0; i<NUM_BANDS; i++) settings.setIsBeat(i, bd.isBeat("spectralFlux", i));
@@ -181,13 +182,10 @@ void updatePaletteType() {
 
 class Settings {
   private color[] palette;
-  private float[] params;
   private boolean[] isBeat;
   private HashMap paramMap;
-  private HashMap controlMap;
   private HashMap actions;
   private int numBands;
-  private int basePaletteColors = 1;
   private OscP5 oscP5;
   private NetAddress oscReceiver;
   List<String> keyNames;
@@ -289,62 +287,17 @@ class Settings {
             public void function() {
               tap();
             }});
+    setDefaultSettings();
    }
   
   int numBands() {
     return numBands;
   }
   
-  void setParam(String paramName, float value) {
-    paramMap.put(paramName, value);
-  }
-  
-  //float getParam(String paramName) { println(paramMap.keySet()); println(paramName); return (Float) paramMap.get(paramName); }
-  
-  float getParam(String paramName) {
-
-    if (false) {
-      println("*** getParam(" + paramName + ")");
-      
-      Object rawValue = paramMap.get(paramName);
-      if (rawValue == null) {
-        if (keyNames.contains(paramName)) {
-          paramMap.put(paramName, 0.0);
-        }
-        else
-          assert(false);
-      }
-    }
-    if (paramName.equals(settings.keySpeed)) {
-      float speed = (Float) paramMap.get(paramName);
-      for (int i=0; i<NUM_BANDS; i++) {
-        if (isBeat(i)) {
-          speed += beatPos(i)*(Float)paramMap.get(getKeyAudioSpeedChange(i));
-        }
-      }
-      return constrain(speed, 0, 1);
-    }
-    
-    if (paramName.startsWith("/2/multifader4/")) { //audioSensitivity
-      return 1 - (Float)paramMap.get(paramName);
-    }
-    
-    return (Float) paramMap.get(paramName);
-  }
-  
-  void setPalette(color[] p, int basePaletteColors) {
-    palette = p;
-    this.basePaletteColors = basePaletteColors;
-  }
-  
   color[] getPalette() {
     return palette;
   }
-  
-  int basePaletteColors() {
-    return basePaletteColors;
-  }
-  
+
   boolean isBeat(int band) {
     return isBeat[band];
   }
@@ -361,6 +314,72 @@ class Settings {
     return bd.beatPosSimple("spectralFlux", band);
   }
   
+  ////////////////////////////////////////////////////////////////////
+  //General Setting Management
+
+  
+//  Object switchSettings(Object newSettings) {
+//
+//    HashMap saver = new HashMap();
+//    saver.put("1",palette);
+//    saver.put("2",isBeat);
+//    saver.put("3",paramMap);
+//
+//    if (saver != null) {
+//      palette = saver.get("1");
+//      isBeat = saver.get("2");
+//      paramMap = saver.get("3");
+//    }    
+//    return saver;
+//  }
+  
+  void setParam(String paramName, float value) {
+    paramMap.put(paramName, value);
+  }
+  
+  float getParam(String paramName) {
+    assert(keyNames.contains(paramName));
+    
+    if (paramName.equals(settings.keySpeed)) {
+      float speed = (Float) paramMap.get(paramName);
+      for (int i=0; i<NUM_BANDS; i++) {
+        if (isBeat(i)) {
+          speed += beatPos(i)*(Float)paramMap.get(getKeyAudioSpeedChange(i));
+        }
+      }
+      return constrain(speed, 0, 1);
+    }
+    
+    return (Float) paramMap.get(paramName);
+  }
+  
+  void sendAllSettingsToPad() {
+    for (Object controlName : paramMap.keySet()) {
+      float value = (Float)paramMap.get(controlName);
+      temp_SendMessage((String)controlName, value);
+    }
+  }
+         
+  void setDefaultSettings() {
+    setParam(keySpeed,0.3);
+    setParam(keyColorCyclingSpeed,0.3);
+    setParam(keyCustom1,0.3);
+    setParam(keyCustom2,0.3);
+    setParam(keyBrightness,0.5);
+    setParam(keyAudioSpeedChange1,0.3);
+    setParam(keyAudioSpeedChange2,0.3);
+    setParam(keyAudioSpeedChange3,0.3);
+    setParam(keyAudioColorChange1,0.3);
+    setParam(keyAudioColorChange2,0.3);
+    setParam(keyAudioColorChange3,0.3);
+    setParam(keyAudioBrightnessChange1,0.3);
+    setParam(keyAudioBrightnessChange2,0.3);
+    setParam(keyAudioBrightnessChange3,0.3);
+    setParam(keyAudioSensitivity1,0.3);
+    setParam(keyAudioSensitivity2,0.3);
+    setParam(keyAudioSensitivity3,0.3);
+    setParam(keyBeatLength,0.5);
+  }
  
 ////////////////////////////////////////////////////////////////////
 //Key helpers
@@ -422,42 +441,17 @@ class Settings {
   }
   
   
-
 ////////////////////////////////////////////////////////////////////
 //OSC 5 stuff
   void initOSC() {
     oscP5 = new OscP5(this,8000);
     oscReceiver = new NetAddress(iPadIP,9000);
 
-    setAndSendParam(keySpeed,0.3);
-    setAndSendParam(keyColorCyclingSpeed,0.3);
-    setAndSendParam(keyCustom1,0.3);
-    setAndSendParam(keyCustom2,0.3);
-    setAndSendParam(keyBrightness,0.5);
-    setAndSendParam(keyAudioSpeedChange1,0.0);
-    setAndSendParam(keyAudioSpeedChange2,0.0);
-    setAndSendParam(keyAudioSpeedChange3,0.0);
-    setAndSendParam(keyAudioColorChange1,0.0);
-    setAndSendParam(keyAudioColorChange2,0.0);
-    setAndSendParam(keyAudioColorChange3,0.0);
-    setAndSendParam(keyAudioBrightnessChange1,0.0);
-    setAndSendParam(keyAudioBrightnessChange2,0.0);
-    setAndSendParam(keyAudioBrightnessChange3,0.0);
-    setAndSendParam(keyAudioSensitivity1,0.0);
-    setAndSendParam(keyAudioSensitivity2,0.0);
-    setAndSendParam(keyAudioSensitivity3,0.0);
-    setAndSendParam(keyBeatLength,0.5);
+    sendAllSettingsToPad();
     updateIPadGUI();
-    enableControl(keySpeed, false);
+//    enableControl(keySpeed, false);
   }
 
-  
-  void setAndSendParam(String paramName, float value) {
-    setParam(paramName,value);
-    temp_SendMessage(paramName,value);
-  }
-
-  
   private void enableControl(String controlKey, boolean enabled) {
     temp_SendMessage(controlKey + "/visible",enabled?"1":"0");
   }
