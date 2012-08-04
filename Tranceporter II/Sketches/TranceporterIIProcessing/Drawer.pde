@@ -17,6 +17,7 @@ class Drawer {
   long[] lastTouchTimes;
   short[][] rgbGamma; 
   Settings settings;
+  private Object settingsBackup;
   int MIN_SATURATION = 245;
   int MAX_AUDIO_COLOR_OFFSET = 300;
   
@@ -167,5 +168,14 @@ class Drawer {
       rgbGamma[i][1] = (short)(gMin + (int)Math.floor(gRange * Math.pow(d,gGamma) + 0.5));
       rgbGamma[i][2] = (short)(bMin + (int)Math.floor(bRange * Math.pow(d,bGamma) + 0.5));
     }
-  }  
+  }
+  
+  void setSettingsBackup(Object backup) {
+    settingsBackup = backup;
+  }
+  
+  Object getSettingsBackup() {
+    return settingsBackup;
+  }
+  
 }

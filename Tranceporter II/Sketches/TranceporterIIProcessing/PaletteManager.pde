@@ -8,14 +8,14 @@ import toxi.color.theory.*;
 import toxi.util.datatypes.*;
 
 class PaletteManager {
-  Kuler k;
-  Palette[] kPs;
-  int kPalInd = 0;
-  int PT_KULER=0;
-  int paletteType = PT_KULER;
-  ArrayList ptStrategies = ColorTheoryRegistry.getRegisteredStrategies();
-  int NUM_PT = 1 + ptStrategies.size();
-  int basePaletteColors = -1;
+  private Kuler k;
+  private Palette[] kPs;
+  private int kPalInd = 0;
+  private int PT_KULER=0;
+  private int paletteType = PT_KULER;
+  private ArrayList ptStrategies = ColorTheoryRegistry.getRegisteredStrategies();
+  private int NUM_PT = 1 + ptStrategies.size();
+  private int basePaletteColors = -1;
   
   void init(PApplet pa) {
     kPs = new Palette[21];
@@ -39,15 +39,20 @@ class PaletteManager {
     }
   }
   
-  void getNewPalette(int numColors, color[] colors) {
+  void setupPalette(int numColors, color[] colors) {
     color[] c;
-    println("Advancing to next palette");
+    if(colors == null) {
+      println("setupPalette colors cannot be null!");
+    }
+ //   println("Setting up palette " + getPaletteDisplayName() + ", colors.length = " + colors.length);
 
+    assert(numColors != 0);
+    assert(colors.length > 0);
+    
     //color[] colors = new color[numColors];
     colorMode(RGB, 255);
     
     if (paletteType == PT_KULER) {
-      kPalInd = (kPalInd + 1) % kPs.length;
       Palette p = kPs[kPalInd];
       basePaletteColors = p.totalSwatches();      
       
@@ -74,13 +79,22 @@ class PaletteManager {
     }
   }
   
-  int basePaletteColors() { return this.basePaletteColors; }
+  void getNewPalette(int numColors, color[] colors) {
+    if (paletteType == PT_KULER) {
+      kPalInd = (kPalInd + 1) % kPs.length;
+    }
+    setupPalette(numColors,colors);
+  }
+  
+  int basePaletteColors() {
+    return this.basePaletteColors;
+  }
   
   void nextPaletteType() {
-    paletteType = (paletteType + 1) % NUM_PT;    
+    paletteType = (paletteType + 1) % NUM_PT;
   } 
   
-  String getPaletteType() {
+  String getPaletteDisplayName() {
     if (paletteType == PT_KULER) {
       return "Kuler";
     } else {
@@ -88,4 +102,17 @@ class PaletteManager {
       return s.getName();
     }
   }
+  
+  int getPaletteType() {
+    return paletteType;
+  }
+  
+  void setPaletteType(int whichPalette, int numColors, color[] colors) {
+    assert(whichPalette <  NUM_PT);
+    paletteType = whichPalette;
+    pm.setupPalette(numColors, colors);
+  }
+  
+  
+  
 }

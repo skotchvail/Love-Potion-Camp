@@ -45,6 +45,7 @@ int MAX_BEAT_LENGTH = 750, MAX_AUDIO_SENSITIVITY = 12;
 
 Drawer[] modes;
 int modeInd = 0;
+Utility utility = new Utility();
 
 PaletteManager pm = new PaletteManager();
 Settings settings = new Settings(NUM_BANDS);
@@ -76,7 +77,7 @@ void setup() {
   modes[modeInd].setup();
 
   pm.init(this);
-  updatePaletteType();
+  updatePaletteName();
   newPalette();  
   
   // Audio features
@@ -108,8 +109,11 @@ void draw() {
   
   Drawer d = modes[modeInd];
 
-  assert(settings.palette != null);
-  if (settings.palette == null) return;
+  if (settings.palette == null) {
+   assert(settings.palette != null);
+   // println("can't draw, palett is null");
+    return;
+  }
 
   d.setMousePressed(mousePressed);
   
@@ -128,6 +132,7 @@ void draw() {
 void newPalette() {
   settings.palette = new color[NUM_COLORS];
   pm.getNewPalette(NUM_COLORS, settings.palette);
+  settings.paletteType = pm.getPaletteType();
 }
 
 void newPaletteType() {
@@ -137,10 +142,22 @@ void newPaletteType() {
 }
 
 void newProgram() {
+  int oldMode = modeInd;
   modeInd = (modeInd + 1) % modes.length;
+  println("newProgram " + modes[oldMode].getName() + " -> "+ modes[modeInd].getName());
+
+  // Each mode tracks its own settings
+  Object newSettings = modes[modeInd].getSettingsBackup();
+  Object oldSettings = settings.switchSettings(newSettings);
+  modes[oldMode].setSettingsBackup(oldSettings);
+  if (settings.palette == null ) {
+    settings.palette = new color[NUM_COLORS];
+  }
+  pm.setPaletteType(settings.paletteType, NUM_COLORS, settings.palette);
   modes[modeInd].setup();
+  assert(settings.palette != null);
+  settings.sendAllSettingsToPad();
   updateIPadGUI();
-  println("Advancing to next mode: " + modes[modeInd].getName());
 }
 
 
@@ -165,20 +182,59 @@ void mouseClicked() {
 void tap() {
 }
 
+void debugPaletteType(String extra) {
+  println(extra + " paletteType = " + settings.paletteType + " " + pm.getPaletteDisplayName() + (settings.palette == null?" (null)":" (not null)"));
+}
+
 void updateIPadGUI()
 {
   updateModeName();
-  updatePaletteType();
+  updatePaletteName();
 }
 
 void updateModeName() {
   String name = modes[modeInd].getName();
-  settings.temp_SendMessage(settings.keyModeName, name);
+  settings.sendMessageToPad(settings.keyModeName, name);
 }
 
-void updatePaletteType() {
-  settings.temp_SendMessage(settings.keyPaletteName, pm.getPaletteType());
+void updatePaletteName() {
+  settings.sendMessageToPad(settings.keyPaletteName, pm.getPaletteDisplayName());
 }
+
+class Utility {
+  public ArrayList<Integer> toIntegerList(int[] intArray) {
+    ArrayList<Integer> intList = new ArrayList<Integer>();
+    for (int index = 0; index < intArray.length; index++) {
+      intList.add(intArray[index]);
+    }
+    return intList;
+  }
+  
+  public int[] toIntArray(List<Integer> integerList) {
+    int[] intArray = new int[integerList.size()];
+    for (int i = 0; i < integerList.size(); i++) {
+      intArray[i] = integerList.get(i);
+    }
+    return intArray;
+  }
+  
+  public ArrayList<Boolean> toBooleanList(boolean[] booleanArray) {
+    ArrayList<Boolean> booleanList = new ArrayList<Boolean>();
+    for (int index = 0; index < booleanArray.length; index++) {
+      booleanList.add(booleanArray[index]);
+    }
+    return booleanList;
+  }
+  
+  public boolean[] toBooleanArray(List<Boolean> booleanList) {
+    boolean[] boolArray = new boolean[booleanList.size()];
+    for (int i = 0; i < booleanList.size(); i++) {
+      boolArray[i] = booleanList.get(i);
+    }
+    return boolArray;
+  }
+}
+
 
 class Settings {
   private color[] palette;
@@ -188,6 +244,7 @@ class Settings {
   private int numBands;
   private OscP5 oscP5;
   private NetAddress oscReceiver;
+  private int paletteType;
   List<String> keyNames;
   
   final String keySpeed="/1/fader1";
@@ -211,7 +268,6 @@ class Settings {
   
   final String keyModeName = "/1/mode/";
   final String keyPaletteName = "/1/palette/";
-  
   
   Settings(int numBands) {
     
@@ -243,8 +299,7 @@ class Settings {
     //    }
 
     this.numBands = numBands;
-    isBeat = new boolean[numBands];
-    paramMap = new HashMap();
+    setDefaultSettings();
     
     actions = new HashMap();
     actions.put("/1/multixy1/1",  new FunctionFloatFloat() {
@@ -287,7 +342,7 @@ class Settings {
             public void function() {
               tap();
             }});
-    setDefaultSettings();
+
    }
   
   int numBands() {
@@ -317,22 +372,6 @@ class Settings {
   ////////////////////////////////////////////////////////////////////
   //General Setting Management
 
-  
-//  Object switchSettings(Object newSettings) {
-//
-//    HashMap saver = new HashMap();
-//    saver.put("1",palette);
-//    saver.put("2",isBeat);
-//    saver.put("3",paramMap);
-//
-//    if (saver != null) {
-//      palette = saver.get("1");
-//      isBeat = saver.get("2");
-//      paramMap = saver.get("3");
-//    }    
-//    return saver;
-//  }
-  
   void setParam(String paramName, float value) {
     paramMap.put(paramName, value);
   }
@@ -353,14 +392,12 @@ class Settings {
     return (Float) paramMap.get(paramName);
   }
   
-  void sendAllSettingsToPad() {
-    for (Object controlName : paramMap.keySet()) {
-      float value = (Float)paramMap.get(controlName);
-      temp_SendMessage((String)controlName, value);
-    }
-  }
-         
   void setDefaultSettings() {
+    isBeat = new boolean[numBands];
+    paramMap = new HashMap();
+    palette = null;
+    paletteType = 0;
+    
     setParam(keySpeed,0.3);
     setParam(keyColorCyclingSpeed,0.3);
     setParam(keyCustom1,0.3);
@@ -380,6 +417,31 @@ class Settings {
     setParam(keyAudioSensitivity3,0.3);
     setParam(keyBeatLength,0.5);
   }
+
+  public Object switchSettings(Object newSettings) {
+    
+    HashMap saver = new HashMap();
+    saver.put("1",paramMap);
+    saver.put("2",utility.toIntegerList(palette));
+    saver.put("3",utility.toBooleanList(isBeat));
+    saver.put("4",paletteType);
+    
+    if (newSettings == null) {
+      println("newSettings are null");
+      setDefaultSettings();
+    }
+    else {
+      HashMap setter = (HashMap)newSettings;
+      paramMap = (HashMap)setter.get("1");
+      palette = utility.toIntArray((ArrayList<Integer>)setter.get("2"));
+      isBeat = utility.toBooleanArray((ArrayList<Boolean>)setter.get("3"));
+      paletteType = (Integer)setter.get("4");
+      assert(palette != null);
+    }
+    return saver;
+  }
+  
+
  
 ////////////////////////////////////////////////////////////////////
 //Key helpers
@@ -453,7 +515,7 @@ class Settings {
   }
 
   private void enableControl(String controlKey, boolean enabled) {
-    temp_SendMessage(controlKey + "/visible",enabled?"1":"0");
+    sendMessageToPad(controlKey + "/visible",enabled?"1":"0");
   }
   
   
@@ -480,37 +542,50 @@ class Settings {
   /* unplugged OSC messages */
   void oscEvent(OscMessage msg) {
     String addr = msg.addrPattern();
-    String ipAddress = msg.netAddress().address();
-    if (ipAddress != null && ipAddress.length() > 0 && !ipAddress.equals(iPadIP)) {
-      detectedNewIPadAddress(ipAddress);
-    }
-
-    Object func = actions.get(addr);
-    if (func != null) {
-      if (addr.indexOf("push") >= 0) {
-        if (msg.get(0).floatValue() != 1.0) {
-          ((VoidFunction)func).function();
+    
+    try {
+      String ipAddress = msg.netAddress().address();
+      if (ipAddress != null && ipAddress.length() > 0 && !ipAddress.equals(iPadIP)) {
+        detectedNewIPadAddress(ipAddress);
+      }
+      
+      Object func = actions.get(addr);
+      if (func != null) {
+        println("\naction  = " + addr);
+        if (addr.indexOf("push") >= 0) {
+          if (msg.get(0).floatValue() != 1.0) {
+            ((VoidFunction)func).function();
+          }
         }
+        else if (addr.indexOf("multixy") >= 0) {
+          ((FunctionFloatFloat)func).function(msg.get(0).floatValue(), msg.get(1).floatValue());
+        }
+        return;
       }
-      else if (addr.indexOf("multixy") >= 0) {
-        ((FunctionFloatFloat)func).function(msg.get(0).floatValue(), msg.get(1).floatValue());
+      
+      if (keyNames.contains(addr)) {
+        float value = msg.get(0).floatValue();
+        setParam(addr, value);
+        println("Set " + addr + " to " + value);
+        return;
       }
-      return;
+      
+      if (addr.equals("/1") || addr.equals("/2")) {
+        //just a page change, ignore
+        return;
+      }
+      
+      print("### Received an unhandled osc message: " + msg.addrPattern() + " " + msg.typetag() + " ");
+      Object[] args = msg.arguments();
+      for (int i=0; i<args.length; i++) {
+        print(args[i].toString() + " ");
+      }
+      println();
+    } catch (Exception e) {
+      // Print out the exception that occurred
+      System.out.println("Action Exception " + addr + ": " + e.getMessage());
+      e.printStackTrace();
     }
-
-    if (keyNames.contains(addr)) {
-      float value = msg.get(0).floatValue();
-      setParam(addr, value);
-      println("Set " + addr + " to " + value);
-      return;
-    }
-
-    print("### Received an unhandled osc message: " + msg.addrPattern() + " " + msg.typetag() + " ");
-    Object[] args = msg.arguments();
-    for (int i=0; i<args.length; i++) {
-      print(args[i].toString() + " ");
-    }
-    println();
   }
 
   private void detectedNewIPadAddress(String ipAddress)
@@ -521,16 +596,24 @@ class Settings {
     updateIPadGUI();
   }
   
-  void temp_SendMessage(String key, String value) {
+  void sendMessageToPad(String key, String value) {
     OscMessage myMessage = new OscMessage(key);
     myMessage.add(value);
     oscP5.send(myMessage, oscReceiver);
   }
 
-  void temp_SendMessage(String key, float value) {
+  void sendMessageToPad(String key, float value) {
     OscMessage myMessage = new OscMessage(key);
     myMessage.add(value);
     oscP5.send(myMessage, oscReceiver);
   }
+
+  void sendAllSettingsToPad() {
+    for (Object controlName : paramMap.keySet()) {
+      float value = (Float)paramMap.get(controlName);
+      sendMessageToPad((String)controlName, value);
+    }
+  }
+  
 
 }
