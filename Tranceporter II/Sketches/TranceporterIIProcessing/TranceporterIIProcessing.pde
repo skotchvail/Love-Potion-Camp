@@ -9,6 +9,7 @@ import java.util.List;
 
 
 //ADJUSTABLE PARAMS
+boolean render3d = true;
 int baud = 921600;
 //int baud = 0;
 String iPadIP = "10.0.1.8";

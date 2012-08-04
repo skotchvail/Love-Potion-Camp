@@ -21,7 +21,6 @@ class Pixels {
   private PGraphics pg3D;
 
   private Rectangle box2d, box3d;
-  boolean render3d = false;
   
   Pixels(PApplet p, int wi, int he, int pSize, int baud) {
     ledWidth = wi; 
