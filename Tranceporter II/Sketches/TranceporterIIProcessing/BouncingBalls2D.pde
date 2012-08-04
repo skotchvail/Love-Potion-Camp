@@ -55,11 +55,9 @@ class BouncingBalls2D extends Drawer {
     int numBalls = (int) (settings.getParam(settings.keyCustom1) * 20);
     while (numBalls < balls.size()) {
       balls.remove(balls.size()-1);
-      println("removing ball");
     }
     while (numBalls > balls.size()) {
       addBall();
-      println("adding ball");
     }
     
     for(int i=0; i< balls.size();i++) {

@@ -13,6 +13,8 @@ class BouncingBalls3D extends Drawer {
   
   BouncingBalls3D(Pixels p, Settings s) {
     super(p, s, P3D);
+    
+    assert false;
   }
   
   String getName() { return "BouncingBalls3D"; }

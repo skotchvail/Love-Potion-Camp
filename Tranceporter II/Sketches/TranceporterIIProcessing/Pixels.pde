@@ -214,7 +214,8 @@ class Pixels {
 
     pg3D.beginDraw();
     pg3D.noStroke();
-    pg3D.background(color(6,25,41));
+    colorMode(RGB,255);
+    pg3D.background(color(6,25,41)); //dark blue color
     pg3D.lights();
         
     if (false) {
@@ -281,7 +282,8 @@ class Pixels {
   }
   
   void drawToScreen() {
-    background(color(12,49,81));
+    colorMode(RGB,255);
+    background(color(12,49,81)); //dark blue color
     PGraphics pg = drawFlat2DVersion();
     drawMappedOntoBottle(pg);
   }

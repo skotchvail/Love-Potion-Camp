@@ -4,6 +4,8 @@ class BouncingBallsToAudio extends BouncingBalls2D {
   BouncingBallsToAudio(Pixels p, Settings s) {
     super(p, s);    
 
+    assert false;
+    
     colorMode(HSB, 1.0);
     pg.colorMode(HSB, 1.0);
     pg.smooth();
