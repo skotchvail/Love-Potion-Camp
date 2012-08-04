@@ -111,7 +111,7 @@ class PaletteManager {
   void setPaletteType(int whichPalette, int numColors, color[] colors) {
     assert(whichPalette <  NUM_PT);
     paletteType = whichPalette;
-    pm.setupPalette(numColors, colors);
+    setupPalette(numColors, colors);
   }
   
   

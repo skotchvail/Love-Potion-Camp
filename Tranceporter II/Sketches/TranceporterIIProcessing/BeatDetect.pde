@@ -24,7 +24,7 @@ class BeatDetect {
   int[] beatLength;
   
   BeatDetect(FFT fft, int numBands, int historySize) {
-    MIN_FREQ = max(MIN_FREQ, SAMPLE_RATE/SAMPLE_SIZE);
+    MIN_FREQ = max(MIN_FREQ, main.SAMPLE_RATE/main.SAMPLE_SIZE);
     this.fft = fft;
     this.historySize = historySize;
     
@@ -117,7 +117,7 @@ class BeatDetect {
   void update(AudioBuffer data) {
     fft.forward(data);
     
-    for (int i=0; i<NUM_BANDS; i++) {
+    for (int i=0; i< main.NUM_BANDS; i++) {
       if (!analyzeBands[i]) continue;
       
       // multiply neighbors

@@ -21,6 +21,7 @@ class Pixels {
   private PGraphics pg3D;
 
   private Rectangle box2d, box3d;
+  boolean render3d = false;
   
   Pixels(PApplet p, int wi, int he, int pSize, int baud) {
     ledWidth = wi; 
@@ -62,6 +63,10 @@ class Pixels {
         setPixel(x, y, c);
       }
     }
+  }
+  
+  void toggle3dRender() {
+    render3d = !render3d;
   }
   
   PGraphics drawFlat2DVersion() {
@@ -247,7 +252,9 @@ class Pixels {
     colorMode(RGB,255);
     background(color(12,49,81)); //dark blue color
     PGraphics pg = drawFlat2DVersion();
-    drawMappedOntoBottle(pg);
+    if (render3d) {
+      drawMappedOntoBottle(pg);
+    }
   }
   
   void drawToLedWall() {

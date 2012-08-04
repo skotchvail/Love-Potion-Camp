@@ -15,205 +15,233 @@ String iPadIP = "10.0.1.8";
 int ledWidth = 32;
 int ledHeight = 17;
 int screenPixelSize = 8;
+
 int screenWidth = 800;
-int screenHeight = 400; 
-
-Pixels px;
-SerialPacketWriter spw;
-Console console;
-
-
-int NUM_COLORS = 512;
-//int FRAME_RATE = 100;
-
-//HashMap controlInfo;
-float DEFAULT_GAMMA = 2.5;
-
-// Audio
-BeatDetect bd;
-int HISTORY_SIZE = 50;
-int SAMPLE_SIZE = 1024;
-int NUM_BANDS = 3;
-boolean[] analyzeBands = {true, true, true };
-int SAMPLE_RATE = 44100;
-//AudioSocket signal;
-AudioInput in;
-AudioOutput out;
-FFT fft;
-Minim minim;
-int MAX_BEAT_LENGTH = 750, MAX_AUDIO_SENSITIVITY = 12;
-
-Drawer[] modes;
-int modeInd = 0;
-Utility utility = new Utility();
-
-PaletteManager pm = new PaletteManager();
-Settings settings = new Settings(NUM_BANDS);
-
-void setup() {
-  size(screenWidth, screenHeight);
-  
-  // redirect stdout/err
-  try {
-    console = new Console();
-  } catch(Exception e) {
-    println("Error redirecting stdout/stderr: " + e);
-  }
-  
-  try {
-    px = new Pixels(this, ledWidth, ledHeight, screenPixelSize, baud);
-    println("### Started at " + baud);
-  } catch (Exception e) {
-    baud = 0;
-    px = new Pixels(this, ledWidth, ledHeight, screenPixelSize, baud);
-    println("### Started in standalone mode");
-  }
-  
-  modes = new Drawer[] { new Paint(px, settings), new Bzr3(px, settings), 
-                         new Fire(px, settings), new AlienBlob(px, settings), new BouncingBalls2D(px, settings) }; 
-
-  settings.initOSC();
-  pm.init(this);
-
-  newEffectFirstTime();
-//  modes[modeInd].setup();
-//  updatePaletteName();
-//  newPalette();  
-  
-  // Audio features
-  minim = new Minim(this);
-  in = minim.getLineIn(Minim.STEREO, SAMPLE_SIZE, SAMPLE_RATE);
-  fft = new FFT(SAMPLE_SIZE, SAMPLE_RATE);  
-
-  bd = new BeatDetect(fft, NUM_BANDS, HISTORY_SIZE);
-  for (int i=0; i<NUM_BANDS; i++) bd.analyzeBand(i, analyzeBands[i]);
-  bd.setFFTWindow(FFT.HAMMING);
-
-  frameRate(SAMPLE_RATE/SAMPLE_SIZE);
-  println("Done setup");
-}
-
-//long lastDraw = millis();
-void draw() {
-  if (key == ' ')
-    return;
-  
-  for (int i=0; i<NUM_BANDS; i++) {
-    float audioSensitivity = 1 - settings.getParam(settings.getKeyAudioSensitivity(i));
-    bd.setSensitivity(i, audioSensitivity * MAX_AUDIO_SENSITIVITY, (int)(settings.getParam(settings.keyBeatLength)*MAX_BEAT_LENGTH));
-  }
-  bd.update(in.mix);
-  for (int i=0; i<NUM_BANDS; i++) settings.setIsBeat(i, bd.isBeat("spectralFlux", i));
-
-//  if (millis() - lastDraw < 1000.0/FRAME_RATE) return;
-  
-  Drawer d = modes[modeInd];
-
-  if (settings.palette == null) {
-   assert(settings.palette != null);
-   // println("can't draw, palett is null");
-    return;
-  }
-
-  d.setMousePressed(mousePressed);
-  
-  if (d.getLastMouseX() != mouseX || d.getLastMouseY() != mouseY) {
-    d.setMouseCoords(mouseX, mouseY);
-  }
-  
-//  sendParamsOSC();
-  d.update();
-  px.drawToScreen();                 
-  if (baud != 0) px.drawToLedWall(); 
-  
-//  lastDraw = millis();  
-}
-
-void newPalette() {
-  settings.palette = new color[NUM_COLORS];
-  pm.getNewPalette(NUM_COLORS, settings.palette);
-  settings.paletteType = pm.getPaletteType();
-}
-
-void newPaletteType() {
-  pm.nextPaletteType();
-  newPalette();
-  updateIPadGUI();
-}
-
-void newEffectFirstTime() {
-  settings.palette = new color[NUM_COLORS];
-  pm.setPaletteType(settings.paletteType, NUM_COLORS, settings.palette);
-  modes[modeInd].setup();
-}
-
-void newEffect() {
-  int oldMode = modeInd;
-  modeInd = (modeInd + 1) % modes.length;
-  println("newEffect " + modes[oldMode].getName() + " -> "+ modes[modeInd].getName());
-
-  // Each mode tracks its own settings
-  Object newSettings = modes[modeInd].getSettingsBackup();
-  Object oldSettings = settings.switchSettings(newSettings);
-  modes[oldMode].setSettingsBackup(oldSettings);
-
-  if (newSettings == null) {
-    newEffectFirstTime();
-  }
-  else {
-    pm.setPaletteType(settings.paletteType, NUM_COLORS, settings.palette);
-  }
-//  if (settings.palette == null ) {
-//    settings.palette = new color[NUM_COLORS];
-//  }
-//  pm.setPaletteType(settings.paletteType, NUM_COLORS, settings.palette);
-//  if (newSettings == nil) {
-//    modes[modeInd].setup();
-//  }
-  assert(settings.palette != null);
-  settings.sendAllSettingsToPad();
-  updateIPadGUI();
-}
-
+int screenHeight = 400;
+MainClass main;
+Utility utility;
 
 interface VoidFunction { void function(); }
 interface FunctionFloatFloat { void function(float x, float y); }
 
-void reset() {
-  modes[modeInd].reset();
-  updateIPadGUI();
+
+void setup() {
+  size(screenWidth, screenHeight);
+  utility = new Utility();
+  main = new MainClass();
+  main.setup(this);
 }
 
-void touchXY(int touchNum, float x, float y) {
-  if (frameCount % 10 == 0) println("Touch" + touchNum + " at " + nf(x,1,2) + " " + nf(y,1,2));
-  modes[modeInd].setTouch(touchNum, x, y);
+void draw() {
+  main.draw();
 }
 
 void mouseClicked() {
-  println("got click");
-  newEffect();
+  main.mouseClicked();
 }
 
-void tap() {
-}
+class MainClass {
+  
+  Pixels display;
+  SerialPacketWriter spw;
+  Console console;
 
-void debugPaletteType(String extra) {
-  println(extra + " paletteType = " + settings.paletteType + " " + pm.getPaletteDisplayName() + (settings.palette == null?" (null)":" (not null)"));
-}
+  int NUM_COLORS = 512;
+  //int FRAME_RATE = 100;
+  
+  //HashMap controlInfo;
+  float DEFAULT_GAMMA = 2.5;
+  
+  // Audio
+  BeatDetect bd;
+  int HISTORY_SIZE = 50;
+  int SAMPLE_SIZE = 1024;
+  int NUM_BANDS = 3;
+  boolean[] analyzeBands = {true, true, true };
+  int SAMPLE_RATE = 44100;
+  //AudioSocket signal;
+  AudioInput in;
+  AudioOutput out;
+  FFT fft;
+  Minim minim;
+  int MAX_BEAT_LENGTH = 750, MAX_AUDIO_SENSITIVITY = 12;
+  
+  Drawer[] modes;
+  int modeInd = 0;
 
-void updateIPadGUI()
-{
-  updateModeName();
-  updatePaletteName();
-}
+  
+  PaletteManager pm = new PaletteManager();
+  Settings settings = new Settings(NUM_BANDS);
 
-void updateModeName() {
-  String name = modes[modeInd].getName();
-  settings.sendMessageToPad(settings.keyModeName, name);
-}
+  void setup(PApplet applet) {
+    
+    // redirect stdout/err
+    try {
+      console = new Console();
+    } catch(Exception e) {
+      println("Error redirecting stdout/stderr: " + e);
+    }
+    
+    try {
+      display = new Pixels(applet, ledWidth, ledHeight, screenPixelSize, baud);
+      println("### Started at " + baud);
+    } catch (Exception e) {
+      baud = 0;
+      display = new Pixels(applet, ledWidth, ledHeight, screenPixelSize, baud);
+      println("### Started in standalone mode");
+    }
+    
+    modes = new Drawer[] { new Paint(display, settings), new Bzr3(display, settings),
+      new Fire(display, settings), new AlienBlob(display, settings), new BouncingBalls2D(display, settings) };
+    
+    settings.initOSC();
+    pm.init(applet);
+    
+    newEffectFirstTime();
+    //  modes[modeInd].setup();
+    //  updatePaletteName();
+    //  newPalette();
+    
+    // Audio features
+    minim = new Minim(applet);
+    in = minim.getLineIn(Minim.STEREO, SAMPLE_SIZE, SAMPLE_RATE);
+    fft = new FFT(SAMPLE_SIZE, SAMPLE_RATE);
+    
+    bd = new BeatDetect(fft, NUM_BANDS, HISTORY_SIZE);
+    for (int i=0; i<NUM_BANDS; i++) bd.analyzeBand(i, analyzeBands[i]);
+    bd.setFFTWindow(FFT.HAMMING);
+    
+    frameRate(SAMPLE_RATE/SAMPLE_SIZE);
+    
+    settings.sendAllSettingsToPad();
+    updateIPadGUI();
+    
+    println("Done setup");
+  }
 
-void updatePaletteName() {
-  settings.sendMessageToPad(settings.keyPaletteName, pm.getPaletteDisplayName());
+  //long lastDraw = millis();
+  void draw() {
+    if (key == ' ')
+      return;
+    
+    for (int i=0; i<NUM_BANDS; i++) {
+      float audioSensitivity = 1 - settings.getParam(settings.getKeyAudioSensitivity(i));
+      bd.setSensitivity(i, audioSensitivity * MAX_AUDIO_SENSITIVITY, (int)(settings.getParam(settings.keyBeatLength)*MAX_BEAT_LENGTH));
+    }
+    bd.update(in.mix);
+    for (int i=0; i<NUM_BANDS; i++) settings.setIsBeat(i, bd.isBeat("spectralFlux", i));
+    
+    //  if (millis() - lastDraw < 1000.0/FRAME_RATE) return;
+    
+    Drawer d = modes[modeInd];
+    
+    if (settings.palette == null) {
+      assert(settings.palette != null);
+      // println("can't draw, palett is null");
+      return;
+    }
+    
+    d.setMousePressed(mousePressed);
+    
+    if (d.getLastMouseX() != mouseX || d.getLastMouseY() != mouseY) {
+      d.setMouseCoords(mouseX, mouseY);
+    }
+    
+    //  sendParamsOSC();
+    d.update();
+    display.drawToScreen();
+    if (baud != 0) display.drawToLedWall();
+    
+    //  lastDraw = millis();
+  }
+  
+  void newPalette() {
+    settings.palette = new color[NUM_COLORS];
+    pm.getNewPalette(NUM_COLORS, settings.palette);
+    settings.paletteType = pm.getPaletteType();
+  }
+  
+  void newPaletteType() {
+    pm.nextPaletteType();
+    newPalette();
+    updateIPadGUI();
+  }
+  
+  void newEffectFirstTime() {
+    settings.palette = new color[NUM_COLORS];
+    pm.setPaletteType(settings.paletteType, NUM_COLORS, settings.palette);
+    modes[modeInd].setup();
+  }
+  
+  void newEffect() {
+    int oldMode = modeInd;
+    modeInd = (modeInd + 1) % modes.length;
+    println("newEffect " + modes[oldMode].getName() + " -> "+ modes[modeInd].getName());
+    
+    // Each mode tracks its own settings
+    Object newSettings = modes[modeInd].getSettingsBackup();
+    Object oldSettings = settings.switchSettings(newSettings);
+    modes[oldMode].setSettingsBackup(oldSettings);
+    
+    if (newSettings == null) {
+      newEffectFirstTime();
+    }
+    else {
+      pm.setPaletteType(settings.paletteType, NUM_COLORS, settings.palette);
+    }
+    //  if (settings.palette == null ) {
+    //    settings.palette = new color[NUM_COLORS];
+    //  }
+    //  pm.setPaletteType(settings.paletteType, NUM_COLORS, settings.palette);
+    //  if (newSettings == nil) {
+    //    modes[modeInd].setup();
+    //  }
+    assert(settings.palette != null);
+    settings.sendAllSettingsToPad();
+    updateIPadGUI();
+  }
+  
+  void reset() {
+    modes[modeInd].reset();
+    updateIPadGUI();
+  }
+  
+  void touchXY(int touchNum, float x, float y) {
+    if (frameCount % 10 == 0) println("Touch" + touchNum + " at " + nf(x,1,2) + " " + nf(y,1,2));
+    modes[modeInd].setTouch(touchNum, x, y);
+  }
+  
+  void mouseClicked() {
+    Point p = new Point(mouseX,mouseY);
+    if (display.getBox2D().contains(p)) {
+      newEffect();
+    }
+    else if (display.getBox3D().contains(p)) {
+      display.toggle3dRender();
+    }
+  }
+  
+  void tap() {
+  }
+  
+  void debugPaletteType(String extra) {
+    println(extra + " paletteType = " + settings.paletteType + " " + pm.getPaletteDisplayName() + (settings.palette == null?" (null)":" (not null)"));
+  }
+  
+  void updateIPadGUI()
+  {
+    updateModeName();
+    updatePaletteName();
+  }
+  
+  void updateModeName() {
+    String name = modes[modeInd].getName();
+    settings.sendMessageToPad(settings.keyModeName, name);
+  }
+  
+  void updatePaletteName() {
+    settings.sendMessageToPad(settings.keyPaletteName, pm.getPaletteDisplayName());
+  }
 }
 
 class Utility {
@@ -319,43 +347,43 @@ class Settings {
     actions = new HashMap();
     actions.put("/1/multixy1/1",  new FunctionFloatFloat() {
               public void function(float x, float y) {
-                touchXY(1, x, y);
+                main.touchXY(1, x, y);
               }});
     actions.put("/1/multixy1/2",  new FunctionFloatFloat() {
               public void function(float x, float y) {
-                touchXY(2, x, y);
+                main.touchXY(2, x, y);
               }});
     actions.put("/1/multixy1/3",  new FunctionFloatFloat() {
             public void function(float x, float y) {
-              touchXY(3, x, y);
+              main.touchXY(3, x, y);
             }});
     actions.put("/1/multixy1/4",  new FunctionFloatFloat() {
             public void function(float x, float y) {
-              touchXY(4, x, y);
+              main.touchXY(4, x, y);
             }});
     actions.put("/1/multixy1/5",  new FunctionFloatFloat() {
             public void function(float x, float y) {
-              touchXY(5, x, y);
+              main.touchXY(5, x, y);
             }});
     actions.put("/1/push1",       new VoidFunction() {
             public void function() {
-              newEffect();
+              main.newEffect();
             }});
     actions.put("/1/push2",       new VoidFunction() {
             public void function() {
-              newPaletteType();
+              main.newPaletteType();
             }});
     actions.put("/1/push3",       new VoidFunction() {
             public void function() {
-              newPalette();
+              main.newPalette();
             }});
     actions.put("/1/push4",       new VoidFunction() {
             public void function() {
-              reset();
+              main.reset();
             }});
     actions.put("/2/push1",       new VoidFunction() {
             public void function() {
-              tap();
+              main.tap();
             }});
 
    }
@@ -377,11 +405,11 @@ class Settings {
   }
   
   float beatPos(int band) {
-    return bd.beatPos("spectralFlux", band);
+    return main.bd.beatPos("spectralFlux", band);
   }
   
   float beatPosSimple(int band) {
-    return bd.beatPosSimple("spectralFlux", band);
+    return main.bd.beatPosSimple("spectralFlux", band);
   }
   
   ////////////////////////////////////////////////////////////////////
@@ -396,9 +424,9 @@ class Settings {
     assert(paramMap != null) : "param is null";
     assert(paramName != null) : "paramName is null";
     
-    if (paramName.equals(settings.keySpeed)) {
+    if (paramName.equals(keySpeed)) {
       float speed = (Float) paramMap.get(paramName);
-      for (int i=0; i<NUM_BANDS; i++) {
+      for (int i=0; i < main.NUM_BANDS; i++) {
         if (isBeat(i)) {
           speed += beatPos(i)*(Float)paramMap.get(getKeyAudioSpeedChange(i));
         }
@@ -406,7 +434,9 @@ class Settings {
       return constrain(speed, 0, 1);
     }
     
-    return (Float) paramMap.get(paramName);
+    Object result = paramMap.get(paramName);
+    assert result != null : "getParam does not have " + paramName;
+    return (Float) result;
   }
   
   void setDefaultSettings() {
@@ -466,11 +496,11 @@ class Settings {
   String getKeyAudioSpeedChange(int index) {
     switch(index) {
       case 0:
-        return settings.keyAudioSpeedChange1;
+        return keyAudioSpeedChange1;
       case 1:
-        return settings.keyAudioSpeedChange2;
+        return keyAudioSpeedChange2;
       case 2:
-        return settings.keyAudioSpeedChange3;
+        return keyAudioSpeedChange3;
       default:
         assert(false);
     }
@@ -480,11 +510,11 @@ class Settings {
   String getKeyAudioColorChange(int index) {
     switch(index) {
       case 0:
-        return settings.keyAudioColorChange1;
+        return keyAudioColorChange1;
       case 1:
-        return settings.keyAudioColorChange2;
+        return keyAudioColorChange2;
       case 2:
-        return settings.keyAudioColorChange3;
+        return keyAudioColorChange3;
       default:
         assert(false);
     }
@@ -494,11 +524,11 @@ class Settings {
   String getKeyAudioBrightnessChange(int index) {
     switch(index) {
       case 0:
-        return settings.keyAudioBrightnessChange1;
+        return keyAudioBrightnessChange1;
       case 1:
-        return settings.keyAudioBrightnessChange2;
+        return keyAudioBrightnessChange2;
       case 2:
-        return settings.keyAudioBrightnessChange3;
+        return keyAudioBrightnessChange3;
       default:
         assert(false);
     }
@@ -508,11 +538,11 @@ class Settings {
   String getKeyAudioSensitivity(int index) {
     switch(index) {
       case 0:
-        return settings.keyAudioSensitivity1;
+        return keyAudioSensitivity1;
       case 1:
-        return settings.keyAudioSensitivity2;
+        return keyAudioSensitivity2;
       case 2:
-        return settings.keyAudioSensitivity3;
+        return keyAudioSensitivity3;
       default:
         assert(false);
     }
@@ -525,11 +555,7 @@ class Settings {
   void initOSC() {
     oscP5 = new OscP5(this,8000);
     oscReceiver = new NetAddress(iPadIP,9000);
-
-    sendAllSettingsToPad();
-    updateIPadGUI();
-//    enableControl(keySpeed, false);
-  }
+}
 
   private void enableControl(String controlKey, boolean enabled) {
     sendMessageToPad(controlKey + "/visible",enabled?"1":"0");
@@ -610,8 +636,8 @@ class Settings {
     println("detected new iPad address: " + iPadIP + " -> " + ipAddress);
     iPadIP = ipAddress; //once the iPad contacts us, we can contact them, if the hardcoded IP address is wrong
     oscReceiver = new NetAddress(iPadIP,9000);
-    updateIPadGUI();
-  }
+    sendAllSettingsToPad();
+    main.updateIPadGUI();  }
   
   void sendMessageToPad(String key, String value) {
     OscMessage myMessage = new OscMessage(key);

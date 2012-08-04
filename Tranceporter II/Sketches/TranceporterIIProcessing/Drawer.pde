@@ -31,18 +31,19 @@ class Drawer {
     yTouches = new float[MAX_TOUCHES];
     lastTouchTimes = new long[MAX_TOUCHES];
     rgbGamma = new short[256][3];
-    setGamma(DEFAULT_GAMMA);    
+    setGamma(main.DEFAULT_GAMMA);
     settings = s;
   }
   
   Drawer(Pixels px, Settings s, String renderer) {
+    assert false : "this needs to be reviewed";
     p = px;
     pressed = false;
     pg = createGraphics(p.getWidth(), p.getHeight(), renderer);
     width = p.getWidth();
     height = p.getHeight();
     rgbGamma = new short[256][3];
-    setGamma(DEFAULT_GAMMA);
+    setGamma(main.DEFAULT_GAMMA);
     settings = s;
   }    
   
