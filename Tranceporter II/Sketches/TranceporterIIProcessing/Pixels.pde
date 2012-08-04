@@ -2,33 +2,33 @@
 // to the processing display.
 
 import saito.objloader.*;
+import java.awt.Rectangle;
 
 int PACKET_SIZE = 100;
 int LOC_BYTES = 1; // how many bytes to use to store the index at the beginning of each packet
 int MAX_RGB = 255;
 
 class Pixels {
-  int ledWidth, ledHeight, pixelSize;
-  color[][] px;
-  SerialPacketWriter spw;
-  byte txData[];
+  private int ledWidth, ledHeight, pixelSize;
+
+  private color[][] px;
+  private SerialPacketWriter spw;
+  private byte txData[];
   
-  int xOffset = 10;
-  int yOffset = 10;
-  int rotation = 0;
+  private int rotation = 0;
 
-  OBJModel objModel;
-  PGraphics pg3D;
+  private OBJModel objModel;
+  private PGraphics pg3D;
 
-  // 3D version
-  int tubeRes = 32;
-  float[] tubeX = new float[tubeRes];
-  float[] tubeY = new float[tubeRes];
+  private Rectangle box2d, box3d;
   
   Pixels(PApplet p, int wi, int he, int pSize, int baud) {
     ledWidth = wi; 
     ledHeight = he;
     pixelSize = pSize;
+    box2d = new Rectangle(10, 10, ledWidth * pixelSize, ledHeight * pixelSize);
+    box3d = new Rectangle(box2d.x * 2 + box2d.width,box2d.y,360,360);
+    
     px = new color[ledWidth][ledHeight];
   
     if (baud > 0) {
@@ -39,16 +39,7 @@ class Pixels {
       spw.init(p, baud, PACKET_SIZE);
     }
     
-    float angle = 270.0 / tubeRes;
-    for (int i = 0; i < tubeRes; i++) {
-      tubeX[i] = cos(radians(i * angle));
-      tubeY[i] = sin(radians(i * angle));
-    }
-    
-    int width3d = 360;
-    int height3d = 360;
-
-    pg3D = createGraphics(width3d, height3d, P3D);
+    pg3D = createGraphics(box3d.width, box3d.height, P3D);
     
     objModel = new OBJModel(p, "tranceporter.obj");
     // turning on the debug output (it's all the stuff that spews out in the black box down the bottom)
@@ -59,7 +50,6 @@ class Pixels {
     //noStroke();
     println("drawModes POINTS=" + POINTS + " LINES=" + LINES + " TRIANGLES=" + TRIANGLES + " TRIANGLE_FAN=" + TRIANGLE_FAN
             + " TRIANGLE_STRIP=" + TRIANGLE_STRIP + " QUADS=" + QUADS + " QUAD_STRIP=" + QUAD_STRIP);
-  
   }
 
   void setPixel(int x, int y, color c) {
@@ -75,11 +65,12 @@ class Pixels {
   }
   
   PGraphics drawFlat2DVersion() {
-    int expandedWidth = ledWidth * pixelSize;
-    int expandedHeight = ledHeight * pixelSize;
     
     // render into offscreen buffer so that we can blur it, and then copy it
     // onto the display window
+    int expandedWidth = box2d.width;
+    int expandedHeight = box2d.height;
+
     PGraphics pg = createGraphics(expandedWidth, expandedHeight, JAVA2D);
     pg.beginDraw();
     pg.noStroke();
@@ -98,12 +89,12 @@ class Pixels {
     loadPixels();
     for (int x = 0; x < expandedWidth; x++) {
       for (int y = 0; y < expandedHeight; y++) {
-        pixels[(y + yOffset)*width + x + xOffset] = pg.pixels[y*expandedWidth + x];
+        pixels[(y + box2d.y)*width + x + box2d.x] = pg.pixels[y*expandedWidth + x];
       }
     }
     updatePixels();
     pg.updatePixels();
-    return pg; 
+    return pg;
   }
 
   void drawModel(PImage texture) {
@@ -218,63 +209,34 @@ class Pixels {
     pg3D.background(color(6,25,41)); //dark blue color
     pg3D.lights();
         
-    if (false) {
-      pg3D.translate(pg3D.width / 2, pg3D.height / 2);
-      
-      int fullRevolution = 30*5; //5 seconds
-      rotation = (rotation  + 1) % fullRevolution;
-      pg3D.rotateY(map(rotation, 0, fullRevolution, -PI, PI));
-
-      pg3D.beginShape(QUAD_STRIP);
-      pg3D.texture(img);
-      for (int i = 0; i < tubeRes; i++) {
-        float x = tubeX[i] * 100;
-        float z = tubeY[i] * 100;
-        float u = img.width / tubeRes * i;
-        pg3D.vertex(x, -100, z, u, 0);
-        pg3D.vertex(x, 100, z, u, img.height);
-      }
-      pg3D.endShape();
-      pg3D.beginShape(QUADS);
-      pg3D.texture(img);
-      pg3D.vertex(0, -100, 0, 0, 0);
-      pg3D.vertex(100, -100, 0, 100, 0);
-      pg3D.vertex(100, 100, 0, 100, 100);
-      pg3D.vertex(0, 100, 0, 0, 100);
-      pg3D.endShape();
-      pg3D.endDraw();
-    }
-    else {
-      pg3D.pushMatrix();
-
-      float rX = map(mouseY, 0, height, -PI, PI);
-      float rY = map(mouseX, 0, width, -PI, PI);
-      //println("rX = " + rX + " rY = " + rY);
-      rX = PI/2;
-      
-      int fullRevolution = 30*5; //X seconds
-      rotation = (rotation  + 1) % fullRevolution;
-      rY = map(rotation, 0, fullRevolution, -PI, PI);
-
-      pg3D.translate(pg3D.height * 0.5, pg3D.height * 2, pg3D.height * -3.5);
-      
-      pg3D.rotateY(rY);
-      pg3D.rotateX(rX);
-     
-      pg3D.translate(pg3D.height * 0,pg3D.height * 1, pg3D.height * 0);
-
-      drawModel(img);
-      pg3D.popMatrix();
-      pg3D.endDraw();
-    }
+    pg3D.pushMatrix();
+    
+    float rX = map(mouseY, 0, height, -PI, PI);
+    float rY = map(mouseX, 0, width, -PI, PI);
+    //println("rX = " + rX + " rY = " + rY);
+    rX = PI/2;
+    
+    int fullRevolution = 30*5; //X seconds
+    rotation = (rotation  + 1) % fullRevolution;
+    rY = map(rotation, 0, fullRevolution, -PI, PI);
+    
+    pg3D.translate(pg3D.height * 0.5, pg3D.height * 2, pg3D.height * -3.5);
+    
+    pg3D.rotateY(rY);
+    pg3D.rotateX(rX);
+    
+    pg3D.translate(pg3D.height * 0,pg3D.height * 1, pg3D.height * 0);
+    
+    drawModel(img);
+    pg3D.popMatrix();
+    pg3D.endDraw();
     
     // copy onto the display window
     pg3D.loadPixels();
     loadPixels();
-    int xAdjust = (xOffset * 2 + pg.width);
     for (int x = 0; x < pg3D.width; x++) {
       for (int y = 0; y < pg3D.height; y++) {
-        pixels[(y + yOffset) * width + x + xAdjust] = pg3D.pixels[y * pg3D.width + x];
+        pixels[(y + box2d.y) * width + x + box3d.x] = pg3D.pixels[y * pg3D.width + x];
       }
     }
     updatePixels();
@@ -329,5 +291,7 @@ class Pixels {
   int getHeight() { return ledHeight; }
   int getWidth() { return ledWidth; }
   int getPixelSize() { return pixelSize; }
+  Rectangle getBox2D() {return box2d;}
+  Rectangle getBox3D() {return box3d;}
 }
 
