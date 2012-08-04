@@ -3,10 +3,10 @@
 // configured for the LEDwall dimensions and can use any PGraphics method like loadPixels, set, beginShape etc.
 
 class Drawer {
-  Pixels p;
+  Pixels p; //flat 2D version
   boolean pressed;
   int pressX, pressY;
-  PGraphics pg;
+  PGraphics pg; //flat 2D version
   boolean mousePressed;
   int width, height;
   int mouseX, mouseY;

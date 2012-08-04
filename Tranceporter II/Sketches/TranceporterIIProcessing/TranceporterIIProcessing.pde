@@ -73,12 +73,12 @@ void setup() {
                          new Fire(px, settings), new AlienBlob(px, settings), new BouncingBalls2D(px, settings) }; 
 
   settings.initOSC();
-
-  modes[modeInd].setup();
-
   pm.init(this);
-  updatePaletteName();
-  newPalette();  
+
+  newEffectFirstTime();
+//  modes[modeInd].setup();
+//  updatePaletteName();
+//  newPalette();  
   
   // Audio features
   minim = new Minim(this);
@@ -141,20 +141,35 @@ void newPaletteType() {
   updateIPadGUI();
 }
 
-void newProgram() {
+void newEffectFirstTime() {
+  settings.palette = new color[NUM_COLORS];
+  pm.setPaletteType(settings.paletteType, NUM_COLORS, settings.palette);
+  modes[modeInd].setup();
+}
+
+void newEffect() {
   int oldMode = modeInd;
   modeInd = (modeInd + 1) % modes.length;
-  println("newProgram " + modes[oldMode].getName() + " -> "+ modes[modeInd].getName());
+  println("newEffect " + modes[oldMode].getName() + " -> "+ modes[modeInd].getName());
 
   // Each mode tracks its own settings
   Object newSettings = modes[modeInd].getSettingsBackup();
   Object oldSettings = settings.switchSettings(newSettings);
   modes[oldMode].setSettingsBackup(oldSettings);
-  if (settings.palette == null ) {
-    settings.palette = new color[NUM_COLORS];
+
+  if (newSettings == null) {
+    newEffectFirstTime();
   }
-  pm.setPaletteType(settings.paletteType, NUM_COLORS, settings.palette);
-  modes[modeInd].setup();
+  else {
+    pm.setPaletteType(settings.paletteType, NUM_COLORS, settings.palette);
+  }
+//  if (settings.palette == null ) {
+//    settings.palette = new color[NUM_COLORS];
+//  }
+//  pm.setPaletteType(settings.paletteType, NUM_COLORS, settings.palette);
+//  if (newSettings == nil) {
+//    modes[modeInd].setup();
+//  }
   assert(settings.palette != null);
   settings.sendAllSettingsToPad();
   updateIPadGUI();
@@ -176,7 +191,7 @@ void touchXY(int touchNum, float x, float y) {
 
 void mouseClicked() {
   println("got click");
-  newProgram();
+  newEffect();
 }
 
 void tap() {
@@ -324,7 +339,7 @@ class Settings {
             }});
     actions.put("/1/push1",       new VoidFunction() {
             public void function() {
-              newProgram();
+              newEffect();
             }});
     actions.put("/1/push2",       new VoidFunction() {
             public void function() {
@@ -378,6 +393,8 @@ class Settings {
   
   float getParam(String paramName) {
     assert(keyNames.contains(paramName));
+    assert(paramMap != null) : "param is null";
+    assert(paramName != null) : "paramName is null";
     
     if (paramName.equals(settings.keySpeed)) {
       float speed = (Float) paramMap.get(paramName);

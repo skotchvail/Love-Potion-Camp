@@ -22,8 +22,10 @@ class BouncingBalls2D extends Drawer {
     colorMode(HSB, 1.0);
     pg.colorMode(HSB, 1.0);
     pg.smooth();
+    println("setting up bbox");
     bbox = new Bbox(new Vec2D(width, height));
     reset();
+    assert(bbox != null);
   }
   
   void reset() {
@@ -37,6 +39,7 @@ class BouncingBalls2D extends Drawer {
     float mass = radius*radius;
     color col = color(mass/maxMass, 0.5, 1.0);
     
+    assert(bbox != null);
     Vec2D pos = new Vec2D(random(0,bbox.getDims().x), random(0, bbox.getDims().y/2));
     Vec2D dpos = new Vec2D(random(-1, 1), random(-1, 1));
     dpos = dpos.normalizeTo(startMomentum/mass);
@@ -44,16 +47,22 @@ class BouncingBalls2D extends Drawer {
   }    
   
   void draw() {
+    assert(bbox != null);
     float speed = settings.getParam(settings.keySpeed);
     int frameSkip = int(10 - speed*9);
     if (frameCount % frameSkip != 0) return;
     
     int numBalls = (int) (settings.getParam(settings.keyCustom1) * 20);
-    while (numBalls < balls.size()) balls.remove(balls.size()-1);
-    while (numBalls > balls.size()) addBall();
+    while (numBalls < balls.size()) {
+      balls.remove(balls.size()-1);
+      println("removing ball");
+    }
+    while (numBalls > balls.size()) {
+      addBall();
+      println("adding ball");
+    }
     
     for(int i=0; i< balls.size();i++) {
-    
       balls.get(i).update(gravity);
     }
     checkForCollisions();
@@ -88,7 +97,7 @@ class ball {
     this.col = col;
     this.startMomentum = getMomentum();
     updateColor();
-    this.bbox = bbox;  
+    this.bbox = bbox;
   }
   
   void updateColor() {
@@ -160,7 +169,7 @@ class ball {
 
 class Bbox {
   Vec2D dims;
-  color[][] wallColors;
+  //color[][] wallColors;
   
   Bbox(Vec2D dims) {
     colorMode(HSB, 1.0);

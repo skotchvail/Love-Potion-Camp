@@ -43,6 +43,7 @@ class PaletteManager {
     color[] c;
     if(colors == null) {
       println("setupPalette colors cannot be null!");
+      assert(false);
     }
  //   println("Setting up palette " + getPaletteDisplayName() + ", colors.length = " + colors.length);
 
