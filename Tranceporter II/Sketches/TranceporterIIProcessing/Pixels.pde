@@ -382,6 +382,15 @@ class Pixels {
     ledSetValue(whichStrand, ordinal, c2i(x,y));
   }
   
+  Point ledGet(int whichStrand, int ordinal) {
+    int index = (whichStrand * kPixelsPerStrand) + ordinal;
+    int value = strandMap[index];
+    if (value < 0) {
+      return new Point(-1,-1);
+    }
+    return i2c(value);
+  }
+  
   void ledInterpolate() {
     
     int available = 0;

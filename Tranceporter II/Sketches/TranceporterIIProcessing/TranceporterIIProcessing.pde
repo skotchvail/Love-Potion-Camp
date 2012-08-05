@@ -87,7 +87,7 @@ class MainClass {
       println("### Started in standalone mode");
     }
     
-    modes = new Drawer[] { new Paint(display, settings), new Bzr3(display, settings),
+    modes = new Drawer[] { new HardwareTest(display, settings), new Paint(display, settings), new Bzr3(display, settings),
       new Fire(display, settings), new AlienBlob(display, settings), new BouncingBalls2D(display, settings) };
     
     settings.initOSC();
