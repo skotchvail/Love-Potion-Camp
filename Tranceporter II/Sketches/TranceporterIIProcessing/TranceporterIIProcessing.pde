@@ -43,22 +43,18 @@ void mouseClicked() {
 class MainClass {
   
   Pixels display;
-  SerialPacketWriter spw;
   Console console;
 
   int NUM_COLORS = 512;
-  //int FRAME_RATE = 100;
-  
-  //HashMap controlInfo;
   float DEFAULT_GAMMA = 2.5;
   
   // Audio
   BeatDetect bd;
   int HISTORY_SIZE = 50;
+  int SAMPLE_RATE = 44100;
   int SAMPLE_SIZE = 1024;
   int NUM_BANDS = 3;
   boolean[] analyzeBands = {true, true, true };
-  int SAMPLE_RATE = 44100;
   //AudioSocket signal;
   AudioInput in;
   AudioOutput out;
@@ -119,7 +115,6 @@ class MainClass {
     println("Done setup");
   }
 
-  //long lastDraw = millis();
   void draw() {
     if (key == ' ')
       return;
@@ -129,10 +124,7 @@ class MainClass {
       bd.setSensitivity(i, audioSensitivity * MAX_AUDIO_SENSITIVITY, (int)(settings.getParam(settings.keyBeatLength)*MAX_BEAT_LENGTH));
     }
     bd.update(in.mix);
-    for (int i=0; i<NUM_BANDS; i++) settings.setIsBeat(i, bd.isBeat("spectralFlux", i));
-    
-    //  if (millis() - lastDraw < 1000.0/FRAME_RATE) return;
-    
+    for (int i=0; i<NUM_BANDS; i++) settings.setIsBeat(i, bd.isBeat("spectralFlux", i));    
     Drawer d = modes[modeInd];
     
     if (settings.palette == null) {
@@ -150,9 +142,7 @@ class MainClass {
     //  sendParamsOSC();
     d.update();
     display.drawToScreen();
-    if (baud != 0) display.drawToLedWall();
-    
-    //  lastDraw = millis();
+    display.drawToLeds();
   }
   
   void newPalette() {
