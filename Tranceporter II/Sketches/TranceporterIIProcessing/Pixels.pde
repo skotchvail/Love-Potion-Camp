@@ -32,14 +32,14 @@ class Pixels {
     objModel.scale(3);
     
     //noStroke();
-    println("drawModes POINTS=" + POINTS + " LINES=" + LINES + " TRIANGLES=" + TRIANGLES + " TRIANGLE_FAN=" + TRIANGLE_FAN
-            + " TRIANGLE_STRIP=" + TRIANGLE_STRIP + " QUADS=" + QUADS + " QUAD_STRIP=" + QUAD_STRIP);
+//    println("drawModes POINTS=" + POINTS + " LINES=" + LINES + " TRIANGLES=" + TRIANGLES + " TRIANGLE_FAN=" + TRIANGLE_FAN
+//            + " TRIANGLE_STRIP=" + TRIANGLE_STRIP + " QUADS=" + QUADS + " QUAD_STRIP=" + QUAD_STRIP);
     
     setupTotalControl();
   }
 
   void setPixel(int x, int y, color c) {
-    pixelData[c(x,y)] = c;
+    pixelData[c2i(x,y)] = c;
   }
 
   void setAll(color c) {
@@ -66,7 +66,7 @@ class Pixels {
     pg.noStroke();
     for (int x=0; x<ledWidth; x++) {
       for (int y=0; y<ledHeight; y++) {
-        color pixelColor = pixelData[c(x,y)];
+        color pixelColor = pixelData[c2i(x,y)];
         pg.fill(pixelColor);
         pg.rect(x*screenPixelSize,y*screenPixelSize, screenPixelSize, screenPixelSize);
       }
@@ -257,9 +257,9 @@ class Pixels {
 //      
 //      while (x >= 0 && x < ledWidth) {
 //        byte[] rgb = new byte[3];
-//        rgb[2] = (byte) constrain(pixelData[c(x,y)] & 0xFF, 0, MAX_RGB);
-//        rgb[1] = (byte) constrain((pixelData[c(x,y)] >> 8) & 0xFF, 0, MAX_RGB);
-//        rgb[0] = (byte) constrain((pixelData[c(x,y)] >> 16) & 0xFF, 0, MAX_RGB);
+//        rgb[2] = (byte) constrain(pixelData[c2i(x,y)] & 0xFF, 0, MAX_RGB);
+//        rgb[1] = (byte) constrain((pixelData[c2i(x,y)] >> 8) & 0xFF, 0, MAX_RGB);
+//        rgb[0] = (byte) constrain((pixelData[c2i(x,y)] >> 16) & 0xFF, 0, MAX_RGB);
 //        
 //        for (int c=0; c<3; c++) {
 //          if (ti%PACKET_SIZE == 0) {
@@ -283,49 +283,302 @@ class Pixels {
 ////////////////////////////////////////////////////////////////////
 //Total Control
   
-  int TC_OK = 0;       /* Function completed successfully      */
-  int TC_ERR_VALUE = 1;     /* Parameter out of range               */
-  int TC_ERR_MALLOC = 2;    /* malloc() failure                     */
-  int TC_ERR_OPEN = 3;      /* Could not open FTDI device           */
-  int TC_ERR_WRITE = 4;     /* Error writing to FTDI device         */
-  int TC_ERR_MODE = 5;      /* Could not enable async bit bang mode */
-  int TC_ERR_DIVISOR = 6;   /* Could not set baud divisor           */
-  int TC_ERR_BAUDRATE = 7;   /* Could not set baud rate              */
-  
-  int TC_PIXEL_UNUSED =       -1;     // Pixel is attached but not used
-  int TC_PIXEL_DISCONNECTED = -2;     // Pixel is not attached to strand
-  
-  
-  //convert coordinates into index into pixel array
-  private int c(int x, int y) {
-    return (y*ledWidth) + x;
-  }
+  /*
+   spreadsheet
+   
+   for each led:
+   which strand, offset x, y, which shape
+   
+   strand1:
+   1: 3, 10, shapeA
+   2: 16, 10, shapeA
+   3: 55, 9, shapeB
+   4: unused
+   3: 59, 49, shapeB
+   
+   strand2:
+   1: 77, 14, shapeA
+   2: 46, 98, shapeA
+   3: 3, 12, shapeB
+   
+   */
 
-  int nStrands = 1;
-  int pixelsPerStrand;
-  int[] mapnum;
+  
+  /*
+   ..    00      01      02      03      04      05      06      07      08      09      10
+   00    xx      xx      xx      xx      xx      xx      xx      xx      xx      xx      xx
+   01    xx      xx      xx      xx      xx      xx      xx      xx      xx      xx      xx
+   02    xx      xx      xx      xx      xx      xx      xx      xx      xx      xx      xx
+   03    xx      xx      xx      xx      xx      xx      xx      xx      xx      xx      xx
+   04    xx      xx      xx      xx      xx      xx      xx      xx      xx      xx      xx
+   05    xx      xx      xx      xx      xx      xx      xx      xx      xx      xx      xx
+   
+   ..   00      01      02      03      04      05      06      07      08      09      10      11      12      13      14
+   sA: (00,00) (00,00) (00,00) (00,00) (00,00) (00,00) (00,00) (00,00) (00,00) (00,00) (00,00) (00,00) (00,00) (00,00) (00,00)
+   sB  (00,00) (00,00) (00,00) (00,00) (00,00) (00,00) (00,00) (00,00) (00,00) (00,00) (00,00) (00,00) (00,00) (00,00) (00,00)
+   sC  (00,00) (00,00) (00,00) (00,00) (00,00) (00,00) (00,00) (00,00) (00,00) (00,00) (00,00) (00,00) (00,00) (00,00) (00,00)
+   
+   
+   */
+
+  
+  final int TC_OK = 0;       /* Function completed successfully      */
+  final int TC_ERR_VALUE = 1;     /* Parameter out of range               */
+  final int TC_ERR_MALLOC = 2;    /* malloc() failure                     */
+  final int TC_ERR_OPEN = 3;      /* Could not open FTDI device           */
+  final int TC_ERR_WRITE = 4;     /* Error writing to FTDI device         */
+  final int TC_ERR_MODE = 5;      /* Could not enable async bit bang mode */
+  final int TC_ERR_DIVISOR = 6;   /* Could not set baud divisor           */
+  final int TC_ERR_BAUDRATE = 7;   /* Could not set baud rate              */
+  
+  final int TC_PIXEL_UNUSED =       -1;     // Pixel is attached but not used
+  final int TC_PIXEL_DISCONNECTED = -2;     // Pixel is not attached to strand
+  final int TC_PIXEL_UNDEFINED =    -3;     // Pixel not yet assigned a value
+  
+  final int kNumStrands = 3;
+  final int kPixelsPerStrand = 15;
+  int[] strandMap = new int[kNumStrands * kPixelsPerStrand];
   
   boolean useTotalControl = true;
+   
+  //convert coordinates into index into pixel array index
+  private int c2i(int x, int y) {
+    return (y*ledWidth) + x;
+  }
   
+  private Point i2c(int index) {
+    Point p = new Point();
+    p.y = index / ledWidth;
+    p.x = index % ledWidth;
+    return p;
+  }
+  
+  void initStrand(int whichStrand, int numPixels) {
+    int start = whichStrand * kPixelsPerStrand;
+    int boundary = start + numPixels;
+    int j;
+    for (j = start; j < boundary; j++) {
+      strandMap[j] = TC_PIXEL_UNDEFINED;
+    }
+    int end = start + kPixelsPerStrand;
+    for (; j < end; j++) {
+      strandMap[j] = TC_PIXEL_DISCONNECTED;
+    }
+  }
+
+  void ledSetValue(int whichStrand, int ordinal, int value) {
+    assert(whichStrand < kNumStrands) : "not this many strands";
+    assert(ordinal < kPixelsPerStrand) : "whichStrand exceeds number of leds per strand";
+    int index = (whichStrand * kPixelsPerStrand) + ordinal;
+    assert(strandMap[index] == TC_PIXEL_UNDEFINED) : "led " + ordinal + " on strand " + whichStrand + " is already defined: " + strandMap[index];
+    strandMap[index] = value;
+  }
+  
+  void ledMissing(int whichStrand, int ordinal) {
+    ledSetValue(whichStrand, ordinal, TC_PIXEL_UNUSED);
+  }
+  
+  void ledSet(int whichStrand, int ordinal, int x, int y) {
+    ledSetValue(whichStrand, ordinal, c2i(x,y));
+  }
+  
+  void ledInterpolate() {
+    
+    int available = 0;
+    
+    for (int strand = 0; strand < kNumStrands; strand++) {
+      int start = strand * kPixelsPerStrand;
+      int lastIndexWithCoord = -1;
+      available = 0;
+      for (int i = start; i < start + kPixelsPerStrand; i++) {
+        int value = strandMap[i];
+        if (value == TC_PIXEL_UNDEFINED) {
+          available++;
+        }
+        else if (value >= 0) {
+          
+          if (lastIndexWithCoord < 0) {
+            
+          }
+          else {
+            Point a = i2c(strandMap[lastIndexWithCoord]);
+            Point b = i2c(value);
+            int writable = abs(b.y - a.y) + abs(b.x - a.x) - 1;
+            //println ("writable(" + writable + ") = abs(" + b.y + " - " + a.y + ") + abs(" + b.x + " - " + a.x + ")");
+            
+//            for (int k = lastIndexWithCoord + 1; k < i; k++) {
+//              if (strandMap[k] == TC_PIXEL_UNDEFINED)
+//                strandMap[k] = c2i(11,writable);
+//            }
+            if (writable == available) {
+              if (!(a.x != b.x && a.y != b.y)) {
+                
+                int xChange = 0;
+                int yChange = 0;
+                if (b.x > a.x)
+                  xChange = 1;
+                else if (b.x < a.x)
+                  xChange = -1;
+                if (b.y > a.y)
+                  yChange = 1;
+                else if (b.y < a.y)
+                  yChange = -1;
+
+                int inc = 0;
+                for (int j = lastIndexWithCoord + 1; j < i; j++) {
+                  int jVal = strandMap[j];
+                  if (jVal == TC_PIXEL_UNDEFINED) {
+                    inc++;
+                    int x = a.x + inc * xChange;
+                    int y = a.y + inc * yChange;
+                    strandMap[j] = c2i(x,y);
+                    
+                  }
+                }
+              }
+            }
+          }
+          lastIndexWithCoord = i;
+          available = 0;
+        }
+      }
+    }
+  }
+  
+  /*
+   
+   
+   
+   
+   ..   00      01      02      03      04      05      06      07      08      09      10      11      12      13      14
+   s0: (??,??) (??,??) (02,05)  UNUSED (11,04) (11,04) (05,05) (05,04) (11,02) (01,04)  DISC    DISC    DISC    DISC    DISC
+   s1: (02,02) (00,04) (00,02) (00,03) (11,03) (11,03) (03,03) (03,04) (??,??) (??,??) (??,??)  DISC    DISC    DISC    DISC
+   s2: (00,01) (11,03) (11,03) (03,01) (03,02) (04,02) (04,03)  DISC    DISC    DISC    DISC    DISC    DISC    DISC    DISC
+   
+   
+   writable(4) = abs(0 - 0) + abs(6 - 2)
+   writable(1) = abs(0 - 0) + abs(7 - 6)
+   writable(2) = abs(0 - 0) + abs(9 - 7)
+   writable(1) = abs(0 - 0) + abs(16 - 15)
+   writable(1) = abs(0 - 0) + abs(17 - 16)
+   writable(1) = abs(0 - 0) + abs(18 - 17)
+   writable(3) = abs(0 - 0) + abs(21 - 18)
+   writable(1) = abs(0 - 0) + abs(22 - 21)
+   writable(3) = abs(0 - 0) + abs(33 - 30)
+   writable(1) = abs(0 - 0) + abs(34 - 33)
+   writable(1) = abs(0 - 0) + abs(35 - 34)
+   writable(1) = abs(0 - 0) + abs(36 - 35)
+   
+   
+   
+
+   */
+  
+  String ledMapDump() {
+    StringBuffer s = new StringBuffer();
+
+    s.append("\n..   ");
+    
+    for (int t = 0; t < kPixelsPerStrand; t++) {
+      s.append(String.format("%02d      ",t));
+    }
+    for (int whichStrand = 0; whichStrand < kNumStrands; whichStrand++) {
+      s.append(String.format("\ns%d: ",whichStrand));
+      int start = whichStrand  * kPixelsPerStrand;
+      for (int index = start; index < start + kPixelsPerStrand; index++) {
+        int value = strandMap[index];
+        if (value == TC_PIXEL_DISCONNECTED) {
+          s.append(" DISC   ");
+        } else if (value == TC_PIXEL_UNUSED) {
+          s.append(" UNUSED ");
+        } else if (value == TC_PIXEL_UNDEFINED) {
+          s.append("(??,??) ");
+        }
+        else {
+          assert (value > 0) : "can't print unrecognized value " + value;
+          Point p = i2c(value);
+          s.append(String.format("(%02d,%02d) ",p.x,p.y));
+        }
+
+      }
+    }
+    s.append("\n");
+    return s.toString();
+  }
+   
   void setupTotalControl()
   {
-    // Maps the PHYSICAL string location to the pixel buffer location, which is precomputed with the width, eg: see the
-    // "c" function just above.  Therefore, the total-control code doesn't need to know the width * height of the image.
-    if (mapnum == null) {
-      mapnum = new int[] {
-        c(12, 5), c(11, 5), c(10, 5), c(9, 5), c(8, 5), c(7, 5), c(6, 5), c(5, 5), c(4, 5), c(3, 5), c(2, 5), c(1, 5),
-        c(1, 4), c(2, 4), c(3, 4), c(4, 4), c(5, 4), c(6, 4), c(7, 4), c(8, 4), c(10, 4), c(11, 4), c(12, 4), c(13, 4),
-        c(12, 3), c(11, 3), c(10, 3), c(9, 3), c(8, 3), c(7, 3), c(6, 3), TC_PIXEL_UNUSED, c(5, 3), c(4, 3), c(3, 3), c(2, 1), c(1, 3),
-        c(1, 2), c(2, 2), c(3, 2), c(4, 2), c(5, 2), c(6, 2), c(8, 2), c(9, 2), c(10, 2), c(11, 2), c(13, 2),
-        c(12, 1), c(11, 1), c(10, 1), c(8, 1), c(7, 1), c(6, 1), c(4, 1), c(3, 1), c(2, 1), c(1, 1), TC_PIXEL_DISCONNECTED, c(0, 1),
-        c(1, 0), c(2, 0), c(3, 0), c(4, 0), c(5, 0), c(7, 0), c(9, 0), c(10, 0), c(12, 0)
-      };
-      
-    }
+    final int sA = 0;
+    final int sB = 1;
+    final int sC = 2;
     
-    pixelsPerStrand = mapnum.length;
+    initStrand(sA,9);
+    initStrand(sB,11);
+    initStrand(sC,7);
     
-    int status = tc.open(nStrands, pixelsPerStrand);
+    /*
+     
+     layout from coordinate POV:
+     
+     ..    00      01      02      03      04      05      06      07      08      09      10
+     00    xx      xx      xx      xx      xx      xx      xx      xx      xx      xx      xx
+     01    2:00    2:01    2:02    2:03    xx      xx      xx      xx      xx      xx      xx
+     02    1:02    1:01    1:00    2:04    2:05    xx      xx      xx      xx      xx      xx
+     03    1:03    1:04    1:05    1:06    2:06    xx      xx      xx      xx      xx      xx
+     04    1:10    1:09    1:08    1:07    0:08    0:07    xx      xx      xx      xx      xx
+     05    0:00    0:01    0:02    0:04    0:05    0:06    xx      xx      xx      xx      xx
+
+     layout from strand POV:
+     ..   00      01      02      03      04      05      06      07      08      09      10      11      12      13      14
+     sA: (00,05) (01,05) (02,05)  UNUSED (03,05) (04,05) (05,05) (05,04) (04,04) DISC  DISC    DISC    DISC    DISC    DISC
+     sB  (02,02) (01,02) (00,02) (00,03) (01,03) (02,03) (03,03) (03,04) (02,04) (01,04) (00,04)  DISC    DISC    DISC    DISC
+     sC  (00,01) (01,01) (02,01) (03,01) (03,02) (04,02) (04,03)  DISC    DISC    DISC    DISC    DISC    DISC    DISC    DISC
+ 
+     desired layout from strand before interpolation:
+     
+     ..   00      01      02      03      04      05      06      07      08      09      10      11      12      13      14
+     sA: (??,??) (??,??) (02,05)  UNUSED (??,??) (??,??) (05,05) (05,04) (04,04)  DISC    DISC    DISC    DISC    DISC    DISC
+     sB  (02,02) (00,04) (00,02) (00,03) (??,??) (??,??) (03,03) (03,04) (??,??) (??,??) (??,??)  DISC    DISC    DISC    DISC
+     sC  (00,01) (??,??) (??,??) (03,01) (03,02) (04,02) (04,03)  DISC    DISC    DISC    DISC    DISC    DISC    DISC    DISC
+     
+     
+     actual calculation:
+     
+     ..   00      01      02      03      04      05      06      07      08      09      10      11      12      13      14
+     s0: (??,??) (??,??) (02,05)  UNUSED (03,05) (04,05) (05,05) (05,04) (04,04)  DISC    DISC    DISC    DISC    DISC    DISC
+     s1: (02,02) (00,04) (00,02) (00,03) (01,03) (02,03) (03,03) (03,04) (02,04) (01,04) (00,04)  DISC    DISC    DISC    DISC
+     s2: (00,01) (01,01) (02,01) (03,01) (03,02) (04,02) (04,03)  DISC    DISC    DISC    DISC    DISC    DISC    DISC    DISC
+     
+     
+
+     */
+
+    ledMissing(sA,3);
+    
+    ledSet(sA,2,  2,5);
+    ledSet(sA,6,  5,5);
+    ledSet(sA,7,  5,4);
+    ledSet(sA,8,  4,4);
+    
+    ledSet(sB,1,  0,4);
+    ledSet(sB,3,  0,3);
+    ledSet(sB,7,  3,4);
+    ledSet(sB,6,  3,3);
+    ledSet(sB,2,  0,2);
+    ledSet(sB,0,  2,2);
+    ledSet(sB,10, 0,4);
+    
+    ledSet(sC,0,  0,1);
+    ledSet(sC,3,  3,1);
+    ledSet(sC,5,  4,2);
+    ledSet(sC,4,  3,2);
+    ledSet(sC,6,  4,3);
+  
+    ledInterpolate();
+    //assert false : ledMapDump();
+    println(ledMapDump());
+    
+    int status = tc.open(kNumStrands, kPixelsPerStrand);
     if(status != 0) {
       tc.printError(status);
       useTotalControl = false;
@@ -334,18 +587,12 @@ class Pixels {
   }
   
   // This function loads the screen-buffer and sends it to the TotalControl
-  void drawToLeds() {
-    
+  void drawToLeds() {    
     if (!useTotalControl) {
       return;
     }
     
-//    for (int x=0; x<ledWidth; x++) {
-//      for (int y=0; y<ledHeight; y++) {
-//        color pixelColor = pixelData[c(x,y)];
-//      }
-//    }
-    tc.refresh(pixelData, mapnum);
+    tc.refresh(pixelData, strandMap);
     tc.printStats();
   }
   
