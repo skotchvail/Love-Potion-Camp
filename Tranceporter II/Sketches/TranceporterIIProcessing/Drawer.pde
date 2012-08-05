@@ -24,9 +24,9 @@ class Drawer {
   Drawer(Pixels px, Settings s) {
     p = px;
     pressed = false;
-    pg = createGraphics(p.getWidth(), p.getHeight(), JAVA2D);
-    width = p.getWidth();
-    height = p.getHeight();
+    width = ledWidth;
+    height = ledHeight;
+    pg = createGraphics(width, height, JAVA2D);
     xTouches = new float[MAX_TOUCHES];
     yTouches = new float[MAX_TOUCHES];
     lastTouchTimes = new long[MAX_TOUCHES];
@@ -39,9 +39,9 @@ class Drawer {
     assert false : "this needs to be reviewed";
     p = px;
     pressed = false;
-    pg = createGraphics(p.getWidth(), p.getHeight(), renderer);
-    width = p.getWidth();
-    height = p.getHeight();
+    width = ledWidth;
+    height = ledHeight;
+    pg = createGraphics(width, height, renderer);
     rgbGamma = new short[256][3];
     setGamma(main.DEFAULT_GAMMA);
     settings = s;
@@ -55,23 +55,28 @@ class Drawer {
   void update() {
     draw();
         
-    for (int x=0; x<p.getWidth(); x++) {
-      for (int y=0; y<p.getHeight(); y++) {
+    for (int x = 0; x < width; x++) {
+      for (int y = 0; y < height; y++) {
         p.setPixel(x, y, pg.get(x, y));
       }
     }    
   }
   
-  int getHeight() { return p.getHeight(); }
-  int getWidth() { return p.getWidth(); }
-    
-  void setMousePressed(boolean mp) { 
+  int getWidth() {
+    return ledWidth;
+  }
+  
+  int getHeight() {
+    return ledHeight;
+  }
+
+  void setMousePressed(boolean mp) {
     mousePressed = mp; 
   }
   
   void setMouseCoords(int mx, int my) {
-    mouseX = mx/p.getPixelSize();
-    mouseY = my/p.getPixelSize();
+    mouseX = mx/screenPixelSize;
+    mouseY = my/screenPixelSize;
     lastMouseX = mx; 
     lastMouseY = my;
   }

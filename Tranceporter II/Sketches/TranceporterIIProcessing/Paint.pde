@@ -9,6 +9,8 @@ class Paint extends Drawer {
   
   Paint(Pixels p, Settings s) {
     super(p ,s);
+    width = ledWidth;
+    height = ledHeight;
     canvas = new int[width][height];
     tailX = new int[MAX_TAIL_LENGTH][MAX_TOUCHES];
     tailY = new int[MAX_TAIL_LENGTH][MAX_TOUCHES];

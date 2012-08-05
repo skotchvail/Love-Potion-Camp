@@ -13,11 +13,10 @@ boolean render3d = true;
 int baud = 921600;
 //int baud = 0;
 String iPadIP = "10.0.1.8";
-int ledWidth = 32;
-int ledHeight = 17;
-int screenPixelSize = 8;
-
-int screenWidth = 800;
+int ledWidth = 60;
+int ledHeight = 40;
+int screenPixelSize = 5;
+int screenWidth = 700;
 int screenHeight = 400;
 MainClass main;
 Utility utility;
@@ -84,11 +83,11 @@ class MainClass {
     }
     
     try {
-      display = new Pixels(applet, ledWidth, ledHeight, screenPixelSize, baud);
+      display = new Pixels(applet, baud);
       println("### Started at " + baud);
     } catch (Exception e) {
       baud = 0;
-      display = new Pixels(applet, ledWidth, ledHeight, screenPixelSize, baud);
+      display = new Pixels(applet, baud);
       println("### Started in standalone mode");
     }
     

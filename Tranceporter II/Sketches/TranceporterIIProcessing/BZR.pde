@@ -8,10 +8,12 @@ class Bzr3 extends Drawer {
   int p = 0, q = 1;
   int state = 0;
   int PRESS_RADIUS = 1;
-  int w = 64, h = 34; 
+  int w, h;
   
   Bzr3(Pixels p, Settings s) {
     super(p, s);
+    w = ledWidth;
+    h = ledHeight;
     a = new float [ w ][ h ][2];  
     b = new float [ w ][ h ][2];  
     c = new float [ w ][ h ][2];
