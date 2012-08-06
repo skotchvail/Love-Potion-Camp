@@ -335,11 +335,13 @@ class Pixels {
   final int TC_PIXEL_DISCONNECTED = -2;     // Pixel is not attached to strand
   final int TC_PIXEL_UNDEFINED =    -3;     // Pixel not yet assigned a value
   
-  final int kNumStrands = 3;
-  final int kPixelsPerStrand = 15;
-  int[] strandMap = new int[kNumStrands * kPixelsPerStrand];
+  final int kNumStrands = 1;
+  final int kPixelsPerStrand = 50;
+  private int[] strandMap = new int[kNumStrands * kPixelsPerStrand];
+  private int[] trainingStrandMap = new int[kNumStrands * kPixelsPerStrand];
   
   boolean useTotalControl = true;
+  boolean useTrainingMode = false;
    
   //convert coordinates into index into pixel array index
   private int c2i(int x, int y) {
@@ -359,10 +361,13 @@ class Pixels {
     int j;
     for (j = start; j < boundary; j++) {
       strandMap[j] = TC_PIXEL_UNDEFINED;
+      trainingStrandMap[j] = j;
+      
     }
     int end = start + kPixelsPerStrand;
     for (; j < end; j++) {
       strandMap[j] = TC_PIXEL_DISCONNECTED;
+      trainingStrandMap[j] = TC_PIXEL_DISCONNECTED;
     }
   }
 
@@ -383,8 +388,10 @@ class Pixels {
   }
   
   Point ledGet(int whichStrand, int ordinal) {
+    int[] map = useTrainingMode?trainingStrandMap:strandMap;
+    
     int index = (whichStrand * kPixelsPerStrand) + ordinal;
-    int value = strandMap[index];
+    int value = map[index];
     if (value < 0) {
       return new Point(-1,-1);
     }
@@ -483,7 +490,7 @@ class Pixels {
 
    */
   
-  String ledMapDump() {
+  String ledMapDump1() {
     StringBuffer s = new StringBuffer();
 
     s.append("\n..   ");
@@ -504,7 +511,7 @@ class Pixels {
           s.append("(??,??) ");
         }
         else {
-          assert (value > 0) : "can't print unrecognized value " + value;
+          assert (value >= 0) : "can't print unrecognized value " + value;
           Point p = i2c(value);
           s.append(String.format("(%02d,%02d) ",p.x,p.y));
         }
@@ -514,16 +521,47 @@ class Pixels {
     s.append("\n");
     return s.toString();
   }
-   
+
+  String ledMapDump() {
+    StringBuffer s = new StringBuffer();
+    
+    for (int whichStrand = 0; whichStrand < kNumStrands; whichStrand++) {
+      int start = whichStrand  * kPixelsPerStrand;
+      for (int ordinal = 0; ordinal < kPixelsPerStrand; ordinal++) {
+        int index = ordinal + start;
+        if ((ordinal % 10) == 0)
+          s.append("\n");
+        s.append(String.format(" %03d:",ordinal));
+        int value = strandMap[index];
+        if (value == TC_PIXEL_DISCONNECTED) {
+          s.append(" DISC   ");
+        } else if (value == TC_PIXEL_UNUSED) {
+          s.append(" UNUSED ");
+        } else if (value == TC_PIXEL_UNDEFINED) {
+          s.append("(??,??) ");
+        }
+        else {
+          assert (value >= 0) : "can't print unrecognized value " + value;
+          Point p = i2c(value);
+          s.append(String.format("(%02d,%02d) ",p.x,p.y));
+        }
+        
+      }
+    }
+    s.append("\n");
+    return s.toString();
+  }
+
+  
   void setupTotalControl()
   {
     final int sA = 0;
     final int sB = 1;
     final int sC = 2;
     
-    initStrand(sA,9);
-    initStrand(sB,11);
-    initStrand(sC,7);
+    initStrand(sA,50);
+//    initStrand(sB,11);
+//    initStrand(sC,7);
     
     /*
      
@@ -559,35 +597,51 @@ class Pixels {
      s2: (00,01) (01,01) (02,01) (03,01) (03,02) (04,02) (04,03)  DISC    DISC    DISC    DISC    DISC    DISC    DISC    DISC
      
      
-
+     
+     000:(09,04)  001:(08,04)  002:(07,04)  003:(06,04)  004: UNUSED  005:(04,04)  006:(??,??)  007:(04,03)  008:(??,??)  009:(??,??)
+     010:(??,??)  011:(??,??)  012:(??,??)  013:(??,??)  014:(??,??)  015:(11,03)  016:(??,??)  017:(11,02)  018:(10,02)  019:(09,02)
+     020:(08,02)  021:(07,02)  022:(06,02)  023:(05,02)  024: UNUSED  025:(05,01)  026:(??,??)  027:(??,??)  028:(??,??)  029:(10,01)
+     030: UNUSED  031:(09,00)  032:(08,00)  033:(07,00)  034:(06,00)  035:(05,00)  036:(04,00)  037:(03,00)  038:(02,00)  039:(01,00)
+     040:(00,00)  041:(??,??)  042:(??,??)  043:(??,??)  044:(??,??)  045:(??,??)  046:(??,??)  047:(??,??)  048:(??,??)  049:(??,??)
+     
+     
      */
 
-    ledMissing(sA,3);
+    ledMissing(sA, 40);
+    ledSet(sA,41, 0,0);
+    ledSet(sA,47, 6,0);
     
-    ledSet(sA,2,  2,5);
-    ledSet(sA,6,  5,5);
-    ledSet(sA,7,  5,4);
-    ledSet(sA,8,  4,4);
+    ledSet(sA,39, 0,1);
+    ledSet(sA,33, 6,1);
     
-    ledSet(sB,1,  0,4);
-    ledSet(sB,3,  0,3);
-    ledSet(sB,7,  3,4);
-    ledSet(sB,6,  3,3);
-    ledSet(sB,2,  0,2);
-    ledSet(sB,0,  2,2);
-    ledSet(sB,10, 0,4);
+    ledSet(sA,26, 0,2);
+    ledSet(sA,32, 6,2);
     
-    ledSet(sC,0,  0,1);
-    ledSet(sC,3,  3,1);
-    ledSet(sC,5,  4,2);
-    ledSet(sC,4,  3,2);
-    ledSet(sC,6,  4,3);
+    ledSet(sA,19, 6,3);
+    ledSet(sA,25, 0,3);
+    
+    ledMissing(sA, 18);
+    
+    ledSet(sA,17, 6,4);
+    ledSet(sA,11, 0,4);
+    
+    ledMissing(sA, 10);
+
+    ledSet(sA,9,  0,5);
+    ledSet(sA,4,  5,5);
+    
+    ledSet(sA,3,  5,6);
+    ledSet(sA,0,  2,6);
   
+    
     ledInterpolate();
-    //assert false : ledMapDump();
+   // assert false : ledMapDump();
     println(ledMapDump());
     
     int status = tc.open(kNumStrands, kPixelsPerStrand);
+    tc.setGamma(2.4);
+
+    
     if(status != 0) {
       tc.printError(status);
       useTotalControl = false;
@@ -601,8 +655,8 @@ class Pixels {
       return;
     }
     
-    tc.refresh(pixelData, strandMap);
-    tc.printStats();
+    tc.refresh(pixelData, useTrainingMode?trainingStrandMap:strandMap);
+   // tc.printStats();
   }
   
 }
