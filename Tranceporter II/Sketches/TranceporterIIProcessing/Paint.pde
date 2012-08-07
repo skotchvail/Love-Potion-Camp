@@ -35,7 +35,6 @@ class Paint extends Drawer {
   }  
   
   void draw() { 
-    pg.beginDraw();
     //if (int(getParam(2) + 0.5) == 1) clear();
     
     pg.background(0);
@@ -76,7 +75,6 @@ class Paint extends Drawer {
       }
     }
     tailInd = (tailInd + 1) % MAX_TAIL_LENGTH;
-    pg.endDraw();
   }
 
   void clear() {

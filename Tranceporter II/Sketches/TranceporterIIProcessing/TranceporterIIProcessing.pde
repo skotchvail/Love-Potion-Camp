@@ -33,7 +33,9 @@ void setup() {
 }
 
 void draw() {
+  main.settings.getParam(main.settings.getKeyAudioBrightnessChange(2));
   main.draw();
+  main.settings.getParam(main.settings.getKeyAudioBrightnessChange(2));
 }
 
 void mouseClicked() {
@@ -87,7 +89,7 @@ class MainClass {
       println("### Started in standalone mode");
     }
     
-    modes = new Drawer[] { new HardwareTest(display, settings), new Paint(display, settings), new Bzr3(display, settings),
+    modes = new Drawer[] { new Smoke(display, settings), new HardwareTest(display, settings), new Paint(display, settings), new Bzr3(display, settings),
       new Fire(display, settings), new AlienBlob(display, settings), new BouncingBalls2D(display, settings) };
     
     settings.initOSC();

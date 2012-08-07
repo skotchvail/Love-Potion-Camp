@@ -30,6 +30,7 @@ class Bzr3 extends Drawer {
   }
   
   void draw () {
+    settings.getParam(settings.getKeyAudioBrightnessChange(2));
     int numStates = 20 - int(settings.getParam(settings.keySpeed)*9);
     
     if (state == 0) {
@@ -68,6 +69,8 @@ class Bzr3 extends Drawer {
       }
     }
     
+    settings.getParam(settings.getKeyAudioBrightnessChange(2));
+    
     //interpolate between p and q to allow slowing things down
     pg.loadPixels();
     for (int x=0; x<width; x++) {
@@ -77,15 +80,16 @@ class Bzr3 extends Drawer {
         pg.pixels[y*width + x] = c;
       }
     }
+    settings.getParam(settings.getKeyAudioBrightnessChange(2));
     pg.updatePixels();
-
+settings.getParam(settings.getKeyAudioBrightnessChange(2));
     int[] xy = new int[2];
     for (int i=0; i<MAX_TOUCHES; i++) {
       if (isTouching(i, xy, 100)) {
         highDots(constrain(xy[0]-PRESS_RADIUS, 0, w), constrain(xy[1]-PRESS_RADIUS, 0, h), constrain(xy[0]+PRESS_RADIUS, 0, w), constrain(xy[1]+PRESS_RADIUS, 0, h));
       }
     }
-      
+ settings.getParam(settings.getKeyAudioBrightnessChange(2));
     state++;
     if (state >= numStates) state = 0;
   }

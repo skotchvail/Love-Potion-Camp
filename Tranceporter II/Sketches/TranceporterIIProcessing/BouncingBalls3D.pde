@@ -43,7 +43,6 @@ class BouncingBalls3D extends Drawer {
     }
     checkForCollisions();
 
-    pg.beginDraw();
     pg.lights();
     pg.pointLight(255, 255, 255, -width/2, -height/2, depth/2);
     pg.background(0);

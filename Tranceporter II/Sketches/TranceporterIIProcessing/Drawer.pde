@@ -53,7 +53,9 @@ class Drawer {
   void reset() {}
   
   void update() {
+    pg.beginDraw();
     draw();
+    pg.endDraw();
         
     for (int x = 0; x < width; x++) {
       for (int y = 0; y < height; y++) {
@@ -102,6 +104,8 @@ class Drawer {
   int getNumColors() { return settings.palette.length; }
   
   color getColor(int index) {
+settings.getParam(settings.getKeyAudioBrightnessChange(2));
+
     int numColors = settings.palette.length;
     float bright = settings.getParam(settings.keyBrightness);
     int cyclingOffset = int(settings.getParam(settings.keyColorCyclingSpeed)*numColors/40)*frameCount;

@@ -27,7 +27,6 @@ class HardwareTest extends Drawer {
   
   void draw() {
     colorMode(RGB,255);
-    pg.beginDraw();
 
     if (millis() - lastTimeSwitched  >= 100) {
       //do something once a second
@@ -131,6 +130,5 @@ class HardwareTest extends Drawer {
       }
 
     }
-    pg.endDraw();
   }
 }
