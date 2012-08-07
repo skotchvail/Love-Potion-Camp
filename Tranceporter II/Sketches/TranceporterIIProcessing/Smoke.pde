@@ -73,15 +73,12 @@ class Smoke extends Drawer {
 
   void draw()
   {
-    pg.background(#cccccc);
+    pg.scale(0.5);
     if (false) {
       pg.translate(-20,32);
       pg.scale(0.5);
       pg.rotate(PI * 1.65);
     }
-    
-    pg.scale(0.5);
-    
     int axvel = mouseX-pmouseX;
     int ayvel = mouseY-pmouseY;
     
@@ -299,7 +296,7 @@ class vsquare {
       tcol = (int)(tcol+col*0.5);
     }
 
-    pg.fill(255-tcol, 255-tcol, 255-tcol);
+    pg.fill(255-tcol);
     pg.rect(x,y,res,res);
     col = 0;
   }

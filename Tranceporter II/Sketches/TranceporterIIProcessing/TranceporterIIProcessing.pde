@@ -106,7 +106,8 @@ class MainClass {
     fft = new FFT(SAMPLE_SIZE, SAMPLE_RATE);
     
     bd = new BeatDetect(fft, NUM_BANDS, HISTORY_SIZE);
-    for (int i=0; i<NUM_BANDS; i++) bd.analyzeBand(i, analyzeBands[i]);
+    for (int i=0; i<NUM_BANDS; i++)
+      bd.analyzeBand(i, analyzeBands[i]);
     bd.setFFTWindow(FFT.HAMMING);
     
     frameRate(SAMPLE_RATE/SAMPLE_SIZE);
@@ -126,7 +127,8 @@ class MainClass {
       bd.setSensitivity(i, audioSensitivity * MAX_AUDIO_SENSITIVITY, (int)(settings.getParam(settings.keyBeatLength)*MAX_BEAT_LENGTH));
     }
     bd.update(in.mix);
-    for (int i=0; i<NUM_BANDS; i++) settings.setIsBeat(i, bd.isBeat("spectralFlux", i));    
+    for (int i=0; i<NUM_BANDS; i++)
+      settings.setIsBeat(i, bd.isBeat("spectralFlux", i));
     Drawer d = modes[modeInd];
     
     if (settings.palette == null) {
