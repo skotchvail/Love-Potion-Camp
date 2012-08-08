@@ -1,6 +1,5 @@
 /**
- * Based on Smoke
- * by Glen Murphy.
+ * Based on Smoke by Glen Murphy.
  * 
  * Drag the mouse across the image to move the particles.
  * Code has not been optimised and will run fairly slowly.
@@ -33,8 +32,9 @@ class Smoke extends Drawer {
   float randomGustXvel;
   float randomGustYvel;
   
-  final int startBlockWidth = 20;
+  final int startBlockWidth = 10;
   int startPosition;
+  
   
   String getName() { return "Smoke"; }
   
@@ -59,9 +59,7 @@ class Smoke extends Drawer {
     
     startPosition = (int)(scaledWidth - startBlockWidth);
     for(int i = 0; i < pnum; i++) {
-      p[i] = new particle(
-          random(startPosition-startBlockWidth,startPosition+startBlockWidth),
-          random(scaledHeight-startBlockWidth,scaledHeight));
+      p[i] = new particle(newParticleX(), newParticleY());
     }
     for(int i = 0; i <= lwidth; i++) {
       for(int u = 0; u <= lheight; u++) {
@@ -71,6 +69,17 @@ class Smoke extends Drawer {
     }
   }
 
+  float newParticleX()
+  {
+    return random(startPosition-startBlockWidth,startPosition+startBlockWidth);
+  }
+
+  float newParticleY()
+  {
+    return random(scaledHeight-startBlockWidth/2,scaledHeight);
+  }
+
+  
   void draw()
   {
     pg.scale(0.5);
@@ -85,8 +94,8 @@ class Smoke extends Drawer {
     mouseXvel = (axvel != mouseXvel) ? axvel : 0;
     mouseYvel = (ayvel != mouseYvel) ? ayvel : 0;
     
-    if(false && randomGust <= 0) {
-      if(random(0,10)<1) {
+    if(randomGust <= 0) {
+      if(settings.isBeat(2) && random(0,10)<1) {
         randomGustMax = (int)random(5,12);
         randomGust = randomGustMax;
         randomGustX = random(0,scaledWidth);
@@ -128,8 +137,6 @@ class particle
   float y;
   float xvel;
   float yvel;
-  float temp;
-  int pos;
 
   particle(float xIn, float yIn) {
     x = xIn;
@@ -137,8 +144,8 @@ class particle
   }
 
   void reposition() {
-    x = startPosition+random(-startBlockWidth, startBlockWidth);
-    y = random(scaledHeight-startBlockWidth/2,scaledHeight);
+    x = newParticleX();
+    y = newParticleY();
 
     xvel = random(-1,1);
     yvel = random(-1,1);
@@ -265,7 +272,7 @@ class vsquare {
         yvel += mvelY*mod;
       }
     }
-    if(false && randomGust > 0) {
+    if(randomGust > 0) {
       adj = x - randomGustX;
       opp = y - randomGustY;
       dist = sqrt(opp*opp + adj*adj);
@@ -296,7 +303,37 @@ class vsquare {
       tcol = (int)(tcol+col*0.5);
     }
 
-    pg.fill(255-tcol);
+////    getColor(settings.beatPosSimple*getNumColors());
+//    
+//    float a1 = 1.0*i/lwidth;
+//    float a2 = 1.0*u/lheight;
+//    float a3 = settings.beatPosSimple(1);
+//    float a4 = settings.beatPosSimple(2);
+//    float a5 = tcol/255;
+//    color c1 = #ffb020;
+//    color c2 = #312207;
+//    
+//    color c3 = color(255-tcol);
+////    c1= getColor(0);
+////    c2 = getColor(getNumColors()/2);
+//    float aRed = red(c1) + (red(c2) - red(c1)) * a2 * a3;
+//    float aGreen = green(c1) + (green(c2) - green(c1)) * a1 * a2;
+//    float aBlue = blue(c1) + (blue(c2) - blue(c1)) * (1-a1) * (1-a4);
+//    
+//    color c4 = color(aRed,aGreen,aBlue);
+//    color c5 = blendColor(c4,c3,OVERLAY);
+//    pg.fill(c5);
+    
+    float percent = (255 - tcol)/255.0;
+    color c = 0;
+    if (percent > 0.5) {
+      c = getColor(int(percent/2.0*(getNumColors()-1)));
+    } else {
+      c = getColor(0);
+    }
+
+    pg.fill(c);
+    
     pg.rect(x,y,res,res);
     col = 0;
   }
