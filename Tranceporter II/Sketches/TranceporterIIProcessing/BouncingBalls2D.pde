@@ -17,6 +17,8 @@ class BouncingBalls2D extends Drawer {
   }
   
   String getName() { return "BouncingBalls2D"; }
+  String getCustom1Label() { return "Num Balls";}
+
 
   void setup() {
     colorMode(HSB, 1.0);

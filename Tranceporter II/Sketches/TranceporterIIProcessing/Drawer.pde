@@ -48,11 +48,16 @@ class Drawer {
   }    
   
   String getName() { return "None"; }
+  String getCustom1Label() { return "Disabled";}
+  String getCustom2Label() { return "Disabled";}
+    
   void setup() {}
   void draw() {}
   void reset() {}
   
   void update() {
+    settings.getParam(settings.getKeyAudioBrightnessChange(2)); //trying to trigger bug
+
     pg.beginDraw();
     draw();
     pg.endDraw();
@@ -61,7 +66,9 @@ class Drawer {
       for (int y = 0; y < height; y++) {
         p.setPixel(x, y, pg.get(x, y));
       }
-    }    
+    }
+    settings.getParam(settings.getKeyAudioBrightnessChange(2)); //trying to trigger bug
+
   }
   
   int getWidth() {
@@ -104,7 +111,7 @@ class Drawer {
   int getNumColors() { return settings.palette.length; }
   
   color getColor(int index) {
-settings.getParam(settings.getKeyAudioBrightnessChange(2));
+    settings.getParam(settings.getKeyAudioBrightnessChange(2)); //trying to trigger bug
 
     int numColors = settings.palette.length;
     float bright = settings.getParam(settings.keyBrightness);

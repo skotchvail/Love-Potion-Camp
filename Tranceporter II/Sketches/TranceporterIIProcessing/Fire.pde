@@ -12,6 +12,9 @@ class Fire extends Drawer {
   int height2;
 
   String getName() { return "Fire"; }
+  String getCustom1Label() { return "Which Color";}
+  String getCustom2Label() { return "Cluster Size";}
+
   
   Fire(Pixels p, Settings s) {
     super(p, s);

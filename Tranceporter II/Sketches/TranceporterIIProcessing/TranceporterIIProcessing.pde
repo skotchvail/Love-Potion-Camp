@@ -89,16 +89,20 @@ class MainClass {
       println("### Started in standalone mode");
     }
     
-    modes = new Drawer[] { new HardwareTest(display, settings), new Paint(display, settings), new Bzr3(display, settings),
-      new Fire(display, settings), new AlienBlob(display, settings), new BouncingBalls2D(display, settings), new Smoke(display, settings) };
+    modes = new Drawer[] {
+      new HardwareTest(display, settings),
+      new Paint(display, settings),
+      new Bzr3(display, settings),
+      new Fire(display, settings),
+      
+      new AlienBlob(display, settings),
+      new BouncingBalls2D(display, settings),
+      new Smoke(display, settings) };
     
     settings.initOSC();
     pm.init(applet);
     
     newEffectFirstTime();
-    //  modes[modeInd].setup();
-    //  updatePaletteName();
-    //  newPalette();
     
     // Audio features
     minim = new Minim(applet);
@@ -215,26 +219,30 @@ class MainClass {
     }
   }
   
-  void tap() {
-  }
-  
   void debugPaletteType(String extra) {
     println(extra + " paletteType = " + settings.paletteType + " " + pm.getPaletteDisplayName() + (settings.palette == null?" (null)":" (not null)"));
   }
   
   void updateIPadGUI()
   {
-    updateModeName();
-    updatePaletteName();
-  }
-  
-  void updateModeName() {
     String name = modes[modeInd].getName();
     settings.sendMessageToPad(settings.keyModeName, name);
-  }
-  
-  void updatePaletteName() {
+    
+    name = modes[modeInd].getCustom1Label();
+    settings.sendMessageToPad(settings.keyCustom1Label, name);
+    
+    name = modes[modeInd].getCustom2Label();
+    settings.sendMessageToPad(settings.keyCustom2Label, name);
+    
     settings.sendMessageToPad(settings.keyPaletteName, pm.getPaletteDisplayName());
+    
+    for (int i = 0; i < modes.length; i++) {
+      name = modes[i].getName();
+      println("" + i + ": " + name + " -> " + settings.sketchLabelName(i));
+      settings.sendMessageToPad(settings.sketchLabelName(i),name);
+    }
+    
+    settings.sendSketchesToPad();
   }
 }
 

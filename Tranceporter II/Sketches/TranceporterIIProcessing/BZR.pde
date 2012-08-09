@@ -29,8 +29,13 @@ class Bzr3 extends Drawer {
     randomDots(0,0,w,h);
   }
   
+  String getName() { return "Belousov-Zhabotinsky Reaction"; }
+
+  String getCustom1Label() { return "Which Color";}
+  
+
   void draw () {
-    settings.getParam(settings.getKeyAudioBrightnessChange(2));
+    settings.getParam(settings.getKeyAudioBrightnessChange(2)); //trying to trigger bug
     int numStates = 20 - int(settings.getParam(settings.keySpeed)*9);
     
     if (state == 0) {
@@ -69,7 +74,7 @@ class Bzr3 extends Drawer {
       }
     }
     
-    settings.getParam(settings.getKeyAudioBrightnessChange(2));
+    settings.getParam(settings.getKeyAudioBrightnessChange(2)); //trying to trigger bug
     
     //interpolate between p and q to allow slowing things down
     pg.loadPixels();
@@ -80,21 +85,20 @@ class Bzr3 extends Drawer {
         pg.pixels[y*width + x] = c;
       }
     }
-    settings.getParam(settings.getKeyAudioBrightnessChange(2));
+    settings.getParam(settings.getKeyAudioBrightnessChange(2)); //trying to trigger bug
     pg.updatePixels();
-settings.getParam(settings.getKeyAudioBrightnessChange(2));
+    settings.getParam(settings.getKeyAudioBrightnessChange(2)); //trying to trigger bug
     int[] xy = new int[2];
     for (int i=0; i<MAX_TOUCHES; i++) {
       if (isTouching(i, xy, 100)) {
         highDots(constrain(xy[0]-PRESS_RADIUS, 0, w), constrain(xy[1]-PRESS_RADIUS, 0, h), constrain(xy[0]+PRESS_RADIUS, 0, w), constrain(xy[1]+PRESS_RADIUS, 0, h));
       }
     }
- settings.getParam(settings.getKeyAudioBrightnessChange(2));
+    settings.getParam(settings.getKeyAudioBrightnessChange(2)); //trying to trigger bug
     state++;
     if (state >= numStates) state = 0;
   }
   
-  String getName() { return "Belousov-Zhabotinsky Reaction"; }
 
   void randomDots(float minx, float miny, float maxx, float maxy) {
     for (int y = int(miny); y < int(maxy); y++) {

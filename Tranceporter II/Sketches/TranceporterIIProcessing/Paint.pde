@@ -23,6 +23,9 @@ class Paint extends Drawer {
   }
   
   String getName() { return "Paint"; }
+  String getCustom1Label() { return "Tail Length";}
+  
+
   
   void setup() {
      settings.setParam(settings.keyBrightness, 0.8); // set brightness to 80%    

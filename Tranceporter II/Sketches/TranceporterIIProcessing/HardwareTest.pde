@@ -5,8 +5,6 @@
 
 class HardwareTest extends Drawer {
 
-  String getName() { return "Hardware Test"; }
-  
   HardwareTest(Pixels p, Settings s) {
     super(p, s);
   }
@@ -15,6 +13,10 @@ class HardwareTest extends Drawer {
     colorMode(RGB,255);
   
   }
+
+  String getName() { return "Hardware Test"; }
+  String getCustom1Label() { return "Strand/Checks";}
+  
 
   float lastTimeSwitched;
   int movementPixelFast;

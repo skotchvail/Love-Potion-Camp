@@ -16,6 +16,9 @@ class AlienBlob extends Drawer {
   }
   
   String getName() { return "AlienBlob"; }
+  String getCustom1Label() { return "Noise Detail";}
+  String getCustom2Label() { return "Multiplier";}
+
   
   void setup() {
     dThresh = 90;
