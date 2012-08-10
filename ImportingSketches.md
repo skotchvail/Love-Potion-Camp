@@ -42,7 +42,7 @@ break another sketch.
 
 3) Wrap your code in a class and give it a constructor, like this: 
 
-  class MyNewClass extends Drawer {
+    class MyNewClass extends Drawer {
 
     MyNewClass(Pixels p, Settings s) {
       super(p, s);
