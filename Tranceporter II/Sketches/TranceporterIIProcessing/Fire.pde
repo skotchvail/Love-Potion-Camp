@@ -17,7 +17,7 @@ class Fire extends Drawer {
 
   
   Fire(Pixels p, Settings s) {
-    super(p, s);
+    super(p, s, JAVA2D);
     height2 = height+6;
 
     calc1 = new int[width];

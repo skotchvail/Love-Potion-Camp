@@ -2,6 +2,7 @@ import java.lang.reflect.*;
 
 class Settings {
   
+  private ArrayList oscMessages = new ArrayList();;
   private boolean[][] whichModes = new boolean[3][5];
   private color[] palette;
   private boolean[] isBeat;
@@ -190,9 +191,6 @@ class Settings {
   }
 
   public Object switchSettings(Object newSettings) {
-    
-    getParam(getKeyAudioBrightnessChange(2)); //trying to trigger bug
-
     HashMap saver = new HashMap();
     saver.put("1",paramMap);
     saver.put("2",utility.toIntegerList(palette));
@@ -211,7 +209,6 @@ class Settings {
       paletteType = (Integer)setter.get("4");
       assert(palette != null);
     }
-    getParam(getKeyAudioBrightnessChange(2)); //trying to trigger bug
     return saver;
   }
   
@@ -288,12 +285,37 @@ class Settings {
     sendMessageToPad(controlKey + "/visible",enabled?"1":"0");
   }
   
-  
-  /* unplugged OSC messages */
+  /* this comes in on a different thread than 
+   the draw routines, so we need to add to a queue
+   and then process the events during the heartbeat
+   which is called from the main draw
+   */
   void oscEvent(OscMessage msg) {
-    String addr = msg.addrPattern();
-    getParam(getKeyAudioBrightnessChange(2)); //trying to trigger bug
+    synchronized(oscMessages)
+    {
+      oscMessages.add(msg);
+    }
+  }
+
+  //call once per draw to process events
+  void heartBeat() {
+//TODO: Not sure how much synchronized slows down our framerate. 
+//    if (oscMessages.size() == 0)
+//      return;
+    synchronized(oscMessages)
+    {
+      for (Object obj : oscMessages) {
+        OscMessage msg = (OscMessage)obj;
+        handleOscEvent(msg);
+      }
+      oscMessages.clear();
+    }
     
+  }
+
+  /* unplugged OSC messages */
+  void handleOscEvent(OscMessage msg) {
+    String addr = msg.addrPattern();
     try {
       String ipAddress = msg.netAddress().address();
       if (ipAddress != null && ipAddress.length() > 0 && !ipAddress.equals(iPadIP)) {
@@ -336,8 +358,6 @@ class Settings {
       System.out.println("Action Exception " + addr + ": " + e.getMessage());
       e.printStackTrace();
     }
-    getParam(getKeyAudioBrightnessChange(2)); //trying to trigger bug
-
   }
 
   private void detectedNewIPadAddress(String ipAddress)

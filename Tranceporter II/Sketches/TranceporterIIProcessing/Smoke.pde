@@ -39,7 +39,7 @@ class Smoke extends Drawer {
   String getName() { return "Smoke"; }
   
   Smoke(Pixels p, Settings s) {
-    super(p, s);
+    super(p, s, JAVA2D);
   }
 
   void setup()

@@ -6,7 +6,7 @@
 class HardwareTest extends Drawer {
 
   HardwareTest(Pixels p, Settings s) {
-    super(p, s);
+    super(p, s, JAVA2D);
   }
     
   void setup(){

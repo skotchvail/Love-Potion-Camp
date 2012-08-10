@@ -8,7 +8,7 @@ class Paint extends Drawer {
   int tailInd;
   
   Paint(Pixels p, Settings s) {
-    super(p ,s);
+    super(p, s, JAVA2D);
     width = ledWidth;
     height = ledHeight;
     canvas = new int[width][height];

@@ -90,6 +90,7 @@ class MainClass {
     }
     
     modes = new Drawer[] {
+      new Tunnel(display,settings),
       new HardwareTest(display, settings),
       new Paint(display, settings),
       new Bzr3(display, settings),
@@ -125,6 +126,8 @@ class MainClass {
   void draw() {
     if (key == ' ')
       return;
+    
+    settings.heartBeat();
     
     for (int i=0; i<NUM_BANDS; i++) {
       float audioSensitivity = 1 - settings.getParam(settings.getKeyAudioSensitivity(i));

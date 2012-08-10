@@ -13,7 +13,7 @@ class BouncingBalls2D extends Drawer {
   Vec2D gravity = new Vec2D(0, 0.025);
   
   BouncingBalls2D(Pixels p, Settings s) {
-    super(p, s);
+    super(p, s, JAVA2D);
   }
   
   String getName() { return "BouncingBalls2D"; }

@@ -21,12 +21,12 @@ class Drawer {
   int MIN_SATURATION = 245;
   int MAX_AUDIO_COLOR_OFFSET = 300;
   
-  Drawer(Pixels px, Settings s) {
+  Drawer(Pixels px, Settings s, String renderer) {
     p = px;
     pressed = false;
     width = ledWidth;
     height = ledHeight;
-    pg = createGraphics(width, height, JAVA2D);
+    pg = createGraphics(width, height, renderer);
     xTouches = new float[MAX_TOUCHES];
     yTouches = new float[MAX_TOUCHES];
     lastTouchTimes = new long[MAX_TOUCHES];
@@ -34,18 +34,6 @@ class Drawer {
     setGamma(main.DEFAULT_GAMMA);
     settings = s;
   }
-  
-  Drawer(Pixels px, Settings s, String renderer) {
-    assert false : "this needs to be reviewed";
-    p = px;
-    pressed = false;
-    width = ledWidth;
-    height = ledHeight;
-    pg = createGraphics(width, height, renderer);
-    rgbGamma = new short[256][3];
-    setGamma(main.DEFAULT_GAMMA);
-    settings = s;
-  }    
   
   String getName() { return "None"; }
   String getCustom1Label() { return "Disabled";}
@@ -56,7 +44,6 @@ class Drawer {
   void reset() {}
   
   void update() {
-    settings.getParam(settings.getKeyAudioBrightnessChange(2)); //trying to trigger bug
 
     pg.beginDraw();
     draw();
@@ -67,8 +54,6 @@ class Drawer {
         p.setPixel(x, y, pg.get(x, y));
       }
     }
-    settings.getParam(settings.getKeyAudioBrightnessChange(2)); //trying to trigger bug
-
   }
   
   int getWidth() {
@@ -111,8 +96,6 @@ class Drawer {
   int getNumColors() { return settings.palette.length; }
   
   color getColor(int index) {
-    settings.getParam(settings.getKeyAudioBrightnessChange(2)); //trying to trigger bug
-
     int numColors = settings.palette.length;
     float bright = settings.getParam(settings.keyBrightness);
     int cyclingOffset = int(settings.getParam(settings.keyColorCyclingSpeed)*numColors/40)*frameCount;
