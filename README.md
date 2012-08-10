@@ -25,11 +25,17 @@ base .dylib name to the versioned path.  Copy the *.h files into
 
 Checkout and apply the patch:
 (from the parent dir of Love-Potion-Camp checkout)
-    $ git clone git://github.com/PaintYourDragon/p9813.git
-    $ cd p9813
+
+        $ git clone git://github.com/PaintYourDragon/p9813.git
+    
+        $ cd p9813
+    
     $ patch -p0 < ../Love-Potion-Camp/patch.txt
+    
     $ make
+    
     $ cd processing ; make && make install
+    
 
 Now the libraries are installed in ~/sketchbook. 
 
