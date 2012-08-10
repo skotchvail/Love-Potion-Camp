@@ -7,19 +7,21 @@ import java.awt.geom.PathIterator;
 import java.awt.geom.GeneralPath;
 
 class Tunnel extends Drawer {
-  
-  Tunnel(Pixels p, Settings s) {
-    super(p, s, P3D);
-  }
-  
+
   final float NOISE_FALLOFF = 0.5f;
   final int NUMBER_OF_CIRCLES = 4;
   final int NUMBER_OF_GLOWS = 21;
   final float TRANSPARENCY_COEF = 1.5f;
   final int COLOR_AMPLITUDE = 10;
   final public int NUMBER_OF_LAYERS = 65;
+
   
-  
+  Tunnel(Pixels p, Settings s) {
+    super(p, s, P3D);
+  }
+
+  String getName() { return "Tunnel"; }
+
   LayerCollection lCol = new LayerCollection(NUMBER_OF_CIRCLES);
   GlowCollection glowCol = new GlowCollection(NUMBER_OF_GLOWS);
   
