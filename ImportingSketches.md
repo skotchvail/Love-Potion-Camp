@@ -15,15 +15,15 @@ To do that, go to Pixels.pde and comment out:
 
 	import TotalControl.*;
 
-    Also comment out anything that has the variable "tc" in it. 
-    For example, 
+Also comment out anything that has the variable "tc" in it. 
+For example, 
 
 	TotalControl tc; 
 	tc.printError(status); 
 
-    don't mess with variables that have tc in their name like 
-    TC_ERR_OPEN. Those should be left alone. You should be able to run
-    fine now without the driver. 
+don't mess with variables that have tc in their name like 
+TC_ERR_OPEN. Those should be left alone. You should be able to run
+fine now without the driver. 
 
 ===== Adding Your Sketch =====
 
