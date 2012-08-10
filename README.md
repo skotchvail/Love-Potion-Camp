@@ -11,7 +11,7 @@ The display code runs in a Java-based programming environment called
 on the D2XX library. If you are not going to be driving the hardware,
 but just want to use the simulation, then you don't need to do this. 
 However, you will have to modify the code to remove the TotalProcessing
-stuff (see ImportingSketches.rtf). 
+stuff (see ImportingSketches.md). 
 
  Briefly:
 
@@ -51,5 +51,5 @@ Get the libraries from https://www.box.com/s/a351863d10c9046a2ac1.
 Ask Skotch for permission if needed. 
 
 ===== Adding Sketches =====
-See the document ImportingSketches.rtf for info on how to add Sketches
+See the document ImportingSketches.md for info on how to add Sketches
 to the system. 
