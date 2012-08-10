@@ -15,9 +15,7 @@ stuff (see ImportingSketches.md).
 
  Briefly:
 
-Download the D2XX library:
-
-    http://www.ftdichip.com/Drivers/D2XX.htm
+Download the D2XX library: http://www.ftdichip.com/Drivers/D2XX.htm
 
 Copy the i386 version of the library into /usr/local/lib.  Symlink the
 base .dylib name to the versioned path.  Copy the *.h files into
@@ -56,5 +54,6 @@ Get the libraries from https://www.box.com/s/a351863d10c9046a2ac1.
 Ask Skotch for permission if needed. 
 
 ===== Adding Sketches =====
+
 See the document ImportingSketches.md for info on how to add Sketches
 to the system. 
