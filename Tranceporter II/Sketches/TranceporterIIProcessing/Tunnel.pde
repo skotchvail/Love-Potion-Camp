@@ -31,7 +31,6 @@ class Tunnel extends Drawer {
   public PImage im;
   
   void setup() {
-    frameRate(25);
     noCursor();
     pg.strokeWeight(2);
     colorMode(HSB, NUMBER_OF_LAYERS, 1, 1, NUMBER_OF_LAYERS);
@@ -42,7 +41,8 @@ class Tunnel extends Drawer {
   
   
   void draw() {
-    //pg.scale(0.1);
+    pg.strokeWeight(2);
+    noiseDetail(1, NOISE_FALLOFF);
     colorMode(HSB, NUMBER_OF_LAYERS, 1, 1, NUMBER_OF_LAYERS);
     pg.colorMode(HSB, NUMBER_OF_LAYERS, 1, 1, NUMBER_OF_LAYERS);
     lCol.nextStep();
