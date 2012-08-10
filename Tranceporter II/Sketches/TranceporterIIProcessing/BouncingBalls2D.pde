@@ -31,6 +31,7 @@ class BouncingBalls2D extends Drawer {
   }
   
   void reset() {
+    balls.clear();
     for(int i=0; i<balls.size();i++) {
       addBall();
     }
@@ -49,6 +50,12 @@ class BouncingBalls2D extends Drawer {
   }    
   
   void draw() {
+    
+    colorMode(HSB, 1.0);
+    pg.colorMode(HSB, 1.0);
+    pg.smooth();
+
+    
     assert(bbox != null);
     float speed = settings.getParam(settings.keySpeed);
     int frameSkip = int(10 - speed*9);
