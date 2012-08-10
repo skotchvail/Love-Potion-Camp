@@ -64,8 +64,9 @@ class MainClass {
   Minim minim;
   int MAX_BEAT_LENGTH = 750, MAX_AUDIO_SENSITIVITY = 12;
   
-  Drawer[] modes;
-  int modeInd = 0;
+  Drawer[][] modes;
+  int modeCol = 0;
+  int modeRow = 0;
 
   
   PaletteManager pm = new PaletteManager();
@@ -89,19 +90,28 @@ class MainClass {
       println("### Started in standalone mode");
     }
     
-    modes = new Drawer[] {
-      new Tunnel(display,settings),
-      new HardwareTest(display, settings),
-      new Paint(display, settings),
-      new Bzr3(display, settings),
-      new Fire(display, settings),
-      
-      new AlienBlob(display, settings),
-      new BouncingBalls2D(display, settings),
-      new Smoke(display, settings) };
+    modes = new Drawer[][] {
+      {
+        new Tunnel(display,settings),           //0,0
+        new HardwareTest(display, settings),    //0,1
+        new Paint(display, settings),           //0,2
+        new Bzr3(display, settings),            //0,3
+        new Fire(display, settings),            //0,4
+      },
+      {
+        new AlienBlob(display, settings),       //1,0
+        new BouncingBalls2D(display, settings), //1,1
+        new Smoke(display, settings)            //1,2
+      }
+    };
     
     settings.initOSC();
     pm.init(applet);
+
+    settings.setSketchOn(0, 0, true); //Tunnel
+    settings.setSketchOn(0, 3, true); //Bzr
+    settings.setSketchOn(0, 4, true); //Fire
+    settings.setSketchOn(1, 0, true); //AlienBlob
     
     newEffectFirstTime();
     
@@ -136,7 +146,7 @@ class MainClass {
     bd.update(in.mix);
     for (int i=0; i<NUM_BANDS; i++)
       settings.setIsBeat(i, bd.isBeat("spectralFlux", i));
-    Drawer d = modes[modeInd];
+    Drawer d = modes[modeCol][modeRow];
     
     if (settings.palette == null) {
       assert(settings.palette != null);
@@ -171,18 +181,63 @@ class MainClass {
   void newEffectFirstTime() {
     settings.palette = new color[NUM_COLORS];
     pm.setPaletteType(settings.paletteType, NUM_COLORS, settings.palette);
-    modes[modeInd].setup();
+    modes[modeCol][modeRow].setup();
+  }
+  
+  void findNextMode() {
+    
+    int oldModeCol = modeCol;
+    int oldModeRow = modeRow;
+
+    for (int col = oldModeCol; col < modes.length; col++) {
+      for (int row = 0; row < modes[col].length; row++) {
+        if (col == oldModeCol && row <= oldModeRow)
+          continue;
+        
+        println("loop1 col" + col + " row" + row + " on:" + settings.isSketchOn(col,row));
+        
+        if (settings.isSketchOn(col,row)) {
+          modeCol = col;
+          modeRow = row;
+          return;
+        }
+      }
+    }
+    
+    if (modeCol == oldModeCol && modeRow == oldModeRow) {
+      
+      for (int col = 0; col <= oldModeCol; col++) {
+        for (int row = 0; row < modes[col].length; row++) {
+          if (col == oldModeCol && row >= oldModeRow)
+            break;
+          
+          println("loop2 col" + col + " row" + row + " on:" + settings.isSketchOn(col,row));
+          
+          if (settings.isSketchOn(col,row)) {
+            modeCol = col;
+            modeRow = row;
+            return;
+          }
+        }
+      }
+    }
   }
   
   void newEffect() {
-    int oldMode = modeInd;
-    modeInd = (modeInd + 1) % modes.length;
-    println("newEffect " + modes[oldMode].getName() + " -> "+ modes[modeInd].getName());
+    int oldModeCol = modeCol;
+    int oldModeRow = modeRow;
+    findNextMode();
+    
+    println("newEffect " + modes[oldModeCol][oldModeRow].getName() + " -> "+ modes[modeCol][modeRow].getName());
+    
+    if (modeCol == oldModeCol && modeRow == oldModeRow) {
+      return;
+    }
     
     // Each mode tracks its own settings
-    Object newSettings = modes[modeInd].getSettingsBackup();
+    Object newSettings = modes[modeCol][modeRow].getSettingsBackup();
     Object oldSettings = settings.switchSettings(newSettings);
-    modes[oldMode].setSettingsBackup(oldSettings);
+    modes[oldModeCol][oldModeRow].setSettingsBackup(oldSettings);
     
     if (newSettings == null) {
       newEffectFirstTime();
@@ -190,26 +245,20 @@ class MainClass {
     else {
       pm.setPaletteType(settings.paletteType, NUM_COLORS, settings.palette);
     }
-    //  if (settings.palette == null ) {
-    //    settings.palette = new color[NUM_COLORS];
-    //  }
-    //  pm.setPaletteType(settings.paletteType, NUM_COLORS, settings.palette);
-    //  if (newSettings == nil) {
-    //    modes[modeInd].setup();
-    //  }
+
     assert(settings.palette != null);
     settings.sendAllSettingsToPad();
     updateIPadGUI();
   }
   
   void reset() {
-    modes[modeInd].reset();
+    modes[modeCol][modeRow].reset();
     updateIPadGUI();
   }
   
   void touchXY(int touchNum, float x, float y) {
     if (frameCount % 10 == 0) println("Touch" + touchNum + " at " + nf(x,1,2) + " " + nf(y,1,2));
-    modes[modeInd].setTouch(touchNum, x, y);
+    modes[modeCol][modeRow].setTouch(touchNum, x, y);
   }
   
   void mouseClicked() {
@@ -228,21 +277,22 @@ class MainClass {
   
   void updateIPadGUI()
   {
-    String name = modes[modeInd].getName();
+    String name = modes[modeCol][modeRow].getName();
     settings.sendMessageToPad(settings.keyModeName, name);
     
-    name = modes[modeInd].getCustom1Label();
+    name = modes[modeCol][modeRow].getCustom1Label();
     settings.sendMessageToPad(settings.keyCustom1Label, name);
     
-    name = modes[modeInd].getCustom2Label();
+    name = modes[modeCol][modeRow].getCustom2Label();
     settings.sendMessageToPad(settings.keyCustom2Label, name);
     
     settings.sendMessageToPad(settings.keyPaletteName, pm.getPaletteDisplayName());
     
-    for (int i = 0; i < modes.length; i++) {
-      name = modes[i].getName();
-      println("" + i + ": " + name + " -> " + settings.sketchLabelName(i));
-      settings.sendMessageToPad(settings.sketchLabelName(i),name);
+    for (int col = 0; col < modes.length; col++) {
+      for (int row = 0; row < modes[col].length; row++) {
+        name = modes[col][row].getName();
+        settings.sendMessageToPad(settings.sketchLabelName(col,row),name);
+      }
     }
     
     settings.sendSketchesToPad();

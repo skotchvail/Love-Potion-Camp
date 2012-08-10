@@ -380,6 +380,8 @@ class Settings {
     oscP5.send(myMessage, oscReceiver);
   }
 
+  
+  //TODO: these methods may need to go on another thread to speed things up
   void sendAllSettingsToPad() {
     for (Object controlName : paramMap.keySet()) {
       float value = (Float)paramMap.get(controlName);
@@ -391,6 +393,12 @@ class Settings {
     String substring = addr.substring("/sketches/col".length());
     println("value = " + value + " substring = " + substring);
     if (substring.indexOf("row") >= 0) {
+      String[] temp = substring.split("row");
+      int col = Integer.parseInt( temp[0] );
+      int row = Integer.parseInt( temp[1] );
+      
+      whichModes[col][row] = (value > 0?true:false);
+      
     }
     else {
       if (value == 1.0) {
@@ -423,6 +431,15 @@ class Settings {
       }
     }
   }
+
+  boolean isSketchOn(int col, int row) {
+    return whichModes[col][row];
+  }
+
+  
+  void setSketchOn(int col, int row, boolean state) {
+    whichModes[col][row] = state;
+  }
   
   String sketchName(int col, int row) {
     return "/sketches/col" + col + "row" + row;
@@ -431,12 +448,5 @@ class Settings {
   String sketchLabelName(int col, int row) {
     return sketchName(col, row) + "_label";
   }
-  
-  String sketchLabelName(int which) {
-    int numRows = whichModes[0].length;
-    int row = which % numRows;
-    int col = which / numRows;
-    return sketchLabelName(col, row);
-  }
-  
+    
 }
