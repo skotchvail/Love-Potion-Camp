@@ -8,7 +8,12 @@ Code related to the Burning Man camp called "Love Potion"
 
 The display code runs in a Java-based programming environment called
 'processing'. It depends on an interface library that in turn depends
-on the D2XX library.  Briefly:
+on the D2XX library. If you are not going to be driving the hardware,
+but just want to use the simulation, then you don't need to do this. 
+However, you will have to modify the code to remove the TotalProcessing
+stuff (see ImportingSketches.rtf). 
+
+ Briefly:
 
 Download the D2XX library:
 http://www.ftdichip.com/Drivers/D2XX.htm
@@ -35,3 +40,16 @@ Download processing, load the sketches, run.
 
 Processing has a frame buffer.  We can read the pixels from that frame
 buffer and then send them to the LED "Total Control" code.
+
+===== Libraries =====
+
+The libraries should go in your "sketchbook" folder. The path can be 
+found in Processing preferences. My path looks like this: 
+/Volumes/Data/skotchvail/Documents/Processing
+
+Get the libraries from https://www.box.com/s/a351863d10c9046a2ac1. 
+Ask Skotch for permission if needed. 
+
+===== Adding Sketches =====
+See the document ImportingSketches.rtf for info on how to add Sketches
+to the system. 
