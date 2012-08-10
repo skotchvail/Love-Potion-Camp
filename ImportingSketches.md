@@ -31,6 +31,10 @@ fine now without the driver.
 This will create a new file. Name the new file the same as the class 
 name of your new sketch. 
 
+Alternatively, you can close Processing, drag all of the files into 
+the same directory as our app, put the data files into data, and then 
+reopen Processing. It will have then added the new files to Processing. 
+
 2) Paste the existing sketch into this file. 
 If you have data files, copy them into the TranceporterIIProcessing/data 
 folder, make sure that your filenames don't already exist, or you will 
