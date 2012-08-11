@@ -91,17 +91,23 @@ class MainClass {
     }
     
     modes = new Drawer[][] {
+      //column 0
       {
         new Tunnel(display,settings),           //0,0
-        new HardwareTest(display, settings),    //0,1
-        new Paint(display, settings),           //0,2
-        new Bzr3(display, settings),            //0,3
-        new Fire(display, settings),            //0,4
+        new Paint(display, settings),           //0,1
+        new Bzr3(display, settings),            //0,2
+        new Fire(display, settings),            //0,3
       },
+      //column 1
       {
         new AlienBlob(display, settings),       //1,0
         new BouncingBalls2D(display, settings), //1,1
-        new Smoke(display, settings)            //1,2
+        new Smoke(display, settings),           //1,2
+        new Heart(display, settings),           //1,3
+      },
+      //column 2
+      {
+        new HardwareTest(display, settings),    //0,0
       }
     };
     
@@ -109,9 +115,13 @@ class MainClass {
     pm.init(applet);
 
     settings.setSketchOn(0, 0, true); //Tunnel
-    settings.setSketchOn(0, 3, true); //Bzr
-    settings.setSketchOn(0, 4, true); //Fire
+    settings.setSketchOn(0, 2, true); //Bzr
+    settings.setSketchOn(0, 3, true); //Fire
     settings.setSketchOn(1, 0, true); //AlienBlob
+
+    settings.setSketchOn(1, 3, true); //Heart
+    modeCol = 1;
+    modeRow = 3; //Heart
     
     newEffectFirstTime();
     
