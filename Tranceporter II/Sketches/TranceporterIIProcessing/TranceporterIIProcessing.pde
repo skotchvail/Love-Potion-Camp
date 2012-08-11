@@ -97,6 +97,7 @@ class MainClass {
         new Paint(display, settings),           //0,1
         new Bzr3(display, settings),            //0,2
         new Fire(display, settings),            //0,3
+        new Equalizer3d(display, settings),     //0,4
       },
       //column 1
       {
@@ -107,7 +108,7 @@ class MainClass {
       },
       //column 2
       {
-        new HardwareTest(display, settings),    //0,0
+        new HardwareTest(display, settings),    //2,0
       }
     };
     
@@ -120,8 +121,8 @@ class MainClass {
     settings.setSketchOn(1, 0, true); //AlienBlob
 
     settings.setSketchOn(1, 3, true); //Heart
-    modeCol = 1;
-    modeRow = 1; //Bouncing Balls
+    modeCol = 0;
+    modeRow = 4; //Equalizer3d
     
     newEffectFirstTime();
     
@@ -150,8 +151,11 @@ class MainClass {
     settings.heartBeat();
     
     for (int i=0; i<NUM_BANDS; i++) {
-      float audioSensitivity = 1 - settings.getParam(settings.getKeyAudioSensitivity(i));
+      float userSet = settings.getParam(settings.getKeyAudioSensitivity(i));
+      float audioSensitivity = 1 - userSet;
       bd.setSensitivity(i, audioSensitivity * MAX_AUDIO_SENSITIVITY, (int)(settings.getParam(settings.keyBeatLength)*MAX_BEAT_LENGTH));
+      bd.analyzeBand(i,(userSet != 0));
+      
     }
     bd.update(in.mix);
     for (int i=0; i<NUM_BANDS; i++)

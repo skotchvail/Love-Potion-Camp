@@ -1,7 +1,7 @@
 // Class to detect beats
 // Implementation by Greg Friedland in 2012 based on methods described by Simon Dixon in 
 // "ONSET DETECTION REVISITED" Proc. of the 9th Int. Conference on Digital Audio Effects (DAFx-06), Montreal, Canada, September 18-20, 2006
-// (http://www.dafx.ca/proceedings/papers/p_133.pdf)
+// ( http://www.dafx.ca/proceedings/papers/p_133.pdf )
 
 import java.util.HashMap;
 
@@ -148,7 +148,8 @@ class BeatDetect {
       
       thresh = getArrayAvgs("metric", "spectralFlux", i).getEMA2(ind-1) + threshSensitivity[i] * getArrayAvgs("sd", "spectralFlux", i).getEMA2(ind-1);
       getArray("threshold", "spectralFlux", i).add(thresh);
-      if (getArrayAvgs("metric", "spectralFlux", i).getEMA1(ind) > max((float)thresh, MIN_THRESHOLD) && millis() - lastOnsetTimes[i] >= beatLength[i] ) {
+      if (getArrayAvgs("metric", "spectralFlux", i).getEMA1(ind) > max((float)thresh, MIN_THRESHOLD) && millis()
+          - lastOnsetTimes[i] >= beatLength[i] ) {
         getArray("onsetHist", "spectralFlux", i).add(1);
         //println("beat gap" + (i+1) + ": " + (millis() - lastOnsetTimes[i]));
         lastOnsetTimes[i] = millis();
