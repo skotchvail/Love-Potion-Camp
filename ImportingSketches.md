@@ -83,17 +83,27 @@ but to control the different settings you need the Pad app.
 
 ===== After the Initial Run =====
 
-1) If you are going to use the custom controls, then you should set 
-their display names with these methods: 
+1) There are 2 sliders that you can change to mean anything you want 
+for your particular sketch. To get the value from the slider (0.0-1.0) 
+use:
+ 	
+ 	settings.getParam(settings.keyCustom1)
+ 	settings.getParam(settings.keyCustom2)
+
+
+If you are going to use the custom controls, then you should set 
+their display names with these methods, so that people using the 
+iPad controller know what the custom control does in your sketch: 
 
 	String getCustom1Label() { return "More Awesome";}
  	String getCustom2Label() { return "Zestier";}
+ 	
+ 
+2) If you want to detect beats, use these booleans: 
 
-2) If you want to detect beats, use 
-
+	settings.isBeat(0);
 	settings.isBeat(1);
 	settings.isBeat(2);
-	settings.isBeat(3);
 
 This are one when there is a beat on the treble, mid range, or bass. 
 Use these in your draw routine.
