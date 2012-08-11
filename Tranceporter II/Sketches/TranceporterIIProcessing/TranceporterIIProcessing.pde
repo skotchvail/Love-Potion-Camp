@@ -121,7 +121,7 @@ class MainClass {
 
     settings.setSketchOn(1, 3, true); //Heart
     modeCol = 1;
-    modeRow = 3; //Heart
+    modeRow = 1; //Bouncing Balls
     
     newEffectFirstTime();
     

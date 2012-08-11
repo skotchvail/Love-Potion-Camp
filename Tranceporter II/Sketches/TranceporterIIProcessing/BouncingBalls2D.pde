@@ -11,14 +11,14 @@ class BouncingBalls2D extends Drawer {
   float startMomentum = 0.5;
   float maxMass = maxRadius*maxRadius;
   Vec2D gravity = new Vec2D(0, 0.025);
+  int beatAssign;
   
   BouncingBalls2D(Pixels p, Settings s) {
     super(p, s, JAVA2D);
   }
   
   String getName() { return "BouncingBalls2D"; }
-  String getCustom1Label() { return "Num Balls";}
-
+  String getCustom1Label() { return "# Balls";}
 
   void setup() {
     colorMode(HSB, 1.0);
@@ -47,21 +47,18 @@ class BouncingBalls2D extends Drawer {
     Vec2D dpos = new Vec2D(random(-1, 1), random(-1, 1));
     dpos = dpos.normalizeTo(startMomentum/mass);
     balls.add(new ball(bbox, pos, dpos, radius, col, mass));
-  }    
+    settings.setParam(settings.keyCustom1, 0.3);
+  }
   
   void draw() {
     
     colorMode(HSB, 1.0);
     pg.colorMode(HSB, 1.0);
     pg.smooth();
-
     
-    assert(bbox != null);
-    float speed = settings.getParam(settings.keySpeed);
-    int frameSkip = int(10 - speed*9);
-    if (frameCount % frameSkip != 0) return;
+    int numBalls = (int) (settings.getParam(settings.keyCustom1) * 17) + 1;
+    numBalls *= numBalls;
     
-    int numBalls = (int) (settings.getParam(settings.keyCustom1) * 20);
     while (numBalls < balls.size()) {
       balls.remove(balls.size()-1);
     }
@@ -88,101 +85,106 @@ class BouncingBalls2D extends Drawer {
       }
     }
   }
-}
-
-class ball {
-  Vec2D pos, dpos;
-  Bbox bbox;
-  color col;
-  float radius, mass, startMomentum;
-
-  ball(Bbox bbox, Vec2D pos, Vec2D dpos, float radius, color col, float mass) {
-    this.pos = pos;
-    this.dpos = dpos;
-    this.radius = radius;
-    this.mass = mass;
-    this.col = col;
-    this.startMomentum = getMomentum();
-    updateColor();
-    this.bbox = bbox;
-  }
   
-  void updateColor() {
-    colorMode(HSB, 1.0);
-
-    float newHue = (hue(this.col) + 0.02) % 1.0;
-    this.col = color(newHue, 1.0, 1.0);
-  }
-  
-  float getMomentum() {
-    return mass * dpos.magnitude();
-  }
-  
-  void update(Vec2D gravity) {
-    dpos.addSelf(gravity.scale(0.5));    
-    for (int i=0; i<NUM_DIMS; i++) {
-      if(pos.getComponent(i) >= bbox.getDims().getComponent(i) - radius && dpos.getComponent(i) > 0) {
-        dpos.setComponent(i, -abs(dpos.getComponent(i)));
-        //if (i != 1) col = color((hue(col)+0.1)%1.0, 1.0, 1.0);
-        //bbox.changeWallColor(i, 1);
-        //pos.setComponent(i, bbox.getComponent(i)-1);
-      }
-      if(pos.getComponent(i) <= radius  && dpos.getComponent(i) < 0) {
-        dpos.setComponent(i, abs(dpos.getComponent(i)));
-        //col = color((hue(col)+0.1)%1.0, 1.0, 1.0);
-        //bbox.changeWallColor(i, 0);
-        //pos.setComponent(i, 0);
-      }
-    }
-
-    dpos.addSelf(gravity.scale(0.5));
-    pos.addSelf(dpos);
-  }
-  
-  void checkForCollision(ball b) {
-    Vec2D diffPos = this.pos.sub(b.pos);
-    float d = diffPos.magnitude() - this.radius - b.radius;
-    if (d < 0) {
-      //println("collision");
-      Vec2D norml = diffPos.getNormalized();
-      float aci = this.dpos.dot(norml);
-      float bci = b.dpos.dot(norml);
-      float ma = this.mass;
-      float mb = b.mass;
-      
-      //float acf = bci;
-      float acf = (aci*(ma-mb) + 2*mb*bci) / (ma + mb);
-      //float bcf = aci;
-      float bcf = (bci*(mb-ma) + 2*ma*aci) / (ma + mb);
-      
-      this.dpos.addSelf(norml.scale(acf-aci));
-      b.dpos.addSelf(norml.scale(bcf-bci));
-      
-      this.pos.addSelf(diffPos.scale(-d/2));
-      b.pos.addSelf(diffPos.scale(d/2));
-      
-      // change color
+  class ball {
+    Vec2D pos, dpos;
+    Bbox bbox;
+    color col;
+    float radius, mass, startMomentum;
+    int whichBeat;
+    
+    ball(Bbox bbox, Vec2D pos, Vec2D dpos, float radius, color col, float mass) {
+      this.pos = pos;
+      this.dpos = dpos;
+      this.radius = radius;
+      this.mass = mass;
+      this.col = col;
+      this.startMomentum = getMomentum();
       updateColor();
-      b.updateColor();
+      this.bbox = bbox;
+      beatAssign++;
+      whichBeat = beatAssign % 3;
+    }
+    
+    void updateColor() {
+      colorMode(HSB, 1.0);
+      
+      float newHue = (hue(this.col) + 0.02) % 1.0;
+      this.col = color(newHue, 1.0, 1.0);
+    }
+    
+    float getMomentum() {
+      return mass * dpos.magnitude();
+    }
+    
+    void update(Vec2D gravity) {
+      dpos.addSelf(gravity.scale(0.5));
+      for (int i=0; i<NUM_DIMS; i++) {
+        if(pos.getComponent(i) >= bbox.getDims().getComponent(i) - radius && dpos.getComponent(i) > 0) {
+          dpos.setComponent(i, -abs(dpos.getComponent(i)));
+          //if (i != 1) col = color((hue(col)+0.1)%1.0, 1.0, 1.0);
+          //bbox.changeWallColor(i, 1);
+          //pos.setComponent(i, bbox.getComponent(i)-1);
+        }
+        if(pos.getComponent(i) <= radius  && dpos.getComponent(i) < 0) {
+          dpos.setComponent(i, abs(dpos.getComponent(i)));
+          //col = color((hue(col)+0.1)%1.0, 1.0, 1.0);
+          //bbox.changeWallColor(i, 0);
+          //pos.setComponent(i, 0);
+        }
+      }
+      
+      dpos.addSelf(gravity.scale(0.5));
+      pos.addSelf(dpos);
+    }
+    
+    void checkForCollision(ball b) {
+      Vec2D diffPos = this.pos.sub(b.pos);
+      float d = diffPos.magnitude() - this.radius - b.radius;
+      if (d < 0) {
+        //println("collision");
+        Vec2D norml = diffPos.getNormalized();
+        float aci = this.dpos.dot(norml);
+        float bci = b.dpos.dot(norml);
+        float ma = this.mass;
+        float mb = b.mass;
+        
+        //float acf = bci;
+        float acf = (aci*(ma-mb) + 2*mb*bci) / (ma + mb);
+        //float bcf = aci;
+        float bcf = (bci*(mb-ma) + 2*ma*aci) / (ma + mb);
+        
+        this.dpos.addSelf(norml.scale(acf-aci));
+        b.dpos.addSelf(norml.scale(bcf-bci));
+        
+        this.pos.addSelf(diffPos.scale(-d/2));
+        b.pos.addSelf(diffPos.scale(d/2));
+        
+        // change color
+        updateColor();
+        b.updateColor();
+      }
+    }
+    
+    void draw(PGraphics pg) {
+      pg.fill(col);
+      pg.ellipseMode(CENTER);
+      float beatRadius = radius * (1.0 + (settings.isBeat(whichBeat)?1.0:0.0));
+      //float beatRadius = radius * 2;
+      pg.ellipse(pos.x, pos.y, beatRadius, beatRadius);
     }
   }
-
-  void draw(PGraphics pg) {
-    pg.fill(col);
-    pg.ellipseMode(CENTER);
-    pg.ellipse(pos.x, pos.y, radius*2, radius*2);
-  }    
-}
-
-class Bbox {
-  Vec2D dims;
-  //color[][] wallColors;
   
-  Bbox(Vec2D dims) {
-    colorMode(HSB, 1.0);
-
-    this.dims = dims;
+  class Bbox {
+    Vec2D dims;
+    //color[][] wallColors;
+    
+    Bbox(Vec2D dims) {
+      colorMode(HSB, 1.0);
+      
+      this.dims = dims;
+    }
+    
+    Vec2D getDims() { return dims; }
   }
-  
-  Vec2D getDims() { return dims; }
 }
