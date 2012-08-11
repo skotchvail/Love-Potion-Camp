@@ -8,7 +8,6 @@ class Equalizer3d extends Drawer
   float rad=0;
   float f=radians(0.1);
   float kickSize1, kickSize2, kickSize3;
-  color [][]colorGrid;
   int [][]randoms;
   int numCols = 8;
   int numRows = 4;
@@ -39,14 +38,12 @@ class Equalizer3d extends Drawer
   void draw() {
     colorMode(RGB,255);
     
-    if (colorGrid == null) {
-      colorGrid = new color[numCols][numRows];
+    if (randoms == null) {
       randoms = new int[numCols][numRows];
       
       for (int i = 0; i < numCols; i++) {
         for (int j = 0; j < numRows; j++) {
           int loc = i*60 + j * 60 * numRows; // Pixel array location
-          colorGrid[i][j] = getColor((loc) % getNumColors());
           randoms[i][j] = (int)random(0xFFFF);
         }
       }
@@ -60,12 +57,11 @@ class Equalizer3d extends Drawer
     pg.loadPixels();
 
     int colorWidth = (int)((settings.getParam(settings.keyCustom1) * getNumColors()) / (numRows * numCols * 0.5));
-    println("colorWidth = " + colorWidth);
     
     for (int i = 0; i < numCols; i++) {
       for (int j = 0; j < numRows; j++) {
         
-        color c = getColor(((i + j * numRows) * colorWidth) % getNumColors()); //colorGrid[i][j];
+        color c = getColor(((i + j * numRows) * colorWidth) % getNumColors());
         
         float kickSize = 2*factor;
         
@@ -119,8 +115,4 @@ class Equalizer3d extends Drawer
     rad+=f * settings.getParam(settings.keyCustom2) * 16;
   }
 }
-
-  
-  
-  
 

@@ -36,7 +36,7 @@ class Settings {
   final String keyCustom2Label = "/pageControl/custom2_label";
   
   final String keyModeName = "/pageControl/mode";
-  final String keyPaletteName = "/pageControl/palette ";
+  final String keyPaletteName = "/pageControl/palette";
   
   Settings(int numBands) {
     
