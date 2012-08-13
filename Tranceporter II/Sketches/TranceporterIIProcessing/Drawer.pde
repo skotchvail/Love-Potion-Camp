@@ -139,6 +139,14 @@ class Drawer {
     colorMode(RGB);
     return color(red(c), green(c), blue(c), newAlpha);
   }
+  
+  float randomYForBottle(float x, float scale) {
+    float percent = (x * scale) / width;
+    float start = percent * height / 2.0;
+    float y =  random(start, start + height/2.0);
+//    println("x:" + x + " upper:" +  (x + height/2.0) + "  result: " + y);
+    return y / scale;
+  }
 
   boolean isTouching(int touchNum, int[] xy, long touchCutoffTime) {
     if (xy != null) {

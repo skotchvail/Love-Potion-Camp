@@ -32,6 +32,8 @@ class Smoke extends Drawer {
   float randomGustSize;
   float randomGustXvel;
   float randomGustYvel;
+  float speedFactor;
+  float SCALE = 0.5;
   
   final int startBlockWidth = 20;
   int startPosition;
@@ -45,8 +47,8 @@ class Smoke extends Drawer {
 
   void setup()
   {
-    scaledWidth = width * 2 ;
-    scaledHeight = height * 2;
+    scaledWidth = width / SCALE ;
+    scaledHeight = height / SCALE;
     
     lwidth = (int)(scaledWidth/res);
     lheight = (int)(scaledHeight/res);
@@ -70,9 +72,9 @@ class Smoke extends Drawer {
     }
     
     settings.setParam(settings.keyBeatLength,0.05);
-    settings.setParam(settings.keyAudioSensitivity1,0.7);
-    settings.setParam(settings.keyAudioSensitivity2,0.7);
-    settings.setParam(settings.keyAudioSensitivity3,0.7);
+    settings.setParam(settings.keyAudioSensitivity1,0.5);
+    settings.setParam(settings.keyAudioSensitivity2,0.5);
+    settings.setParam(settings.keyAudioSensitivity3,0.5);
   }
 
   float newParticleX()
@@ -82,20 +84,20 @@ class Smoke extends Drawer {
 
   float newParticleY()
   {
-    return random(scaledHeight-startBlockWidth/2,scaledHeight);
+    return random(scaledHeight-startBlockWidth/2,scaledHeight) - startBlockWidth * 0.25;
   }
 
   
   void draw()
   {
+    speedFactor = 1.4 * settings.getParam(settings.keySpeed);
+    speedFactor *= speedFactor;
+    speedFactor += 0.1;
+    
     colorMode(RGB,255);
     pg.colorMode(RGB,255);
-    pg.scale(0.5);
-    if (false) {
-      pg.translate(-20,32);
-      pg.scale(0.5);
-      pg.rotate(PI * 1.65);
-    }
+    pg.scale(SCALE);
+    pg.background(0);
     int axvel = mouseX-pmouseX;
     int ayvel = mouseY-pmouseY;
     
@@ -112,33 +114,25 @@ class Smoke extends Drawer {
         randomGustMax = (int)random(5,12);
         randomGust = randomGustMax;
         
+        color theColor;
+        randomGustX = random(0,scaledWidth);
+        randomGustY = randomYForBottle(randomGustX,SCALE);
         if (beat0) {
-          randomGustY = random(0,scaledHeight * 0.3);
+          theColor = getColor(1);
         }
         else if (beat1) {
-          randomGustY = random(scaledWidth * 0.3,scaledHeight * 0.7);
+          theColor = getColor((int)(getNumColors() * 0.5));
         }
         else {
-          randomGustY = random(scaledWidth * 0.7,scaledHeight);
+          theColor = getColor((int)(getNumColors() * 0.9));
         }
-        randomGustX = random(0,scaledWidth);
-//        randomGustY = random(0,scaledHeight);
-        
-        Gust g = new Gust(new PVector(randomGustX,randomGustY), getColor(0));
+        Gust g = new Gust(new PVector(randomGustX,randomGustY), theColor);
         gusts.add(g);
         
-//        randomGustSize = random(0,50);
         randomGustSize = 25;
         
         randomGustXvel = -scaledWidth/100.0;
         randomGustYvel = -scaledWidth/100.0;
-        
-//        if(randomGustX > scaledWidth/2) {
-//          randomGustXvel = random(-8,0);
-//        } else {
-//          randomGustXvel = random(0,8);
-//        }
-//        randomGustYvel = random(-2,1);
       }
       randomGust--;
     }
@@ -252,10 +246,8 @@ class particle
       //      if(v[vi][vu].yvel < 0)
       //        v[vi][vu].yvel *= 1.00025;
 
-      
-      
-      x += xvel;
-      y += yvel;
+      x += xvel * speedFactor;
+      y += yvel * speedFactor;
     } 
     else {
       reposition();
@@ -404,6 +396,12 @@ class vsquare {
 //    }
     
     color c = color(tcol * 1.5);
+    if (tcol == 0) {
+      c = color(0);
+    }
+    else {
+      c = replaceAlpha(#00FF00,tcol * 1.5);
+    }
 
     pg.fill(c);
     
