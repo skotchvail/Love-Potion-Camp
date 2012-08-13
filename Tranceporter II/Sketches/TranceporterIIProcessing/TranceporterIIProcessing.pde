@@ -113,6 +113,7 @@ class MainClass {
       //column 2
       {
         new HardwareTest(display, settings),      //2,0
+        new EyeMotion(display, settings),         //2,1
       }
     };
     
@@ -125,8 +126,8 @@ class MainClass {
     settings.setSketchOn(1, 0, true); //AlienBlob
 
     settings.setSketchOn(1, 3, true); //Heart
-    modeCol = 1;
-    modeRow = 2; //Smoke
+    modeCol = 2;
+    modeRow = 1; //Eye Motion
     
     newEffectFirstTime();
     
