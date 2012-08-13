@@ -93,22 +93,23 @@ class MainClass {
     modes = new Drawer[][] {
       //column 0
       {
-        new Tunnel(display,settings),           //0,0
-        new Paint(display, settings),           //0,1
-        new Bzr3(display, settings),            //0,2
-        new Fire(display, settings),            //0,3
-        new Equalizer3d(display, settings),     //0,4
+        new Tunnel(display,settings),             //0,0
+        new Paint(display, settings),             //0,1
+        new Bzr3(display, settings),              //0,2
+        new Fire(display, settings),              //0,3
+        new Equalizer3d(display, settings),       //0,4
       },
       //column 1
       {
-        new AlienBlob(display, settings),       //1,0
-        new BouncingBalls2D(display, settings), //1,1
-        new Smoke(display, settings),           //1,2
-        new Heart(display, settings),           //1,3
+        new AlienBlob(display, settings),         //1,0
+        new BouncingBalls2D(display, settings),   //1,1
+        new Smoke(display, settings),             //1,2
+        new Heart(display, settings),             //1,3
+        new DroppingParticles(display, settings), //1,4
       },
       //column 2
       {
-        new HardwareTest(display, settings),    //2,0
+        new HardwareTest(display, settings),      //2,0
       }
     };
     
@@ -121,8 +122,8 @@ class MainClass {
     settings.setSketchOn(1, 0, true); //AlienBlob
 
     settings.setSketchOn(1, 3, true); //Heart
-    modeCol = 0;
-    modeRow = 4; //Equalizer3d
+    modeCol = 1;
+    modeRow = 4; //Dropping Particles
     
     newEffectFirstTime();
     
