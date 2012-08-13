@@ -154,11 +154,6 @@ class DroppingParticles extends Drawer {
       return getColor((int)round(location * colorRange));
     }
     
-    color replaceAlpha(color c, float newAlpha) {
-      return color(red(c), green(c), blue(c), newAlpha);
-    }
-
-    
   }
   
  

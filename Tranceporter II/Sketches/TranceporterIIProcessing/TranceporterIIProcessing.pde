@@ -18,6 +18,9 @@ int ledHeight = 40;
 int screenPixelSize = 5;
 int screenWidth = 700;
 int screenHeight = 400;
+int FRAME_RATE = 60;
+
+
 MainClass main;
 Utility utility;
 
@@ -123,7 +126,7 @@ class MainClass {
 
     settings.setSketchOn(1, 3, true); //Heart
     modeCol = 1;
-    modeRow = 4; //Dropping Particles
+    modeRow = 2; //Smoke
     
     newEffectFirstTime();
     
@@ -137,7 +140,8 @@ class MainClass {
       bd.analyzeBand(i, analyzeBands[i]);
     bd.setFFTWindow(FFT.HAMMING);
     
-    frameRate(SAMPLE_RATE/SAMPLE_SIZE);
+    //frameRate(SAMPLE_RATE/SAMPLE_SIZE);
+    frameRate(FRAME_RATE);
     
     settings.sendAllSettingsToPad();
     updateIPadGUI();

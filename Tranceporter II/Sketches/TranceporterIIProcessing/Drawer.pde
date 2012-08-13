@@ -135,6 +135,11 @@ class Drawer {
     return col;
   }
 
+  color replaceAlpha(color c, float newAlpha) {
+    colorMode(RGB);
+    return color(red(c), green(c), blue(c), newAlpha);
+  }
+
   boolean isTouching(int touchNum, int[] xy, long touchCutoffTime) {
     if (xy != null) {
       xy[0] = int(xTouches[touchNum] * (width-1) + 0.5);

@@ -18,8 +18,6 @@ class Heart extends Drawer
   
   void setup()
   {
-//  frameRate(20);
-    
     images = new PImage[numFrames];
 
     images[0]  = loadImage("split_0beatnhrt_upd_408.gif");

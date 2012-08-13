@@ -17,6 +17,7 @@ class Smoke extends Drawer {
   vsquare[][] v;
   vbuffer[][] vbuf;
   particle[] p;
+  ArrayList<Gust> gusts = new ArrayList<Gust>();
   int pcount = 0;
   int mouseXvel = 0;
   int mouseYvel = 0;
@@ -32,7 +33,7 @@ class Smoke extends Drawer {
   float randomGustXvel;
   float randomGustYvel;
   
-  final int startBlockWidth = 10;
+  final int startBlockWidth = 20;
   int startPosition;
   
   
@@ -67,6 +68,11 @@ class Smoke extends Drawer {
         vbuf[i][u] = new vbuffer((int)(i*res),(int)(u*res));
       }
     }
+    
+    settings.setParam(settings.keyBeatLength,0.05);
+    settings.setParam(settings.keyAudioSensitivity1,0.7);
+    settings.setParam(settings.keyAudioSensitivity2,0.7);
+    settings.setParam(settings.keyAudioSensitivity3,0.7);
   }
 
   float newParticleX()
@@ -82,6 +88,8 @@ class Smoke extends Drawer {
   
   void draw()
   {
+    colorMode(RGB,255);
+    pg.colorMode(RGB,255);
     pg.scale(0.5);
     if (false) {
       pg.translate(-20,32);
@@ -95,18 +103,42 @@ class Smoke extends Drawer {
     mouseYvel = (ayvel != mouseYvel) ? ayvel : 0;
     
     if(randomGust <= 0) {
-      if(settings.isBeat(2) && random(0,10)<1) {
+
+      boolean beat0 = settings.isBeat(0) && settings.beatPosSimple(0) == 0;
+      boolean beat1 = settings.isBeat(1) && settings.beatPosSimple(1) == 0;
+      boolean beat2 = settings.isBeat(2) && settings.beatPosSimple(2) == 0;
+      
+      if(beat0 || beat1 || beat2) {
         randomGustMax = (int)random(5,12);
         randomGust = randomGustMax;
-        randomGustX = random(0,scaledWidth);
-        randomGustY = random(0,scaledHeight-10);
-        randomGustSize = random(0,50);
-        if(randomGustX > scaledWidth/2) {
-          randomGustXvel = random(-8,0);
-        } else {
-          randomGustXvel = random(0,8);
+        
+        if (beat0) {
+          randomGustY = random(0,scaledHeight * 0.3);
         }
-        randomGustYvel = random(-2,1);
+        else if (beat1) {
+          randomGustY = random(scaledWidth * 0.3,scaledHeight * 0.7);
+        }
+        else {
+          randomGustY = random(scaledWidth * 0.7,scaledHeight);
+        }
+        randomGustX = random(0,scaledWidth);
+//        randomGustY = random(0,scaledHeight);
+        
+        Gust g = new Gust(new PVector(randomGustX,randomGustY), getColor(0));
+        gusts.add(g);
+        
+//        randomGustSize = random(0,50);
+        randomGustSize = 25;
+        
+        randomGustXvel = -scaledWidth/100.0;
+        randomGustYvel = -scaledWidth/100.0;
+        
+//        if(randomGustX > scaledWidth/2) {
+//          randomGustXvel = random(-8,0);
+//        } else {
+//          randomGustXvel = random(0,8);
+//        }
+//        randomGustYvel = random(-2,1);
       }
       randomGust--;
     }
@@ -127,10 +159,48 @@ class Smoke extends Drawer {
         v[i][u].display(i, u);
       }
     }
+
+    //draw the gusts
+    pg.pushStyle();
+    pg.smooth();
+    pg.ellipseMode(CENTER);
+    
+    ArrayList<Gust> newList = new ArrayList<Gust>();
+    
+    for (Gust g : gusts) {
+      g.draw();
+      if (g.drawsLeft > 0) {
+        newList.add(g);
+      }
+    }
+    gusts = newList;
+    pg.popStyle();
+
     randomGust = 0;
   }
 
-
+class Gust
+{
+  PVector location;
+  color fillColor;
+  int drawsLeft;
+  int MAX_FRAMES = int(FRAME_RATE * 0.5);
+  
+  Gust(PVector location, color fillColor) {
+    this.fillColor = fillColor;
+    this.location = location;
+    drawsLeft = MAX_FRAMES;
+  }
+  
+  void draw() {
+    drawsLeft --;
+    color c = this.fillColor;
+    c = replaceAlpha(c, 100 * drawsLeft / MAX_FRAMES);
+    pg.fill(c);
+    pg.ellipse(location.x, location.y, 20, 20);
+  }
+}
+  
 class particle 
 {
   float x;
@@ -294,6 +364,7 @@ class vsquare {
 
   void display(int i, int u) {
     float tcol = 0;
+    
     if(i>0 && i<lwidth-1 && u>0 && u<lheight-1) {
 
       tcol = (+ v[i][u+1].col
@@ -324,13 +395,15 @@ class vsquare {
 //    color c5 = blendColor(c4,c3,OVERLAY);
 //    pg.fill(c5);
     
-    float percent = (255 - tcol)/255.0;
-    color c = 0;
-    if (percent > 0.5) {
-      c = getColor(int(percent/2.0*(getNumColors()-1)));
-    } else {
-      c = getColor(0);
-    }
+//    float percent = (255 - tcol)/255.0;
+//    color c = 0;
+//    if (percent > 0.5) {
+//      c = getColor(int(percent/2.0*(getNumColors()-1)));
+//    } else {
+//      c = getColor(0);
+//    }
+    
+    color c = color(tcol * 1.5);
 
     pg.fill(c);
     
