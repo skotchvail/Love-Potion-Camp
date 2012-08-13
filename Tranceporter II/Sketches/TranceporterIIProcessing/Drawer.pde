@@ -10,6 +10,7 @@ class Drawer {
   boolean mousePressed;
   int width, height;
   int mouseX, mouseY;
+  int touchX, touchY;
   int lastMouseX = -1, lastMouseY = -1;
   Gradient g;
   float[] xTouches, yTouches;
@@ -81,8 +82,8 @@ class Drawer {
   void setTouch(int touchNum, float x, float y) {
     lastTouchTimes[touchNum] = millis();
     if (touchNum == 1) {
-      mouseX = round(x * width); 
-      mouseY = round(y * width);
+      touchX = mouseX = round(x * width);
+      touchY = mouseY = round(y * width);
     }
     
     xTouches[touchNum] = x;

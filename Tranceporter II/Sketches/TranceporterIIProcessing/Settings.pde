@@ -145,15 +145,15 @@ class Settings {
     assert(paramMap != null) : "param is null";
     assert(paramName != null) : "paramName is null";
     
-    if (paramName.equals(keySpeed)) {
-      float speed = (Float) paramMap.get(paramName);
-      for (int i=0; i < main.NUM_BANDS; i++) {
-        if (isBeat(i)) {
-          speed += beatPos(i)*(Float)paramMap.get(getKeyAudioSpeedChange(i));
-        }
-      }
-      return constrain(speed, 0, 1);
-    }
+//    if (paramName.equals(keySpeed)) {
+//      float speed = (Float) paramMap.get(paramName);
+//      for (int i=0; i < main.NUM_BANDS; i++) {
+//        if (isBeat(i)) {
+//          speed += beatPos(i)*(Float)paramMap.get(getKeyAudioSpeedChange(i));
+//        }
+//      }
+//      return constrain(speed, 0, 1);
+//    }
     
     Object result = paramMap.get(paramName);
     if (result == null) {
@@ -447,6 +447,16 @@ class Settings {
 
   String sketchLabelName(int col, int row) {
     return sketchName(col, row) + "_label";
+  }
+  
+  float speedWithAudioSpeed() {
+    float speed = getParam(keySpeed);
+    for (int i=0; i < main.NUM_BANDS; i++) {
+      if (isBeat(i)) {
+        speed += beatPos(i)*(Float)getParam(getKeyAudioSpeedChange(i));
+      }
+    }
+    return constrain(speed, 0, 1);
   }
     
 }

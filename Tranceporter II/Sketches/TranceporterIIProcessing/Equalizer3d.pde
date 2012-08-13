@@ -23,8 +23,6 @@ class Equalizer3d extends Drawer
   
   String getCustom1Label() { return "distinct colors";}
 
-  String getCustom2Label() { return "rotation";}
-
 
   void setup() {
     settings.setParam(settings.keyAudioSensitivity1,0.5);
@@ -112,7 +110,7 @@ class Equalizer3d extends Drawer
     }
     if(rad>PI/2 || rad<-PI/3)
       f=-f;
-    rad+=f * settings.getParam(settings.keyCustom2) * 16;
+    rad+=f * settings.getParam(settings.keySpeed) * 16;
   }
 }
 

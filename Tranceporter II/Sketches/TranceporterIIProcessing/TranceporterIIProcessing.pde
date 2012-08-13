@@ -201,7 +201,12 @@ class MainClass {
   void newEffectFirstTime() {
     settings.palette = new color[NUM_COLORS];
     pm.setPaletteType(settings.paletteType, NUM_COLORS, settings.palette);
-    modes[modeCol][modeRow].setup();
+    Drawer mode = modes[modeCol][modeRow];
+    mode.setup();
+    mouseX = mode.mouseX; //let the mode set the mouseX,Y in their setup and honor that.
+    mouseY = mode.mouseY;
+    
+    println("Initial mouseX:" + mouseX + " mouseY: " + mouseY);
   }
   
   void findNextMode() {

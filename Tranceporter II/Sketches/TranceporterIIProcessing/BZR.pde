@@ -35,7 +35,7 @@ class Bzr3 extends Drawer {
   
 
   void draw () {
-    int numStates = 20 - int(settings.getParam(settings.keySpeed)*9);
+    int numStates = 20 - int(settings.speedWithAudioSpeed()*9);
     
     if (state == 0) {
       for (int x = 0; x < w; x ++) {

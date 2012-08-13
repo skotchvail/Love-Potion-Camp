@@ -6,12 +6,19 @@ class EyeMotion extends Drawer {
   
   float mx;
   float my;
-  float easing = 0.05;
+  float easing;
   int radius = 10;
   int edge = 200;
   int inner = edge + radius;
   int i = 10;
   float SCALE = 0.1;
+  float trippy;
+  float lastmx, lastmy;
+  int MINX, MINY;
+  int MAXX, MAXY;
+  int lastLookChange;
+  boolean readyToBlink;
+  
   
   EyeMotion(Pixels p, Settings s) {
     super(p, s, JAVA2D);
@@ -24,65 +31,64 @@ class EyeMotion extends Drawer {
     pg.background(14, 37, 62);
     pg.noStroke();
     pg.smooth();
-    easing = 3.0/FRAME_RATE;
-    mouseX = 33;
-    mouseY = 22;
+    
+    touchX = 33;
+    touchY = 22;
+    setMouseCoords(touchX*screenPixelSize,touchY*screenPixelSize);
+    settings.setParam(settings.keyCustom1,0.1);
+    
+    MINX = inner + 30;
+    MAXX = (int)(width/SCALE - inner - 40);
+    
+    MINY = inner - 50;
+    MAXY = (int)(height/SCALE - inner + 60);
   }
   
   void draw() {
     
-    float trippy = settings.getParam(settings.keyCustom1);
+    trippy = settings.getParam(settings.keyCustom1);    
+    float speed = settings.getParam(settings.keySpeed);
+
+    float MAX_SECONDS_TO_FOCUS = 0.5;
+    float MIN_SECONDS_TO_FOCUS = 0.025;
+    float totalSecondsForMovement = secondsForSpeed(MIN_SECONDS_TO_FOCUS, MAX_SECONDS_TO_FOCUS,1.0-speed);
+    easing = 1.0/(totalSecondsForMovement * FRAME_RATE);
     
-    println("mouseX: " + mouseX + " mouseY: " + mouseY);
+ //   println("touchX: " + touchX + " touchY: " + touchY);
     pg.scale(SCALE);
     pg.noStroke();
     pg.smooth();
     pg.translate(40,0);
     pg.background(14, 37, 62);
     
-    float targetX = mouseX/SCALE;
-    float targetY = mouseY/SCALE;
-    
-    if (abs(targetX - mx) > 0.1) {
-      mx = mx + (targetX - mx) * easing;
-    }
-    if (abs(targetY - my) > 0.1) {
-      my = my + (targetY - my) * easing;
+    handleTouches(touchX,touchY);
+    if (mx != lastmx || my != lastmy) {
+      lastLookChange = millis();
+      lastmx = mx;
+      lastmy = my;
     }
 
-    println("targetX: " + targetX + " targetY: " + targetY);
-
-//    
-//    mx = constrain(mx, inner + 30, width - inner - 40);
-//    my = constrain(my, inner-30, height - inner);
+    float MAX_SECONDS_BETWEEN_MOVES = 10.0;
+    float MIN_SECONDS_BETWEEN_MOVES = 0.01;
+    float timeBeforeMoveEyes = secondsForSpeed(MIN_SECONDS_BETWEEN_MOVES,MAX_SECONDS_BETWEEN_MOVES,1.0 - (trippy * speed));
     
-
-    mx = constrain(mx, inner + 30, width/SCALE - inner - 40);
-    my = constrain(my, inner - 50, height/SCALE - inner + 60);
-
-    
-    
-    println("mx:"  + mx + " my:" + my + " x:(" + (inner + 30) + ", " + (width/SCALE - inner - 40) + ")" + " y:(" + (inner - 30) + ", " + (height/SCALE - inner) + ")");
-    
+    int timeSinceLastMove = millis() - lastLookChange;
+    if ((timeSinceLastMove/1000 > timeBeforeMoveEyes) && (trippy > 0) && settings.isBeat(2)) {
+      lastLookChange = millis();
+      touchX = (int)round(random(MINX,MAXX)*SCALE);
+      touchY = (int)round(random(MINY,MAXY)*SCALE);
+      println("time before move:" + timeBeforeMoveEyes + " timeSinceLastMove:" + timeSinceLastMove);
+    }
+        
     //eye fill
     pg.fill(8, 74, 119);
     pg.ellipse(313, 220, 285, 187);
     
+    
     //iris
     color irisColor = color(3, 43, 62);
-    if (trippy > 0.2) {
-      
-      color targetColor = getColor(getNumColors()/2);
-      
-      float percent = 0.8 - trippy;
-      if (percent > 1) {
-        irisColor = targetColor;
-      }
-      else {
-        irisColor = replaceAlpha(irisColor,percent * 255);
-        irisColor = blendColor(targetColor,irisColor, BLEND);
-      }
-    }
+    color targetColor = getColor(getNumColors()/2);
+    irisColor = fadeColor(irisColor,targetColor,0.2,0.8);
     pg.fill(irisColor);
     
     
@@ -90,9 +96,8 @@ class EyeMotion extends Drawer {
     
     //pupil
     color pupilColor = color(4, 22, 35);
-    if (trippy > 0.8) {
-      pupilColor = getColor(0);
-    }
+    targetColor = getColor(0);
+    pupilColor = fadeColor(pupilColor,targetColor,0.6,0.95);
     pg.fill(pupilColor);
     pg.ellipse(mx, my - 10, 130, 130);
     
@@ -149,7 +154,12 @@ class EyeMotion extends Drawer {
     pg.bezierVertex(234, 346, 169 ,300, 166, 226);
     pg.endShape();
     
-    if (mousePressed){
+    float secondsBetweenBlinks = 15.0;
+    if (!readyToBlink) {
+      readyToBlink = (random(0.0,1.0) < (1.0/(FRAME_RATE * secondsBetweenBlinks)));
+    }
+    if (settings.isBeat(1) && readyToBlink){
+      readyToBlink = false;
       
       pg.fill(18, 53, 89);
       pg.beginShape();
@@ -207,5 +217,46 @@ class EyeMotion extends Drawer {
     pg.ellipse(253, 205, 13, 21);
     
   }
+ 
+  float secondsForSpeed(float min_seconds, float max_seconds, float speed) {
+    float time = speed * sqrt(max_seconds - min_seconds);
+    time *= time;
+    time += min_seconds;
+    return time;
+  }
+  
+  void handleTouches(float touchX, float touchY)
+  {
+    float targetX = touchX/SCALE;
+    float targetY = touchY/SCALE;
+    
+    if (abs(targetX - mx) > 0.1) {
+      mx = mx + (targetX - mx) * easing;
+    }
+    if (abs(targetY - my) > 0.1) {
+      my = my + (targetY - my) * easing;
+    }
+    
+    mx = constrain(mx, MINX, MAXX);
+    my = constrain(my, MINY, MAXY);
+  }
+
+  
+  color fadeColor(color baseColor, color targetColor, float baseTrippy, float fullTrippy) {
+    if (trippy < baseTrippy) {
+      return baseColor;
+    }
+    
+    if (trippy >= fullTrippy) {
+      return targetColor;
+    }
+    
+    float alpha = map(trippy,baseTrippy,fullTrippy,255,0);
+    color theColor = replaceAlpha(baseColor,alpha);
+    theColor = blendColor(targetColor,theColor, BLEND);
+    return theColor;
+  }
+
+  
   
 }
