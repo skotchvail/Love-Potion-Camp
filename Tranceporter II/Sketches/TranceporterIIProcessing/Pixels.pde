@@ -336,7 +336,7 @@ class Pixels {
   final int TC_PIXEL_UNDEFINED =    -3;     // Pixel not yet assigned a value
   
   final int kNumStrands = 1;
-  final int kPixelsPerStrand = 200;
+  final int kPixelsPerStrand = 897;
   private int[] strandMap = new int[kNumStrands * kPixelsPerStrand];
   private int[] trainingStrandMap = new int[kNumStrands * kPixelsPerStrand];
   
@@ -556,12 +556,6 @@ class Pixels {
   
   void setupTotalControl()
   {
-    final int sA = 0;
-    final int sB = 1;
-    final int sC = 2;
-    final int sD = 3;
-    
-    initStrand(sA,150);
     
     /*
      
@@ -606,64 +600,210 @@ class Pixels {
      
      
      */
+
+    final int sA = 0;
+    final int sB = 1;
+    final int sC = 2;
+    final int sD = 3;
     
-
-    int extraY = 20;
+    initStrand(sA,897);
     
-    ledMissing(sA,149);
-    ledMissing(sA,148);
+  ledMissing(sA, 0);
+  ledSet(sA, 1, 0, 23);
+  ledSet(sA, 10, 0, 14);
+  ledSet(sA, 11, 1, 14);
+  ledSet(sA, 20, 1, 23);
+  ledSet(sA, 21, 2, 23);
+  ledSet(sA, 33, 2, 11);
+  ledSet(sA, 34, 3, 11);
+  ledSet(sA, 46, 3, 23);
+  ledSet(sA, 47, 4, 23);
+  ledSet(sA, 65, 4, 5);
+  ledSet(sA, 66, 5, 5);
+  ledSet(sA, 84, 5, 23);
+  ledSet(sA, 85, 6, 23);
+  ledSet(sA, 102, 6, 6);
+  ledSet(sA, 103, 7, 6);
+  ledSet(sA, 120, 7, 23);
+  ledSet(sA, 121, 8, 23);
+  ledSet(sA, 129, 8, 15);
+  ledSet(sA, 130, 9, 15);
+  ledSet(sA, 138, 9, 23);
+  ledSet(sA, 139, 10, 23);
+  ledSet(sA, 148, 10, 14);
+  ledSet(sA, 149, 11, 14);
+  ledSet(sA, 158, 11, 23);
+  ledSet(sA, 159, 12, 23);
+  ledSet(sA, 169, 12, 13);
+  ledSet(sA, 170, 13, 13);
+  ledSet(sA, 180, 13, 23);
+  ledSet(sA, 181, 14, 23);
+  ledSet(sA, 193, 14, 11);
+  ledSet(sA, 194, 15, 11);
+  ledSet(sA, 198, 15, 15);
+  ledMissing(sA, 199);
+  ledSet(sA, 200, 15, 16);
+  ledSet(sA, 206, 15, 22);
+  ledSet(sA, 207, 16, 22);
+  ledSet(sA, 219, 16, 10);
+  ledSet(sA, 220, 17, 10);
+  ledSet(sA, 232, 17, 22);
+  ledSet(sA, 233, 18, 22);
+  ledSet(sA, 247, 18, 8);
+  ledSet(sA, 248, 19, 8);
+  ledSet(sA, 262, 19, 22);
+  ledSet(sA, 263, 20, 22);
+  ledSet(sA, 277, 20, 8);
+  ledSet(sA, 278, 21, 8);
+  ledSet(sA, 292, 21, 22);
+  ledSet(sA, 293, 22, 22);
+  ledSet(sA, 307, 22, 8);
+  ledSet(sA, 308, 23, 8);
+  ledSet(sA, 321, 23, 21);
+  ledSet(sA, 322, 24, 21);
+  ledSet(sA, 335, 24, 8);
+  ledSet(sA, 336, 25, 8);
+  ledSet(sA, 349, 25, 21);
+  ledSet(sA, 350, 26, 21);
+  ledSet(sA, 363, 26, 8);
+  ledSet(sA, 364, 27, 8);
+  ledSet(sA, 377, 27, 21);
+  ledSet(sA, 378, 28, 21);
+  ledSet(sA, 389, 28, 10);
+  ledSet(sA, 390, 29, 10);
+  ledSet(sA, 400, 29, 20);
+  ledSet(sA, 401, 30, 20);
+  ledSet(sA, 410, 30, 11);
+  ledSet(sA, 411, 31, 11);
+  ledSet(sA, 420, 31, 20);
+  ledSet(sA, 421, 32, 20);
+  ledSet(sA, 432, 32, 9);
+  ledSet(sA, 433, 33, 9);
+  ledSet(sA, 444, 33, 20);
+  ledSet(sA, 445, 34, 20);
+  ledSet(sA, 457, 34, 8);
+  ledSet(sA, 458, 35, 8);
+  ledSet(sA, 470, 35, 20);
+  ledSet(sA, 471, 36, 20);
+  ledSet(sA, 483, 36, 8);
+  ledSet(sA, 484, 37, 8);
+  ledSet(sA, 496, 37, 20);
+  ledSet(sA, 497, 38, 20);
+  ledSet(sA, 509, 38, 8);
+  ledSet(sA, 510, 39, 8);
+  ledSet(sA, 522, 39, 20);
+  ledSet(sA, 523, 40, 20);
+  ledSet(sA, 532, 40, 11);
+  ledSet(sA, 533, 41, 11);
+  ledSet(sA, 542, 41, 20);
+  ledSet(sA, 543, 42, 20);
+  ledSet(sA, 552, 42, 11);
+  ledSet(sA, 553, 43, 11);
+  ledSet(sA, 562, 43, 20);
+  ledSet(sA, 563, 44, 20);
+  ledSet(sA, 571, 44, 12);
+  ledSet(sA, 572, 45, 12);
+  ledSet(sA, 580, 45, 20);
+  ledSet(sA, 581, 46, 20);
+  ledSet(sA, 589, 46, 12);
+  ledSet(sA, 590, 47, 12);
+  ledSet(sA, 598, 47, 20);
+  ledSet(sA, 599, 48, 20);
+//  ledSet(sA, 608, 48, 11);
+//  ledSet(sA, 609, 49, 11);
+//  ledSet(sA, 620, 49, 22);
+//  ledSet(sA, 621, 50, 22);
+//  ledSet(sA, 634, 50, 9);
+//  ledSet(sA, 635, 51, 9);
+//  ledSet(sA, 647, 51, 21);
+//  ledSet(sA, 648, 52, 21);
+//  ledSet(sA, 660, 52, 9);
+//  ledSet(sA, 661, 53, 9);
+//  ledSet(sA, 673, 53, 21);
+//  ledSet(sA, 674, 54, 21);
+//  ledSet(sA, 695, 54, 0);
+//  ledSet(sA, 696, 55, 0);
+//  ledSet(sA, 717, 55, 21);
+//  ledSet(sA, 718, 56, 21);
+//  ledSet(sA, 737, 56, 2);
+//  ledSet(sA, 738, 57, 2);
+//  ledSet(sA, 758, 57, 22);
+//  ledSet(sA, 759, 58, 22);
+//  ledSet(sA, 778, 58, 3);
+//  ledSet(sA, 779, 59, 3);
+//  ledSet(sA, 798, 59, 22);
+//  ledSet(sA, 799, 60, 22);
+//  ledSet(sA, 817, 60, 4);
+//  ledSet(sA, 818, 61, 4);
+//  ledSet(sA, 835, 61, 21);
+//  ledSet(sA, 836, 62, 21);
+//  ledSet(sA, 851, 62, 6);
+//  ledSet(sA, 852, 63, 6);
+//  ledSet(sA, 866, 63, 20);
+//  ledSet(sA, 867, 64, 20);
+//  ledSet(sA, 879, 64, 8);
+//  ledSet(sA, 880, 65, 8);
+//  ledSet(sA, 891, 65, 19);
+//  ledSet(sA, 892, 66, 19);
+//  ledSet(sA, 896, 66, 15);
 
-    ledSet(sA,147,  0,0);
-    ledSet(sA,133,  0,14);
 
-    ledMissing(sA,132);
-
+//    int extraY = 20;    
     
-    ledSet(sA,131,  1,14);
-    ledSet(sA,117,  1,0);
-    ledSet(sA,103,  2,0);
-    ledSet(sA,89,   2,14);
-    ledMissing(sA, 88);
-    ledSet(sA,87,   3,14);
-    ledSet(sA,77,   3,4);
-    ledMissing(sA,76);
-    ledSet(sA,75,   4,4);
-    ledSet(sA,65,   4,14);
-    ledMissing(sA,64);
-    ledMissing(sA,53);
-    ledSet(sA,63,   5,14);
-    ledSet(sA,54,   5,5);
-    ledSet(sA,52,   6,6);
-    ledSet(sA,44,   6,14);
-    ledMissing(sA,43);
-
-    ledSet(sA,42,   7,14);
-    ledSet(sA,33,   7,5);
-    ledMissing(sA,32);
-    ledMissing(sA,31);
-    ledMissing(sA,30);
-    ledMissing(sA,29);
-    ledMissing(sA,28);
-    ledMissing(sA,27);
-    ledMissing(sA,26);
-    ledMissing(sA,25);
-    ledMissing(sA,24);
-    ledMissing(sA,23);
-    ledMissing(sA,22);
-    ledMissing(sA,21);
-    ledMissing(sA,20);
-    ledMissing(sA,19);
-    ledMissing(sA,18);
-    ledMissing(sA,17);
-    ledMissing(sA,16);
-    ledMissing(sA,15);
-    ledMissing(sA,14);
-    ledMissing(sA,13);
-    ledMissing(sA,12);
-    ledMissing(sA,11);
-
-    ledSet(sA,10,   8,4);
-    ledSet(sA,0,    8,14);
+//    ledMissing(sA,149);
+//    ledMissing(sA,148);
+//
+//    ledSet(sA,147,  0,0);
+//    ledSet(sA,133,  0,14);
+//
+//    ledMissing(sA,132);
+//
+//    
+//    ledSet(sA,131,  1,14);
+//    ledSet(sA,117,  1,0);
+//    ledSet(sA,103,  2,0);
+//    ledSet(sA,89,   2,14);
+//    ledMissing(sA, 88);
+//    ledSet(sA,87,   3,14);
+//    ledSet(sA,77,   3,4);
+//    ledMissing(sA,76);
+//    ledSet(sA,75,   4,4);
+//    ledSet(sA,65,   4,14);
+//    ledMissing(sA,64);
+//    ledMissing(sA,53);
+//    ledSet(sA,63,   5,14);
+//    ledSet(sA,54,   5,5);
+//    ledSet(sA,52,   6,6);
+//    ledSet(sA,44,   6,14);
+//    ledMissing(sA,43);
+//
+//    ledSet(sA,42,   7,14);
+//    ledSet(sA,33,   7,5);
+//    ledMissing(sA,32);
+//    ledMissing(sA,31);
+//    ledMissing(sA,30);
+//    ledMissing(sA,29);
+//    ledMissing(sA,28);
+//    ledMissing(sA,27);
+//    ledMissing(sA,26);
+//    ledMissing(sA,25);
+//    ledMissing(sA,24);
+//    ledMissing(sA,23);
+//    ledMissing(sA,22);
+//    ledMissing(sA,21);
+//    ledMissing(sA,20);
+//    ledMissing(sA,19);
+//    ledMissing(sA,18);
+//    ledMissing(sA,17);
+//    ledMissing(sA,16);
+//    ledMissing(sA,15);
+//    ledMissing(sA,14);
+//    ledMissing(sA,13);
+//    ledMissing(sA,12);
+//    ledMissing(sA,11);
+//
+//    ledSet(sA,10,   8,4);
+//    ledSet(sA,0,    8,14);
      
     ledInterpolate();
    // assert false : ledMapDump();
@@ -681,13 +821,17 @@ class Pixels {
   }
   
   // This function loads the screen-buffer and sends it to the TotalControl
-  void drawToLeds() {    
+  void drawToLeds() {
     if (!useTotalControl) {
       return;
     }
     
-    tc.refresh(pixelData, useTrainingMode?trainingStrandMap:strandMap);
-   tc.printStats();
+    int status = tc.refresh(pixelData, useTrainingMode?trainingStrandMap:strandMap);
+    if(status != 0) {
+      tc.printError(status);
+    }
+
+    tc.printStats();
   }
   
 }
