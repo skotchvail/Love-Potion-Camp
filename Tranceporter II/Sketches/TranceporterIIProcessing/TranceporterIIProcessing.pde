@@ -10,8 +10,6 @@ import java.util.List;
 
 //ADJUSTABLE PARAMS
 boolean render3d = true;
-int baud = 921600;
-//int baud = 0;
 String iPadIP = "10.0.1.8";
 int ledWidth = 60;
 int ledHeight = 40;
@@ -84,14 +82,7 @@ class MainClass {
       println("Error redirecting stdout/stderr: " + e);
     }
     
-    try {
-      display = new Pixels(applet, baud);
-      println("### Started at " + baud);
-    } catch (Exception e) {
-      baud = 0;
-      display = new Pixels(applet, baud);
-      println("### Started in standalone mode");
-    }
+    display = new Pixels(applet);
     
     modes = new Drawer[][] {
       //column 0
@@ -126,10 +117,8 @@ class MainClass {
     settings.setSketchOn(1, 0, true); //AlienBlob
 
     settings.setSketchOn(1, 3, true); //Heart
-    modeCol = 2;
-    modeRow = 1; //Eye Motion
-    
-    newEffectFirstTime();
+    modeCol = 0;
+    modeRow = 3; //Fire
     
     // Audio features
     minim = new Minim(applet);
@@ -140,6 +129,8 @@ class MainClass {
     for (int i=0; i<NUM_BANDS; i++)
       bd.analyzeBand(i, analyzeBands[i]);
     bd.setFFTWindow(FFT.HAMMING);
+    
+    newEffectFirstTime();
     
     //frameRate(SAMPLE_RATE/SAMPLE_SIZE);
     frameRate(FRAME_RATE);

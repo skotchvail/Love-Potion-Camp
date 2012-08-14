@@ -19,7 +19,7 @@ class Pixels {
   
   TotalControl tc;
   
-  Pixels(PApplet p, int baud) {
+  Pixels(PApplet p) {
     box2d = new Rectangle(10, 10, ledWidth * screenPixelSize, ledHeight * screenPixelSize);
     box3d = new Rectangle(box2d.x * 2 + box2d.width,box2d.y,360,300);
     pixelData = new color[ledWidth * ledHeight];
@@ -687,7 +687,7 @@ class Pixels {
     }
     
     tc.refresh(pixelData, useTrainingMode?trainingStrandMap:strandMap);
-   // tc.printStats();
+   tc.printStats();
   }
   
 }
