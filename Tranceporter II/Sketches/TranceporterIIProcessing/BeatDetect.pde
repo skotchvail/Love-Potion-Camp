@@ -24,7 +24,7 @@ class BeatDetect {
   int[] beatLength;
   
   BeatDetect(FFT fft, int numBands, int historySize) {
-    MIN_FREQ = max(MIN_FREQ, main.SAMPLE_RATE/main.SAMPLE_SIZE);
+    MIN_FREQ = max(MIN_FREQ, SAMPLE_RATE/SAMPLE_SIZE);
     this.fft = fft;
     this.historySize = historySize;
     

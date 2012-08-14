@@ -59,9 +59,6 @@ class Fire extends Drawer {
   }
   
   void draw() {  
-    // speed of 0: we skip 2/3 of the time; speed of 1; we skip 0 of the time
-//    int frameSkip = 3 - round(settings.getParam(settings.keySpeed)*2);
-//    if (frameCount % frameSkip != 0) return;
 
     // Randomize the bottom row of the fire buffer
     int clusterSize = round(settings.getParam(settings.keyCustom2)*10);

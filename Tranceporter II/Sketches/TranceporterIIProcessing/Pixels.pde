@@ -49,11 +49,7 @@ class Pixels {
       }
     }
   }
-  
-  void toggle3dRender() {
-    render3d = !render3d;
-  }
-  
+    
   PGraphics drawFlat2DVersion() {
     
     // render into offscreen buffer so that we can blur it, and then copy it
@@ -73,6 +69,9 @@ class Pixels {
     }
     pg.filter(BLUR, 2.5);
     pg.endDraw();
+    
+    if (!draw2dGrid)
+      return pg;
     
     // copy onto the display window
     pg.loadPixels();
@@ -234,48 +233,16 @@ class Pixels {
   }
   
   void drawToScreen() {
+    if (!draw2dGrid && !draw3dSimulation)
+      return;
     colorMode(RGB,255);
     background(color(12,49,81)); //dark blue color
     PGraphics pg = drawFlat2DVersion();
-    if (render3d) {
+    if (draw3dSimulation) {
       drawMappedOntoBottle(pg);
     }
   }
   
-//  void drawToLedWall() {
-//    // r, g, b for 1,1 then 1,2; etc.    
-//    int ti=0;
-//    for (int y=ledHeight-1; y>=0; y--) {
-//      int dx, x;
-//      if (y%2 == 0) {
-//        dx = -1;
-//        x = ledWidth-1;
-//      } else {
-//        dx = 1;
-//        x = 0;
-//      }
-//      
-//      while (x >= 0 && x < ledWidth) {
-//        byte[] rgb = new byte[3];
-//        rgb[2] = (byte) constrain(pixelData[c2i(x,y)] & 0xFF, 0, MAX_RGB);
-//        rgb[1] = (byte) constrain((pixelData[c2i(x,y)] >> 8) & 0xFF, 0, MAX_RGB);
-//        rgb[0] = (byte) constrain((pixelData[c2i(x,y)] >> 16) & 0xFF, 0, MAX_RGB);
-//        
-//        for (int c=0; c<3; c++) {
-//          if (ti%PACKET_SIZE == 0) {
-//            int pktNum = floor(float(ti)/PACKET_SIZE);
-//            txData[ti++] = byte(pktNum);
-//          }
-//          
-//          txData[ti++] = rgb[c];
-//        }
-//
-//        x += dx;
-//      }
-//    }        
-//    
-//    spw.send(txData);
-//  }
   Rectangle getBox2D() {return box2d;}
   Rectangle getBox3D() {return box3d;}
   
@@ -342,6 +309,8 @@ class Pixels {
   
   boolean useTotalControl = true;
   boolean useTrainingMode = false;
+  
+  int lastError;
    
   //convert coordinates into index into pixel array index
   private int c2i(int x, int y) {
@@ -709,43 +678,43 @@ class Pixels {
   ledSet(sA, 590, 47, 12);
   ledSet(sA, 598, 47, 20);
   ledSet(sA, 599, 48, 20);
-//  ledSet(sA, 608, 48, 11);
-//  ledSet(sA, 609, 49, 11);
-//  ledSet(sA, 620, 49, 22);
-//  ledSet(sA, 621, 50, 22);
-//  ledSet(sA, 634, 50, 9);
-//  ledSet(sA, 635, 51, 9);
-//  ledSet(sA, 647, 51, 21);
-//  ledSet(sA, 648, 52, 21);
-//  ledSet(sA, 660, 52, 9);
-//  ledSet(sA, 661, 53, 9);
-//  ledSet(sA, 673, 53, 21);
-//  ledSet(sA, 674, 54, 21);
-//  ledSet(sA, 695, 54, 0);
-//  ledSet(sA, 696, 55, 0);
-//  ledSet(sA, 717, 55, 21);
-//  ledSet(sA, 718, 56, 21);
-//  ledSet(sA, 737, 56, 2);
-//  ledSet(sA, 738, 57, 2);
-//  ledSet(sA, 758, 57, 22);
-//  ledSet(sA, 759, 58, 22);
-//  ledSet(sA, 778, 58, 3);
-//  ledSet(sA, 779, 59, 3);
-//  ledSet(sA, 798, 59, 22);
-//  ledSet(sA, 799, 60, 22);
-//  ledSet(sA, 817, 60, 4);
-//  ledSet(sA, 818, 61, 4);
-//  ledSet(sA, 835, 61, 21);
-//  ledSet(sA, 836, 62, 21);
-//  ledSet(sA, 851, 62, 6);
-//  ledSet(sA, 852, 63, 6);
-//  ledSet(sA, 866, 63, 20);
-//  ledSet(sA, 867, 64, 20);
-//  ledSet(sA, 879, 64, 8);
-//  ledSet(sA, 880, 65, 8);
-//  ledSet(sA, 891, 65, 19);
-//  ledSet(sA, 892, 66, 19);
-//  ledSet(sA, 896, 66, 15);
+  ledSet(sA, 608, 48, 11);
+  ledSet(sA, 609, 49, 11);
+  ledSet(sA, 620, 49, 22);
+  ledSet(sA, 621, 50, 22);
+  ledSet(sA, 634, 50, 9);
+  ledSet(sA, 635, 51, 9);
+  ledSet(sA, 647, 51, 21);
+  ledSet(sA, 648, 52, 21);
+  ledSet(sA, 660, 52, 9);
+  ledSet(sA, 661, 53, 9);
+  ledSet(sA, 673, 53, 21);
+  ledSet(sA, 674, 54, 21);
+  ledSet(sA, 695, 54, 0);
+  ledSet(sA, 696, 55, 0);
+  ledSet(sA, 717, 55, 21);
+  ledSet(sA, 718, 56, 21);
+  ledSet(sA, 737, 56, 2);
+  ledSet(sA, 738, 57, 2);
+  ledSet(sA, 758, 57, 22);
+  ledSet(sA, 759, 58, 22);
+  ledSet(sA, 778, 58, 3);
+  ledSet(sA, 779, 59, 3);
+  ledSet(sA, 798, 59, 22);
+  ledSet(sA, 799, 60, 22);
+  ledSet(sA, 817, 60, 4);
+  ledSet(sA, 818, 61, 4);
+  ledSet(sA, 835, 61, 21);
+  ledSet(sA, 836, 62, 21);
+  ledSet(sA, 851, 62, 6);
+  ledSet(sA, 852, 63, 6);
+  ledSet(sA, 866, 63, 20);
+  ledSet(sA, 867, 64, 20);
+  ledSet(sA, 879, 64, 8);
+  ledSet(sA, 880, 65, 8);
+  ledSet(sA, 891, 65, 19);
+  ledSet(sA, 892, 66, 19);
+  ledSet(sA, 896, 66, 15);
 
 
 //    int extraY = 20;    
@@ -827,11 +796,14 @@ class Pixels {
     }
     
     int status = tc.refresh(pixelData, useTrainingMode?trainingStrandMap:strandMap);
-    if(status != 0) {
+    if(status != lastError) {
       tc.printError(status);
     }
+    lastError = status;
 
-    tc.printStats();
+    if (frameCount % (FRAME_RATE * 3) == 0) {
+      tc.printStats();
+    }
   }
   
 }

@@ -9,15 +9,18 @@ import java.util.List;
 
 
 //ADJUSTABLE PARAMS
-boolean render3d = true;
+boolean draw2dGrid = true;
+boolean draw3dSimulation = true;
 String iPadIP = "10.0.1.8";
 int ledWidth = 60;
 int ledHeight = 40;
 int screenPixelSize = 5;
 int screenWidth = 700;
 int screenHeight = 400;
-int FRAME_RATE = 60;
 
+int SAMPLE_RATE = 44100;
+int SAMPLE_SIZE = 1024;
+int FRAME_RATE = SAMPLE_RATE/SAMPLE_SIZE;
 
 MainClass main;
 Utility utility;
@@ -28,20 +31,25 @@ interface FunctionFloatFloat { void function(float x, float y); }
 
 void setup() {
   size(screenWidth, screenHeight);
+
+  println("target FRAME_RATE:" + FRAME_RATE);
   utility = new Utility();
   main = new MainClass();
   main.setup(this);
 }
 
 void draw() {
-  main.settings.getParam(main.settings.getKeyAudioBrightnessChange(2));
   main.draw();
-  main.settings.getParam(main.settings.getKeyAudioBrightnessChange(2));
 }
 
 void mouseClicked() {
   main.mouseClicked();
 }
+
+void keyPressed() {
+  main.keyPressed();
+}
+
 
 class MainClass {
   
@@ -54,8 +62,6 @@ class MainClass {
   // Audio
   BeatDetect bd;
   int HISTORY_SIZE = 50;
-  int SAMPLE_RATE = 44100;
-  int SAMPLE_SIZE = 1024;
   int NUM_BANDS = 3;
   boolean[] analyzeBands = {true, true, true };
   //AudioSocket signal;
@@ -68,7 +74,6 @@ class MainClass {
   Drawer[][] modes;
   int modeCol = 0;
   int modeRow = 0;
-
   
   PaletteManager pm = new PaletteManager();
   Settings settings = new Settings(NUM_BANDS);
@@ -117,8 +122,8 @@ class MainClass {
     settings.setSketchOn(1, 0, true); //AlienBlob
 
     settings.setSketchOn(1, 3, true); //Heart
-    modeCol = 0;
-    modeRow = 3; //Fire
+    modeCol = 2;
+    modeRow = 0; //Hardware Test
     
     // Audio features
     minim = new Minim(applet);
@@ -177,6 +182,25 @@ class MainClass {
     display.drawToLeds();
   }
   
+  
+  void keyPressed() {
+    
+    if (key == 'n') {
+      println("switching to new effect");
+      newEffect();
+    }
+    
+    if (key == '2') {
+      draw2dGrid = !draw2dGrid;
+      println("2D grid: " + draw2dGrid);
+    }
+    
+    if (key == '3') {
+      draw3dSimulation = !draw3dSimulation;
+      println("3D grid: " + draw3dSimulation);
+    }
+  }
+
   void newPalette() {
     settings.palette = new color[NUM_COLORS];
     pm.getNewPalette(NUM_COLORS, settings.palette);
@@ -281,9 +305,6 @@ class MainClass {
     Point p = new Point(mouseX,mouseY);
     if (display.getBox2D().contains(p)) {
       newEffect();
-    }
-    else if (display.getBox3D().contains(p)) {
-      display.toggle3dRender();
     }
   }
   
