@@ -519,6 +519,7 @@ class Pixels {
   }
 
   TotalControlConcurrent totalControlConcurrent;
+  final boolean runConcurrent = true;
 
   void setupTotalControl()
   {
@@ -772,23 +773,42 @@ class Pixels {
     println(ledMapDump());
     
     if (useTotalControl) {
-      //totalControlConcurrent = new TotalControlConcurrent(kNumStrands,kPixelsPerStrand);
-      TotalControl.open(kNumStrands, kPixelsPerStrand);
-//      if (totalControlConcurrent.getLastError() != 0) {
-//       // useTotalControl = false;
-//        println("turning off Total Control because of error during initialization");
-//      }
+      
+      if (runConcurrent) {
+        totalControlConcurrent = new TotalControlConcurrent(kNumStrands,kPixelsPerStrand);
+      }
+      else {
+        int status = TotalControl.open(kNumStrands, kPixelsPerStrand);
+        if (status != 0) {
+          useTotalControl = false;
+          println("turning off Total Control because of error during initialization");
+        }
+
+      }
     }
   }
   
+  int lastError;
+
   // This function loads the screen-buffer and sends it to the TotalControl p9813 driver
   void drawToLeds() {
     if (!useTotalControl) {
       return;
     }
-    //totalControlConcurrent.put(pixelData, useTrainingMode?trainingStrandMap:strandMap);
-//    int status = TotalControl.refresh(pixelData.clone(), strandMap);
-    int status = TotalControl.refresh(pixelData, strandMap);
+    int[] theStrandMap = useTrainingMode?trainingStrandMap:strandMap;
+
+    println("sending pixelData: " + pixelData.length + " strandMap: " + theStrandMap.length);
+    if (runConcurrent) {
+      totalControlConcurrent.put(pixelData, theStrandMap);
+    }
+    else {
+      int status = TotalControl.refresh(pixelData, theStrandMap);
+      if(status != lastError) {
+        lastError = status;
+        TotalControl.printError(status);
+      }
+
+    }
   }
 }
 
