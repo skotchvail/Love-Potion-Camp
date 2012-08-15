@@ -6,11 +6,12 @@ import ddf.minim.analysis.*;
 import ddf.minim.*;
 import java.util.Arrays;
 import java.util.List;
+import java.util.prefs.Preferences;
 
 
 //ADJUSTABLE PARAMS
-boolean draw2dGrid = true;
-boolean draw3dSimulation = true;
+boolean draw2dGrid;
+boolean draw3dSimulation;
 String iPadIP = "10.0.1.8";
 int ledWidth = 60;
 int ledHeight = 40;
@@ -24,16 +25,19 @@ int FRAME_RATE = SAMPLE_RATE/SAMPLE_SIZE;
 
 MainClass main;
 Utility utility;
+Preferences prefs;
 
 interface VoidFunction { void function(); }
 interface FunctionFloatFloat { void function(float x, float y); }
-
-
+  
 void setup() {
   size(screenWidth, screenHeight);
-
+  
   println("target FRAME_RATE:" + FRAME_RATE);
   utility = new Utility();
+  prefs = Preferences.userNodeForPackage(this.getClass());
+  draw2dGrid = prefs.getBoolean("draw2dGrid", true);
+  draw3dSimulation = prefs.getBoolean("draw3dSimulation", true);
   main = new MainClass();
   main.setup(this);
 }
@@ -47,7 +51,7 @@ void mouseClicked() {
 }
 
 void keyPressed() {
-  main.keyPressed();
+    main.keyPressed();
 }
 
 
@@ -197,13 +201,21 @@ class MainClass {
     
     if (key == '2') {
       draw2dGrid = !draw2dGrid;
+      prefs.putBoolean("draw2dGrid", draw2dGrid);
       println("2D grid: " + draw2dGrid);
     }
     
     if (key == '3') {
       draw3dSimulation = !draw3dSimulation;
+      prefs.putBoolean("draw3dSimulation", draw3dSimulation);
       println("3D grid: " + draw3dSimulation);
     }
+
+    try {
+      prefs.flush();
+    } catch(Exception e) {
+      println("keyPressed: " + e);
+    }    
   }
 
   void newPalette() {
