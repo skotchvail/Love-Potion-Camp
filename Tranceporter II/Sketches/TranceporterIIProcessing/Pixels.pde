@@ -780,8 +780,8 @@ class Pixels {
       else {
         int status = TotalControl.open(kNumStrands, kPixelsPerStrand);
         if (status != 0) {
-          useTotalControl = false;
-          println("turning off Total Control because of error during initialization");
+          //useTotalControl = false;
+          //println("turning off Total Control because of error during initialization");
         }
 
       }
@@ -789,6 +789,7 @@ class Pixels {
   }
   
   int lastError;
+  int lastStat;
 
   // This function loads the screen-buffer and sends it to the TotalControl p9813 driver
   void drawToLeds() {
@@ -797,7 +798,7 @@ class Pixels {
     }
     int[] theStrandMap = useTrainingMode?trainingStrandMap:strandMap;
 
-    println("sending pixelData: " + pixelData.length + " strandMap: " + theStrandMap.length);
+    //println("sending pixelData: " + pixelData.length + " strandMap: " + theStrandMap.length);
     if (runConcurrent) {
       totalControlConcurrent.put(pixelData, theStrandMap);
     }
@@ -807,7 +808,10 @@ class Pixels {
         lastError = status;
         TotalControl.printError(status);
       }
-
+      if (millis() - lastStat > 3000) {
+        lastStat = millis();
+        TotalControl.printStats();
+      }
     }
   }
 }

@@ -9,6 +9,7 @@ class TotalControlConcurrent implements Runnable {
   private int lastError;
   private int numStrands;
   private int pixelsPerStrand;
+  private int lastStat;
   
   TotalControlConcurrent(int numStrands, int pixelsPerStrand) {
     this.numStrands = numStrands;
@@ -40,14 +41,15 @@ class TotalControlConcurrent implements Runnable {
     while(true) {
       PixelDataAndMap dm = q.get();
       assert(dm != null) : "no data to write to TotalControl";
-      println("writing dm.pixelData: " + dm.pixelData.length + " dm.strandMap: " + dm.strandMap.length);
+      //println("writing dm.pixelData: " + dm.pixelData.length + " dm.strandMap: " + dm.strandMap.length);
       int status = TotalControl.refresh(dm.pixelData, dm.strandMap);
       if(status != lastError) {
         lastError = status;
         TotalControl.printError(status);
       }
       
-      if (frameCount % (FRAME_RATE * 3) == 0) {
+      if (millis() - lastStat > 3000) {
+        lastStat = millis();
         TotalControl.printStats();
       }
     }
