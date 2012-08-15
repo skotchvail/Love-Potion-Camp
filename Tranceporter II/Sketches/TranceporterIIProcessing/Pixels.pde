@@ -229,12 +229,24 @@ class Pixels {
     updatePixels();
     pg3D.updatePixels(); // is it necessary to call updatePixels when nothing changed?
   }
+
+  boolean wasDrawing2D = true;
+  boolean wasDrawing3D = true;
   
   void drawToScreen() {
-    if (!draw2dGrid && !draw3dSimulation)
-      return;
     colorMode(RGB,255);
-    background(color(12,49,81)); //dark blue color
+    
+    if (wasDrawing2D || wasDrawing3D || draw2dGrid || draw3dSimulation) {
+      background(color(12,49,81)); //dark blue color
+    }
+    
+    wasDrawing2D = draw2dGrid;
+    wasDrawing3D = draw3dSimulation;
+    
+    if (!draw2dGrid && !draw3dSimulation) {
+      return;
+    }
+    
     PGraphics pg = drawFlat2DVersion();
     if (draw3dSimulation) {
       drawMappedOntoBottle(pg);
