@@ -61,7 +61,7 @@ class Fire extends Drawer {
   void draw() {  
 
     // Randomize the bottom row of the fire buffer
-    int clusterSize = round(settings.getParam(settings.keyCustom2)*10);
+    int clusterSize = round(settings.getParam(settings.keyCustom2)*10) + 1;
     for(int x = 0; x < width; x+=clusterSize) {
       int i = int(random(0,190));
       for (int x2=x; x2<min(x+clusterSize, width); x2++) { 
