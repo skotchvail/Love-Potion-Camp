@@ -34,7 +34,7 @@ class TotalControlConcurrent implements Runnable {
   public void run() {
     while(true) {
       PixelDataAndMap dm = q.get();
-      
+      //println("dm.pixelData: " + dm.pixelData.length + " dm.strandMap: " + dm.strandMap.length);
       int status = TotalControl.refresh(dm.pixelData, dm.strandMap);
       if(status != lastError) {
         TotalControl.printError(status);
@@ -65,7 +65,6 @@ class TotalControlConcurrent implements Runnable {
           System.out.println("InterruptedException caught");
         }
       }
-      System.out.println("Got: ");
       valueSet = false;
       notify();
       return n;
@@ -83,7 +82,6 @@ class TotalControlConcurrent implements Runnable {
         }
       this.n = newDM;
       valueSet = true;
-      System.out.println("Put: ");
       notify();
     }
   }

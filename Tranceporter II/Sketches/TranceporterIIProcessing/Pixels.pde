@@ -774,7 +774,7 @@ class Pixels {
     if (useTotalControl) {
       totalControlConcurrent = new TotalControlConcurrent(kNumStrands,kPixelsPerStrand);
       if (totalControlConcurrent.getLastError() != 0) {
-        useTotalControl = false;
+       // useTotalControl = false;
         println("turning off Total Control because of error during initialization");
       }
     }
@@ -785,7 +785,8 @@ class Pixels {
     if (!useTotalControl) {
       return;
     }
-    totalControlConcurrent.put(pixelData, useTrainingMode?trainingStrandMap:strandMap);
+    //totalControlConcurrent.put(pixelData, useTrainingMode?trainingStrandMap:strandMap);
+    int status = TotalControl.refresh(pixelData, strandMap);
   }
 }
 
