@@ -3,7 +3,6 @@
 
 import saito.objloader.*;
 import java.awt.Rectangle;
-import TotalControl.*;
 
 int PACKET_SIZE = 100;
 int LOC_BYTES = 1; // how many bytes to use to store the index at the beginning of each packet
@@ -17,7 +16,6 @@ class Pixels {
 
   private Rectangle box2d, box3d;
   
-  TotalControl tc;
   
   Pixels(PApplet p) {
     box2d = new Rectangle(10, 10, ledWidth * screenPixelSize, ledHeight * screenPixelSize);
@@ -309,9 +307,7 @@ class Pixels {
   
   boolean useTotalControl = true;
   boolean useTrainingMode = false;
-  
-  int lastError;
-   
+     
   //convert coordinates into index into pixel array index
   private int c2i(int x, int y) {
     return (y*ledWidth) + x;
@@ -522,7 +518,8 @@ class Pixels {
     return s.toString();
   }
 
-  
+  TotalControlConcurrent totalControlConcurrent;
+
   void setupTotalControl()
   {
     
@@ -772,36 +769,23 @@ class Pixels {
 //    ledSet(sA,0,    8,14);
      
     ledInterpolate();
-   // assert false : ledMapDump();
     println(ledMapDump());
     
-    int status = tc.open(kNumStrands, kPixelsPerStrand);
-    tc.setGamma(2.4);
-
-    
-    if(status != 0) {
-      tc.printError(status);
-      useTotalControl = false;
+    if (useTotalControl) {
+      totalControlConcurrent = new TotalControlConcurrent(kNumStrands,kPixelsPerStrand);
+      if (totalControlConcurrent.getLastError() != 0) {
+        useTotalControl = false;
+        println("turning off Total Control becuase of error during initialization");
+      }
     }
-    
   }
   
-  // This function loads the screen-buffer and sends it to the TotalControl
+  // This function loads the screen-buffer and sends it to the TotalControl p9813 driver
   void drawToLeds() {
     if (!useTotalControl) {
       return;
     }
-    
-    int status = tc.refresh(pixelData, useTrainingMode?trainingStrandMap:strandMap);
-    if(status != lastError) {
-      tc.printError(status);
-    }
-    lastError = status;
-
-    if (frameCount % (FRAME_RATE * 3) == 0) {
-      tc.printStats();
-    }
+    totalControlConcurrent.put(pixelData, useTrainingMode?trainingStrandMap:strandMap);
   }
-  
 }
 
