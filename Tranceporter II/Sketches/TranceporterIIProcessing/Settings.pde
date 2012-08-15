@@ -7,12 +7,14 @@ class Settings {
   private color[] palette;
   private boolean[] isBeat;
   private HashMap paramMap;
+  private HashMap paramGlobalMap;
   private HashMap actions;
   private int numBands;
   private OscP5 oscP5;
   private NetAddress oscReceiver;
   private int paletteType;
   List<String> keyNames;
+  List<String> keyGlobalNames;
   
   final String keySpeed="/pageControl/speed";
   final String keyColorCyclingSpeed="/pageControl/cycling";
@@ -38,34 +40,44 @@ class Settings {
   final String keyModeName = "/pageControl/mode";
   final String keyPaletteName = "/pageControl/palette";
   
+  final String keyGlobalAutoChangeSpeed = "/sketches/autoChange";
+  final String keyGlobalAutoChangeSpeedLabel = "/sketches/autoChange_label";
+  
   Settings(int numBands) {
     
     //get the list of key constants
-    ArrayList theList =  new ArrayList();
+    ArrayList localModeList =  new ArrayList();
+    ArrayList globalList =  new ArrayList();
+
     Class cls = this.getClass();
     
     try {
       Field fieldlist[] = cls.getDeclaredFields();
       for (int i = 0; i < fieldlist.length; i++) {
         Field fld = fieldlist[i];
+        if (fld.getType() != String.class || !Modifier.isFinal(fld.getModifiers())) {
+          continue;
+        }
+        
         String name = fld.getName();
-        if (name.startsWith("key")
-            && fld.getType() == String.class
-            && Modifier.isFinal(fld.getModifiers())
-            ){
-          
+        if (name.startsWith("keyGlobal")){
           fld.setAccessible(true);
           String value = (String)fld.get(this);
-          theList.add(value);
+          globalList.add(value);
         }
-        keyNames = theList;
+        else if (name.startsWith("key")){
+          fld.setAccessible(true);
+          String value = (String)fld.get(this);
+          localModeList.add(value);
+        }
       }
+      keyNames = localModeList;
+      keyGlobalNames = globalList;
       
     }
     catch (Exception e){
       assert false : "got exception: " + e;
     }
-    
     
     this.numBands = numBands;
     setDefaultSettings();
@@ -107,6 +119,9 @@ class Settings {
             public void function() {
               main.reset();
             }});
+    
+    paramGlobalMap = new HashMap();
+    setParam(keyGlobalAutoChangeSpeed, 1.0);
    }
   
   int numBands() {
@@ -137,28 +152,24 @@ class Settings {
   //General Setting Management
 
   void setParam(String paramName, float value) {
-    paramMap.put(paramName, value);
+    if (keyNames.contains(paramName)) {
+      paramMap.put(paramName, value);
+    }
+    else if (keyGlobalNames.contains(paramName)) {
+      paramGlobalMap.put(paramName, value);
+    }
   }
   
   float getParam(String paramName) {
-    assert(keyNames.contains(paramName)) : "paraName = " + paramName + "\nkeyNames = " + keyNames;
-    assert(paramMap != null) : "param is null";
-    assert(paramName != null) : "paramName is null";
-    
-//    if (paramName.equals(keySpeed)) {
-//      float speed = (Float) paramMap.get(paramName);
-//      for (int i=0; i < main.NUM_BANDS; i++) {
-//        if (isBeat(i)) {
-//          speed += beatPos(i)*(Float)paramMap.get(getKeyAudioSpeedChange(i));
-//        }
-//      }
-//      return constrain(speed, 0, 1);
-//    }
-    
-    Object result = paramMap.get(paramName);
-    if (result == null) {
-      println("DEBUGGING: getParam does not have " + paramName + "\nparamMap = " + paramMap);
+    Object result = null;
+    if (keyNames.contains(paramName)) {
       result = paramMap.get(paramName);
+    }
+    else if (keyGlobalNames.contains(paramName)) {
+      result = paramGlobalMap.get(paramName);
+    }
+    else {
+      assert false : "paraName not found:" + paramName;
     }
     assert result != null : "getParam does not have " + paramName + "\nresult = " + result + "\nparamMap = " + paramMap;
     return (Float) result;
@@ -336,13 +347,23 @@ class Settings {
       }
       else if (keyNames.contains(addr)) {
         float value = msg.get(0).floatValue();
-        setParam(addr, value);
+        paramMap.put(addr, value);
         println("Set " + addr + " to " + value);
+      }
+      else if (keyGlobalNames.contains(addr)) {
+        float value = msg.get(0).floatValue();
+        paramGlobalMap.put(addr, value);
+        println("Set global " + addr + " to " + value);
+        
+        if (addr.equals(keyGlobalAutoChangeSpeed)) {
+          assert(getParam(keyGlobalAutoChangeSpeed) == value);
+          updateLabelForAutoChanger();
+        }
       }
       else if (addr.startsWith("/sketches/col")) {
         handleSketchToggles(addr, msg.get(0).floatValue());
       }
-      else if (addr.equals("/pageControl") || addr.equals("/pageAudio")) {
+      else if (addr.equals("/pageControl") || addr.equals("/pageAudio") || addr.equals("/sketches") || addr.equals("/writer")) {
         //just a page change, ignore
       }
       else {
@@ -458,5 +479,49 @@ class Settings {
     }
     return constrain(speed, 0, 1);
   }
+
+  int millisBetweenAutoChanges() {
+    float result = getParam(keyGlobalAutoChangeSpeed);
+    if (result == 1.0) {
+      return Integer.MAX_VALUE;
+    }
     
+    float MAX_SECONDS = 60*10; //10 minutes
+    float MIN_SECONDS = 10;    //10 seconds
+    
+    float seconds = result;
+    seconds *= sqrt(MAX_SECONDS - MIN_SECONDS);
+    seconds *= seconds; //exponential control
+    seconds += MIN_SECONDS;
+    
+    if (seconds < 30) {
+    }
+    else if (seconds < 90) {
+      seconds = round(seconds / 10.0);
+      seconds *= 10;
+    }
+    else {
+      seconds = round(seconds / 30.0);
+      seconds *= 30;
+    }
+  
+    return (int)(seconds * 1000);
+  }
+  
+  void updateLabelForAutoChanger() {
+    int milliseconds = millisBetweenAutoChanges();
+    
+    int seconds = round(milliseconds/1000.0);
+    String label = "AutoChange " + seconds + "s";
+    
+    if (milliseconds == Integer.MAX_VALUE) {
+      label = "AutoChange Never";
+    }
+    else if (seconds >= 60) {
+      label = "AutoChange " + (seconds/60) + "m " + (seconds % 60) +  "s";
+    }
+    sendMessageToPad(keyGlobalAutoChangeSpeedLabel, label);
+    sendMessageToPad(keyGlobalAutoChangeSpeed, getParam(keyGlobalAutoChangeSpeed));
+  }
+
 }

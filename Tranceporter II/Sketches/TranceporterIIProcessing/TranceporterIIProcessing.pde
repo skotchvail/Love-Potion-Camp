@@ -74,6 +74,7 @@ class MainClass {
   Drawer[][] modes;
   int modeCol = 0;
   int modeRow = 0;
+  float lastModeChangeTimeStamp;
   
   PaletteManager pm = new PaletteManager();
   Settings settings = new Settings(NUM_BANDS);
@@ -180,6 +181,10 @@ class MainClass {
     d.update();
     display.drawToScreen();
     display.drawToLeds();
+    
+    if (settings.millisBetweenAutoChanges() < millis() - lastModeChangeTimeStamp) {
+      newEffect();
+    }
   }
   
   
@@ -264,6 +269,8 @@ class MainClass {
   }
   
   void newEffect() {
+    lastModeChangeTimeStamp = millis();
+    
     int oldModeCol = modeCol;
     int oldModeRow = modeRow;
     findNextMode();
@@ -314,6 +321,8 @@ class MainClass {
   
   void updateIPadGUI()
   {
+    settings.updateLabelForAutoChanger();
+    
     String name = modes[modeCol][modeRow].getName();
     settings.sendMessageToPad(settings.keyModeName, name);
     
