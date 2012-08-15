@@ -791,6 +791,7 @@ class Pixels {
       }
       else {
         int status = TotalControl.open(kNumStrands, kPixelsPerStrand);
+        TotalControl.setGamma(main.DEFAULT_GAMMA);
         if (status != 0) {
           //useTotalControl = false;
           //println("turning off Total Control because of error during initialization");

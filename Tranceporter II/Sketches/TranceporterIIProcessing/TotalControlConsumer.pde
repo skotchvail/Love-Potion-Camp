@@ -36,7 +36,7 @@ class TotalControlConcurrent implements Runnable {
     if(lastError != 0) {
       TotalControl.printError(lastError);
     }
-    TotalControl.setGamma(2.4);
+    TotalControl.setGamma(main.DEFAULT_GAMMA);
     
     while(true) {
       PixelDataAndMap dm = q.get();
