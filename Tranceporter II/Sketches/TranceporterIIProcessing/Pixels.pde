@@ -202,7 +202,7 @@ class Pixels {
 //    float rY = map(mouseX, 0, width, -PI, PI);
     //println("rX = " + rX + " rY = " + rY);
     
-    int fullRevolution = 30*5; //X seconds
+    int fullRevolution = FRAME_RATE * 60; //X seconds
     rotation = (rotation  + 1) % fullRevolution;
     float rX = PI/2;
     float rY = map(rotation, 0, fullRevolution, -PI, PI);
@@ -775,7 +775,7 @@ class Pixels {
       totalControlConcurrent = new TotalControlConcurrent(kNumStrands,kPixelsPerStrand);
       if (totalControlConcurrent.getLastError() != 0) {
         useTotalControl = false;
-        println("turning off Total Control becuase of error during initialization");
+        println("turning off Total Control because of error during initialization");
       }
     }
   }
