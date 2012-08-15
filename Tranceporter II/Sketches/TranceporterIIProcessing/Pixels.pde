@@ -772,11 +772,12 @@ class Pixels {
     println(ledMapDump());
     
     if (useTotalControl) {
-      totalControlConcurrent = new TotalControlConcurrent(kNumStrands,kPixelsPerStrand);
-      if (totalControlConcurrent.getLastError() != 0) {
-       // useTotalControl = false;
-        println("turning off Total Control because of error during initialization");
-      }
+      //totalControlConcurrent = new TotalControlConcurrent(kNumStrands,kPixelsPerStrand);
+      TotalControl.open(kNumStrands, kPixelsPerStrand);
+//      if (totalControlConcurrent.getLastError() != 0) {
+//       // useTotalControl = false;
+//        println("turning off Total Control because of error during initialization");
+//      }
     }
   }
   
@@ -786,6 +787,7 @@ class Pixels {
       return;
     }
     //totalControlConcurrent.put(pixelData, useTrainingMode?trainingStrandMap:strandMap);
+//    int status = TotalControl.refresh(pixelData.clone(), strandMap);
     int status = TotalControl.refresh(pixelData, strandMap);
   }
 }
