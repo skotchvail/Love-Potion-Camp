@@ -41,6 +41,9 @@ class Smoke extends Drawer {
   
   String getName() { return "Smoke"; }
   
+  String getCustom1Label() { return "Dot Brightness";}
+
+  
   Smoke(Pixels p, Settings s) {
     super(p, s, JAVA2D);
   }
@@ -75,6 +78,7 @@ class Smoke extends Drawer {
     settings.setParam(settings.keyAudioSensitivity1,0.5);
     settings.setParam(settings.keyAudioSensitivity2,0.5);
     settings.setParam(settings.keyAudioSensitivity3,0.5);
+    settings.setParam(settings.keyFlash,0.0);
   }
 
   float newParticleX()
@@ -189,7 +193,10 @@ class Gust
   void draw() {
     drawsLeft --;
     color c = this.fillColor;
-    c = replaceAlpha(c, 100 * drawsLeft / MAX_FRAMES);
+    float intensity = 1 - settings.getParam(settings.keyCustom1);
+    intensity *= intensity;
+    intensity = 255 * (1 - intensity);
+    c = replaceAlpha(c, intensity * drawsLeft / MAX_FRAMES);
     pg.fill(c);
     pg.ellipse(location.x, location.y, 20, 20);
   }
