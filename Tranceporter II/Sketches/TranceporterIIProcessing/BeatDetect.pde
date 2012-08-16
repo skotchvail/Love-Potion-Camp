@@ -89,7 +89,7 @@ class BeatDetect {
     else if (type.equals("threshold")) hm = thresholds;
     else if (type.equals("sd")) hm = metricSDs;
     else {
-      println("Invalid array type " + type);
+      assert(false):"Invalid array type " + type;
       return null;
     }
     
@@ -161,15 +161,34 @@ class BeatDetect {
   
   void analyzeBand(int band, boolean on) { analyzeBands[band] = on; }
   
-  double getMetric(String type, int band, int index) { return getArray("metric", type, band).get(index); }
-  double getMetricMean(String type, int band, int index) { return getArrayAvgs("metric", type, band).getEMA1(index); }
-  double getThreshold(String type, int band, int index) { return getArray("threshold", type, band).get(index); }
-  double getMetricMax(String type, int band) { return getArray("metric", type, band).maxVal(); }
-  boolean isOnset(String type, int band, int index) { return getArray("onsetHist", type, band).get(index) == 1; }
-  String[] getMetricNames() { return metricNames; }
+  double getMetric(String type, int band, int index) {
+    return getArray("metric", type, band).get(index);
+  }
+  
+  double getMetricMean(String type, int band, int index) {
+    return getArrayAvgs("metric", type, band).getEMA1(index);
+  }
+  
+  double getThreshold(String type, int band, int index) {
+    return getArray("threshold", type, band).get(index);
+  }
+  
+  double getMetricMax(String type, int band) {
+    return getArray("metric", type, band).maxVal();
+  }
+  
+  boolean isOnset(String type, int band, int index) {
+    return getArray("onsetHist", type, band).get(index) == 1;
+  }
+  
+  String[] getMetricNames() {
+    return metricNames;
+  }
+  
   boolean isBeat(String type, int band) { 
     return (millis() - lastOnsetTimes[band]) < beatLength[band]; 
   }
+  
   float beatPos(String type, int band) {
     float diff = (millis() - lastOnsetTimes[band]) / float(beatLength[band]);
     if (diff <= 1){
