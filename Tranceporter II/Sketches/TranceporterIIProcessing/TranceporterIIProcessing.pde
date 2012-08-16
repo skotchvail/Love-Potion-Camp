@@ -71,7 +71,7 @@ class MainClass {
   int NUM_BANDS = 3;
   boolean[] analyzeBands = {true, true, true };
   //AudioSocket signal;
-  AudioInput in;
+  AudioInput audioIn;
   AudioOutput out;
   FFT fft;
   Minim minim;
@@ -100,36 +100,35 @@ class MainClass {
       //column 0
       {
         new Tunnel(display,settings),             //0,0
-        new Paint(display, settings),             //0,1
-        new Bzr3(display, settings),              //0,2
-        new Fire(display, settings),              //0,3
-        new Equalizer3d(display, settings),       //0,4
+        new Bzr3(display, settings),              //0,1
+        new Fire(display, settings),              //0,2
+        new Equalizer3d(display, settings),       //0,32
       },
       //column 1
       {
         new AlienBlob(display, settings),         //1,0
         new BouncingBalls2D(display, settings),   //1,1
         new Smoke(display, settings),             //1,2
-        new Heart(display, settings),             //1,3
-        new DroppingParticles(display, settings), //1,4
+        new DroppingParticles(display, settings), //1,3
       },
       //column 2
       {
         new HardwareTest(display, settings),      //2,0
-        new EyeMotion(display, settings),         //2,1
+        new Paint(display, settings),             //2,1
+        new EyeMotion(display, settings),         //2,2
+        new Heart(display, settings),             //2,3
+
       }
     };
-    
     settings.initOSC();
     pm.init(applet);
-    settings.updateSketchesFromPrefs();
 
-    modeCol = prefs.getInt("modeCol",2);
+    modeCol = prefs.getInt("modeCol",1);
     modeRow = prefs.getInt("modeRow",0);
     
     // Audio features
     minim = new Minim(applet);
-    in = minim.getLineIn(Minim.STEREO, SAMPLE_SIZE, SAMPLE_RATE);
+    audioIn = minim.getLineIn(Minim.STEREO, SAMPLE_SIZE, SAMPLE_RATE);
     fft = new FFT(SAMPLE_SIZE, SAMPLE_RATE);
     
     bd = new BeatDetect(fft, NUM_BANDS, HISTORY_SIZE);
@@ -171,7 +170,7 @@ class MainClass {
       bd.analyzeBand(i,(userSet != 0));
       
     }
-    bd.update(in.mix);
+    bd.update(audioIn.mix);
     for (int i=0; i<NUM_BANDS; i++)
       settings.setIsBeat(i, bd.isBeat("spectralFlux", i));
     Drawer d = modes[modeCol][modeRow];
