@@ -11,9 +11,7 @@ class Tunnel extends Drawer {
   final float NOISE_FALLOFF = 0.5f;
   final int NUMBER_OF_CIRCLES = 4;
   final int NUMBER_OF_GLOWS = 21;
-  final float TRANSPARENCY_COEF = 1.5f;
-  final int COLOR_AMPLITUDE = 10;
-  final public int NUMBER_OF_LAYERS = 65;
+  final public int NUMBER_OF_LAYERS = 20;//65;
 
   
   Tunnel(Pixels p, Settings s) {
@@ -35,18 +33,16 @@ class Tunnel extends Drawer {
   void setup() {
     noCursor();
     pg.strokeWeight(2);
-    colorMode(HSB, NUMBER_OF_LAYERS, 1, 1, NUMBER_OF_LAYERS);
-    pg.colorMode(HSB, NUMBER_OF_LAYERS, 1, 1, NUMBER_OF_LAYERS);
-    noiseDetail(1, NOISE_FALLOFF);
     im = loadImage("light.png");
   }
   
-  
   void draw() {
+    pg.noFill();
     pg.strokeWeight(2);
     noiseDetail(1, NOISE_FALLOFF);
-    colorMode(HSB, NUMBER_OF_LAYERS, 1, 1, NUMBER_OF_LAYERS);
-    pg.colorMode(HSB, NUMBER_OF_LAYERS, 1, 1, NUMBER_OF_LAYERS);
+    colorMode(RGB,255);
+    pg.colorMode(RGB,255);
+
     lCol.nextStep();
     performCamera();
     //draw Light Glows
@@ -55,12 +51,14 @@ class Tunnel extends Drawer {
       glowCol.drawIt(lCol);
     }
     //draw Tunnel
+    pg.smooth();
     drawTunnel();
+    pg.noSmooth();
     //make delay effect
     pg.camera();
-    pg.fill(0, 20);
+    pg.noStroke();
+    pg.fill(0, 50);
     pg.rect(0, 0, width, height);
-    pg.noFill();
     //"Clean" lCol of layers
     if (lCol.list.size() > NUMBER_OF_LAYERS)
       lCol.list.remove(0);
@@ -69,15 +67,17 @@ class Tunnel extends Drawer {
   
   private void performCamera()
   {
+    float X_OFFSET = -100;
+    float Y_OFFSET = -50;
     //sorry for this...
     if(lCol.list.size()>5)
-      pg.camera(lCol.list.get(0).getCenter().x, lCol.list.get(0).getCenter().y,
-                0, lCol.list.get(5).getCenter().x, lCol.list.get(5).getCenter().y,
-                -lCol.DEPTH/ 2, 0, 1, 0);
+      pg.camera(lCol.list.get(0).getCenter().x, lCol.list.get(0).getCenter().y, 0,
+                lCol.list.get(5).getCenter().x + X_OFFSET, lCol.list.get(5).getCenter().y + Y_OFFSET, -lCol.DEPTH/ 2,
+                0, 1, 0);
     else
-      pg.camera(lCol.list.get(0).getCenter().x, lCol.list.get(0).getCenter().y,
-                0, lCol.list.get(0).getCenter().x, lCol.list.get(0).getCenter().y,
-                -lCol.DEPTH/ 2, 0, 1, 0);
+      pg.camera(lCol.list.get(0).getCenter().x, lCol.list.get(0).getCenter().y, 0,
+                lCol.list.get(0).getCenter().x + X_OFFSET, lCol.list.get(0).getCenter().y + Y_OFFSET, -lCol.DEPTH/ 2,
+                0, 1, 0);
   }
   
   public void drawTunnel() {
@@ -98,7 +98,15 @@ class Tunnel extends Drawer {
   
   public int getColorForLayer(int layerNumber, int transCoef)
   {
-    return color(-(layerNumber - colorIndex) / COLOR_AMPLITUDE % NUMBER_OF_LAYERS, 1, 1,layerNumber / TRANSPARENCY_COEF*transCoef);
+    float layerRange = (getNumColors()/1.0) / NUMBER_OF_LAYERS;
+    layerRange = 2;
+    color result = getColor(round(layerRange * layerNumber));
+    float alpha;
+    alpha = 50 * transCoef;
+    assert(alpha >= 0 && alpha <= 255.0) : "invalid alpha: " + alpha + " layerNumber: " + layerNumber;
+    result = replaceAlpha(result, alpha);
+    return result;
+
   }
   
   //Just paints Light Glows flying along the tunnel
@@ -151,14 +159,13 @@ class Tunnel extends Drawer {
     }
     
     public void drawIt(LayerCollection col) {
-      tint(getColorForLayer(NUMBER_OF_LAYERS - curLayerNum, 5));
       pg.tint(getColorForLayer(NUMBER_OF_LAYERS - curLayerNum, 5));
       pg.pushMatrix();
       
       //hard to read, but easy to understand
-      pg.translate(col.list.get(curLayerNum).getOneCenter(curCircle).x
-                   + dev.x, col.list.get(curLayerNum).getOneCenter(curCircle).y
-                   + dev.y, col.list.get(curLayerNum).getLayer().get(0).get(0).z);
+      pg.translate(col.list.get(curLayerNum).getOneCenter(curCircle).x + dev.x,
+                   col.list.get(curLayerNum).getOneCenter(curCircle).y + dev.y,
+                   col.list.get(curLayerNum).getLayer().get(0).get(0).z);
       
       pg.image(im, 0, 0);
       pg.popMatrix();
