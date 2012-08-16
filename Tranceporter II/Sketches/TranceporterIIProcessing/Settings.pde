@@ -36,6 +36,7 @@ class Settings {
   final String keyBeatLength = "/pageAudio/beatLength";
   final String keyCustom1Label = "/pageControl/custom1_label";
   final String keyCustom2Label = "/pageControl/custom2_label";
+  final String keyFlash = "/pageAudio/flashToggle";
   
   final String keyModeName = "/pageControl/mode";
   final String keyPaletteName = "/pageControl/palette";
@@ -122,6 +123,8 @@ class Settings {
     
     paramGlobalMap = new HashMap();
     setParam(keyGlobalAutoChangeSpeed, 1.0);
+    updateSketchesFromPrefs();
+
    }
   
   int numBands() {
@@ -195,10 +198,12 @@ class Settings {
     setParam(keyAudioBrightnessChange1,0.0);
     setParam(keyAudioBrightnessChange2,0.0);
     setParam(keyAudioBrightnessChange3,0.0);
-    setParam(keyAudioSensitivity1,0.3);
+    setParam(keyAudioSensitivity1,0.8);
     setParam(keyAudioSensitivity2,0.3);
     setParam(keyAudioSensitivity3,0.3);
     setParam(keyBeatLength,0.5);
+    setParam(keyFlash,1.0);
+
   }
 
   public Object switchSettings(Object newSettings) {
@@ -418,8 +423,7 @@ class Settings {
       int col = Integer.parseInt( temp[0] );
       int row = Integer.parseInt( temp[1] );
       
-      whichModes[col][row] = (value > 0?true:false);
-      
+      setSketchOn(col, row, value > 0?true:false);
     }
     else {
       if (value == 1.0) {
