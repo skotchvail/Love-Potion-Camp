@@ -33,7 +33,7 @@ class Pixels {
 //    println("drawModes POINTS=" + POINTS + " LINES=" + LINES + " TRIANGLES=" + TRIANGLES + " TRIANGLE_FAN=" + TRIANGLE_FAN
 //            + " TRIANGLE_STRIP=" + TRIANGLE_STRIP + " QUADS=" + QUADS + " QUAD_STRIP=" + QUAD_STRIP);
     
-    setupTotalControl();
+    initTotalControl();
   }
 
   void setPixel(int x, int y, color c) {
@@ -299,25 +299,18 @@ class Pixels {
    */
 
   
-  final int TC_OK = 0;       /* Function completed successfully      */
-  final int TC_ERR_VALUE = 1;     /* Parameter out of range               */
-  final int TC_ERR_MALLOC = 2;    /* malloc() failure                     */
-  final int TC_ERR_OPEN = 3;      /* Could not open FTDI device           */
-  final int TC_ERR_WRITE = 4;     /* Error writing to FTDI device         */
-  final int TC_ERR_MODE = 5;      /* Could not enable async bit bang mode */
-  final int TC_ERR_DIVISOR = 6;   /* Could not set baud divisor           */
-  final int TC_ERR_BAUDRATE = 7;   /* Could not set baud rate              */
+
   
-  final int TC_PIXEL_UNUSED =       -1;     // Pixel is attached but not used
-  final int TC_PIXEL_DISCONNECTED = -2;     // Pixel is not attached to strand
-  final int TC_PIXEL_UNDEFINED =    -3;     // Pixel not yet assigned a value
-  
-  final int kNumStrands = 1;
+  final boolean kUseBitBang = true;
+  final int kNumStrands = 8;
   final int kPixelsPerStrand = 897;
   private int[] strandMap = new int[kNumStrands * kPixelsPerStrand];
   private int[] trainingStrandMap = new int[kNumStrands * kPixelsPerStrand];
+  final boolean runConcurrent = true;
+  boolean useTotalControl = true;
+
   
-  boolean useTrainingMode = false;
+  boolean useTrainingMode = true;
      
   //convert coordinates into index into pixel array index
   private int c2i(int x, int y) {
@@ -467,42 +460,14 @@ class Pixels {
 
    */
   
-  String ledMapDump1() {
-    StringBuffer s = new StringBuffer();
+  void ledMapDump(int minStrand, int maxStrand) {
+    assert(minStrand < kNumStrands);
+    assert(maxStrand < kNumStrands);
 
-    s.append("\n..   ");
     
-    for (int t = 0; t < kPixelsPerStrand; t++) {
-      s.append(String.format("%02d      ",t));
-    }
-    for (int whichStrand = 0; whichStrand < kNumStrands; whichStrand++) {
-      s.append(String.format("\ns%d: ",whichStrand));
-      int start = whichStrand  * kPixelsPerStrand;
-      for (int index = start; index < start + kPixelsPerStrand; index++) {
-        int value = strandMap[index];
-        if (value == TC_PIXEL_DISCONNECTED) {
-          s.append(" DISC   ");
-        } else if (value == TC_PIXEL_UNUSED) {
-          s.append(" UNUSED ");
-        } else if (value == TC_PIXEL_UNDEFINED) {
-          s.append("(??,??) ");
-        }
-        else {
-          assert (value >= 0) : "can't print unrecognized value " + value;
-          Point p = i2c(value);
-          s.append(String.format("(%02d,%02d) ",p.x,p.y));
-        }
-
-      }
-    }
-    s.append("\n");
-    return s.toString();
-  }
-
-  String ledMapDump() {
-    StringBuffer s = new StringBuffer();
-    
-    for (int whichStrand = 0; whichStrand < kNumStrands; whichStrand++) {
+    for (int whichStrand = minStrand; whichStrand <= maxStrand; whichStrand++) {
+      StringBuffer s = new StringBuffer(kPixelsPerStrand * 12);
+      
       int start = whichStrand  * kPixelsPerStrand;
       for (int ordinal = 0; ordinal < kPixelsPerStrand; ordinal++) {
         int index = ordinal + start;
@@ -524,16 +489,17 @@ class Pixels {
         }
         
       }
+      
+      s.append("\n");
+      println(s);
+
     }
-    s.append("\n");
-    return s.toString();
+    
   }
 
   TotalControlConcurrent totalControlConcurrent;
-  final boolean runConcurrent = true;
-  boolean useTotalControl = false;
 
-  void setupTotalControl()
+  void initTotalControl()
   {
     
     /*
@@ -786,14 +752,13 @@ class Pixels {
 //    ledSet(sA,0,    8,14);
      
     ledInterpolate();
-    println(ledMapDump());
+    ledMapDump(1,0); //set which strands you want to dump
     
     if (runConcurrent) {
-      totalControlConcurrent = new TotalControlConcurrent(kNumStrands,kPixelsPerStrand);
+      totalControlConcurrent = new TotalControlConcurrent(kNumStrands,kPixelsPerStrand, kUseBitBang);
     }
     else {
-      int status = TotalControl.open(kNumStrands, kPixelsPerStrand);
-      TotalControl.setGamma(main.DEFAULT_GAMMA);
+      int status = setupTotalControl(kNumStrands, kPixelsPerStrand, kUseBitBang);
       if (status != 0) {
         //useTotalControl = false;
         //println("turning off Total Control because of error during initialization");
@@ -802,9 +767,6 @@ class Pixels {
     }
   }
   
-  int lastError;
-  int lastStat;
-
   // This function loads the screen-buffer and sends it to the TotalControl p9813 driver
   void drawToLeds() {
     if (!useTotalControl) {
@@ -817,15 +779,7 @@ class Pixels {
       totalControlConcurrent.put(pixelData, theStrandMap);
     }
     else {
-      int status = TotalControl.refresh(pixelData, theStrandMap);
-      if(status != lastError) {
-        lastError = status;
-        TotalControl.printError(status);
-      }
-      if (millis() - lastStat > 3000) {
-        lastStat = millis();
-        TotalControl.printStats();
-      }
+      int status = writeOneFrame(pixelData, theStrandMap);
     }
   }
 }
