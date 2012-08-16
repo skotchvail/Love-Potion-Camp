@@ -98,23 +98,24 @@ class Drawer {
   
   color getColor(int index) {
     int numColors = settings.palette.length;
-    float bright = settings.getParam(settings.keyBrightness);
     int cyclingOffset = int(settings.getParam(settings.keyColorCyclingSpeed)*numColors/40)*frameCount;
     index = (index + cyclingOffset) % numColors;
     
     // calculate brightness and index offsets for audio beats
-    float brightAdjust = 0;
+    float brightTotal = 0;
+    float brightBeat = 0;
     int audioOffset = 0;
     for (int i=0; i<settings.numBands(); i++) {
       float indRange = numColors/settings.numBands; //basePaletteColors;
       //float indStart = (i-0.5)*indRange
       //if (settings.isBeat(i) && index >= i*indRange && index < (i+1)*indRange) {
       float smooth = sin((index - i*indRange) / indRange * PI / 2);  // 1% cpu
-      brightAdjust += /*settings.beatPos(i) */ (1-bright) * settings.getParam(settings.getKeyAudioBrightnessChange(i));
+      brightTotal += settings.getParam(settings.getKeyAudioBrightnessChange(i));
+      brightBeat += settings.beatPos(i) * settings.getParam(settings.getKeyAudioBrightnessChange(i));
       audioOffset += smooth * int(settings.beatPos(i) * MAX_AUDIO_COLOR_OFFSET * settings.getParam(settings.getKeyAudioColorChange(i)));
       //}
     }
-
+    
     //println(audioOffset);
     int ind = (index + audioOffset + numColors) % numColors;
     color col = settings.palette[ind];
@@ -131,7 +132,20 @@ class Drawer {
 
     // cap max brightness on each RGB channel
     colorMode(RGB);
-    col = color(constrain(red(col), 0, (bright+brightAdjust)*255), constrain(green(col), 0, (bright+brightAdjust)*255), constrain(blue(col), 0, (bright+brightAdjust)*255));
+    
+    float percentMainBrightnessControl = 1 - brightTotal/3;
+    if (percentMainBrightnessControl < 0.5) {
+      percentMainBrightnessControl = 0.5; //main control always affects at least min level of brightness
+    }
+    float brightSetting = settings.getParam(settings.keyBrightness);
+    float totalBright = brightSetting * percentMainBrightnessControl;
+    if (brightTotal > 0) {
+      totalBright += (brightBeat / brightTotal) * (1 - percentMainBrightnessControl);
+    }
+    assert(totalBright >= 0 && totalBright <= 1.0): "invalid totalBright" + totalBright;
+    totalBright *= 255;
+ //   println("_totalBright:" + totalBright);
+    col = color(constrain(red(col), 0, totalBright), constrain(green(col), 0, totalBright), constrain(blue(col), 0, totalBright));
     
     return col;
   }
