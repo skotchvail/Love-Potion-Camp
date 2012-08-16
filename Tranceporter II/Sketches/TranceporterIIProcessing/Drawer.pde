@@ -44,12 +44,38 @@ class Drawer {
   void draw() {}
   void reset() {}
   
+  boolean onsetOn1 = false;
+  boolean onsetOn2 = false;
+  boolean onsetOn3 = false;
+  boolean onsetOn4 = false;
+  
   void update() {
 
     pg.beginDraw();
-    draw();
+    int band = 0;
+    
+    boolean flash1 = main.bd.isOnset("spectrum",band,0);
+    boolean flash2 = main.bd.isOnset("spectrum",band,1);
+    boolean flash3 = main.bd.isOnset("spectralFlux",band,0);
+    boolean flash4 = main.bd.isOnset("spectralFlux",band,1);
+    
+    boolean flash = (flash1 && !onsetOn1) || (flash2 && !onsetOn2) || (flash3 && !onsetOn3) || (flash4 && !onsetOn4);
+    
+    if (flash && settings.getParam(settings.keyFlash) == 1.0) {
+      //lastOnset = millis();
+      colorMode(RGB);
+      pg.background(255);
+    }
+    else {
+      draw();
+    }
     pg.endDraw();
-        
+     
+    onsetOn1 = flash1;
+    onsetOn2 = flash2;
+    onsetOn3 = flash3;
+    onsetOn4 = flash4;
+    
     for (int x = 0; x < width; x++) {
       for (int y = 0; y < height; y++) {
         p.setPixel(x, y, pg.get(x, y));
