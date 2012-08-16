@@ -10,8 +10,6 @@ import java.util.prefs.Preferences;
 
 
 //ADJUSTABLE PARAMS
-boolean draw2dGrid;
-boolean draw3dSimulation;
 String iPadIP = "10.0.1.8";
 int ledWidth = 60;
 int ledHeight = 40;
@@ -23,6 +21,10 @@ int SAMPLE_RATE = 44100;
 int SAMPLE_SIZE = 1024;
 int FRAME_RATE = SAMPLE_RATE/SAMPLE_SIZE;
 
+
+boolean draw2dGrid;
+boolean draw3dSimulation;
+boolean needToFlushPrefs;
 MainClass main;
 Utility utility;
 Preferences prefs;
@@ -76,8 +78,8 @@ class MainClass {
   int MAX_BEAT_LENGTH = 750, MAX_AUDIO_SENSITIVITY = 12;
   
   Drawer[][] modes;
-  int modeCol = 0;
-  int modeRow = 0;
+  int modeCol;
+  int modeRow;
   float lastModeChangeTimeStamp;
   
   PaletteManager pm = new PaletteManager();
@@ -120,15 +122,10 @@ class MainClass {
     
     settings.initOSC();
     pm.init(applet);
+    settings.updateSketchesFromPrefs();
 
-    settings.setSketchOn(0, 0, true); //Tunnel
-    settings.setSketchOn(0, 2, true); //Bzr
-    settings.setSketchOn(0, 3, true); //Fire
-    settings.setSketchOn(1, 0, true); //AlienBlob
-
-    settings.setSketchOn(1, 3, true); //Heart
-    modeCol = 2;
-    modeRow = 0; //Hardware Test
+    modeCol = prefs.getInt("modeCol",2);
+    modeRow = prefs.getInt("modeRow",0);
     
     // Audio features
     minim = new Minim(applet);
@@ -152,6 +149,16 @@ class MainClass {
   }
 
   void draw() {
+    
+    if (needToFlushPrefs) {
+      needToFlushPrefs = false;
+      try {
+        prefs.flush();
+      } catch(Exception e) {
+        println("main flushing prefs: " + e);
+      }
+    }
+    
     if (key == ' ')
       return;
     
@@ -202,20 +209,17 @@ class MainClass {
     if (key == '2') {
       draw2dGrid = !draw2dGrid;
       prefs.putBoolean("draw2dGrid", draw2dGrid);
+      needToFlushPrefs = true;
       println("2D grid: " + draw2dGrid);
     }
     
     if (key == '3') {
       draw3dSimulation = !draw3dSimulation;
       prefs.putBoolean("draw3dSimulation", draw3dSimulation);
+      needToFlushPrefs = true;
       println("3D grid: " + draw3dSimulation);
     }
 
-    try {
-      prefs.flush();
-    } catch(Exception e) {
-      println("keyPressed: " + e);
-    }    
   }
 
   void newPalette() {
@@ -286,6 +290,9 @@ class MainClass {
     int oldModeCol = modeCol;
     int oldModeRow = modeRow;
     findNextMode();
+    prefs.putInt("modeCol",modeCol);
+    prefs.putInt("modeRow",modeRow);
+    needToFlushPrefs = true;
     
     println("newEffect " + modes[oldModeCol][oldModeRow].getName() + " -> "+ modes[modeCol][modeRow].getName());
     

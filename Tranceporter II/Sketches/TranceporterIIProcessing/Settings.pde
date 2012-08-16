@@ -185,16 +185,16 @@ class Settings {
     setParam(keyColorCyclingSpeed,0.3);
     setParam(keyCustom1,0.3);
     setParam(keyCustom2,0.3);
-    setParam(keyBrightness,0.5);
+    setParam(keyBrightness,0.75);
     setParam(keyAudioSpeedChange1,0.3);
     setParam(keyAudioSpeedChange2,0.3);
     setParam(keyAudioSpeedChange3,0.3);
     setParam(keyAudioColorChange1,0.3);
     setParam(keyAudioColorChange2,0.3);
     setParam(keyAudioColorChange3,0.3);
-    setParam(keyAudioBrightnessChange1,0.3);
-    setParam(keyAudioBrightnessChange2,0.3);
-    setParam(keyAudioBrightnessChange3,0.3);
+    setParam(keyAudioBrightnessChange1,0.0);
+    setParam(keyAudioBrightnessChange2,0.0);
+    setParam(keyAudioBrightnessChange3,0.0);
     setParam(keyAudioSensitivity1,0.3);
     setParam(keyAudioSensitivity2,0.3);
     setParam(keyAudioSensitivity3,0.3);
@@ -436,7 +436,7 @@ class Settings {
     boolean on = whichModes[column][0];
     
     for (int row = 0; row < numRows; row++) {
-      whichModes[column][row] = !on;
+      setSketchOn(column,row,!on);
     }
     sendSketchesToPad();
   }
@@ -457,9 +457,21 @@ class Settings {
     return whichModes[col][row];
   }
 
-  
   void setSketchOn(int col, int row, boolean state) {
     whichModes[col][row] = state;
+    prefs.putBoolean(sketchName(col,row), state);
+    needToFlushPrefs = true;
+  }
+  
+  void updateSketchesFromPrefs() {
+    int numCols = whichModes.length;
+    int numRows = whichModes[0].length;
+    
+    for (int col = 0; col < numCols; col++) {
+      for (int row = 0; row < numRows; row++) {
+        whichModes[col][row] = prefs.getBoolean(sketchName(col,row), false);
+      }
+    }
   }
   
   String sketchName(int col, int row) {
