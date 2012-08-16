@@ -98,9 +98,9 @@ class Tunnel extends Drawer {
   
   public int getColorForLayer(int layerNumber, int transCoef)
   {
-    float layerRange = (getNumColors()/1.0) / NUMBER_OF_LAYERS;
+    float layerRange = (getNumColors()/1.0) / NUMBER_OF_LAYERS + 1;
     layerRange = 2;
-    color result = getColor(round(layerRange * layerNumber));
+    color result = getColor(round((layerRange + transCoef) * layerNumber) % getNumColors());
     float alpha;
     alpha = 50 * transCoef;
     assert(alpha >= 0 && alpha <= 255.0) : "invalid alpha: " + alpha + " layerNumber: " + layerNumber;
@@ -131,7 +131,7 @@ class Tunnel extends Drawer {
   }
   
   class Glow {
-    int curLayerNum;
+    float curLayerNum;
     int curCircle;
     
     int speed;
@@ -151,7 +151,8 @@ class Tunnel extends Drawer {
     }
     
     public void update(LayerCollection col) {
-      curLayerNum += speed;
+      float factor = settings.getParam(settings.keySpeed) + 0.1;
+      curLayerNum += speed * factor;
       if (curLayerNum > col.list.size() - 1) {
         curLayerNum = 0;
         this.speed = (int)random(1,maxSpeed);
@@ -159,15 +160,19 @@ class Tunnel extends Drawer {
     }
     
     public void drawIt(LayerCollection col) {
-      pg.tint(getColorForLayer(NUMBER_OF_LAYERS - curLayerNum, 5));
+      int layerNum = round(curLayerNum);
+
+      //pg.tint(getColorForLayer(NUMBER_OF_LAYERS - layerNum, 5));
       pg.pushMatrix();
       
       //hard to read, but easy to understand
-      pg.translate(col.list.get(curLayerNum).getOneCenter(curCircle).x + dev.x,
-                   col.list.get(curLayerNum).getOneCenter(curCircle).y + dev.y,
-                   col.list.get(curLayerNum).getLayer().get(0).get(0).z);
+      pg.translate(col.list.get(layerNum).getOneCenter(curCircle).x + dev.x,
+                   col.list.get(layerNum).getOneCenter(curCircle).y + dev.y,
+                   col.list.get(layerNum).getLayer().get(0).get(0).z);
       
-      pg.image(im, 0, 0);
+      float imgScale = 1.5;
+      pg.image(im, 0, 0, im.width * imgScale, im.height * imgScale);
+
       pg.popMatrix();
     }
   }
@@ -259,8 +264,18 @@ class Tunnel extends Drawer {
       offset.x += increment.x;
       offset.y += increment.y;
       
-      center.x = w / 2 - noise(offset.x * 0.05f) * w;
-      center.y = h / 2 - noise(offset.y * 0.05f) * h;
+      float noiseX = noise(offset.x * 0.05f);
+      float noiseY = noise(offset.y * 0.05f);
+
+      if (settings.isBeat(0)) {
+        noiseX *= 0.75;
+      }
+      if (settings.isBeat(2)) {
+        noiseY *= 0.75;
+      }
+      
+      center.x = w / 2 - noiseX * w;
+      center.y = h / 2 - noiseY * h;
     }
     
     public Area getShape(float rad, float det, float oval, float rot) {
