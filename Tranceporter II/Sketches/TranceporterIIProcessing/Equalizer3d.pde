@@ -1,7 +1,5 @@
 /* OpenProcessing Tweak of *@*http://www.openprocessing.org/sketch/1820*@* */
 /* !do not delete the line above, required for linking your tweak if you re-upload */
-import ddf.minim.*;
-import ddf.minim.analysis.*;
 
 class Equalizer3d extends Drawer
 {

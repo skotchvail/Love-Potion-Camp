@@ -36,21 +36,28 @@ class EyeMotion extends Drawer {
     touchY = 22;
     setMouseCoords(touchX*screenPixelSize,touchY*screenPixelSize);
     settings.setParam(settings.keyCustom1,0.1);
-    
-    MINX = inner + 30;
-    MAXX = (int)(width/SCALE - inner - 40);
-    
-    MINY = inner - 50;
-    MAXY = (int)(height/SCALE - inner + 60);
+    settings.setParam(settings.keyFlash,0.0);
+    setEyeLimits(0);
   }
+  
+  void setEyeLimits(float scale) {
+    MINX = (int)(inner + 50 - 15 * scale);
+    MAXX = (int)(width/SCALE - inner - 35 + 20 * scale);
+    
+    MINY = (int)(inner - 10 - 25 * scale);
+    MAXY = (int)(height/SCALE - inner + 40 + 30 * scale);
+  }
+  
   
   void draw() {
     
-    trippy = settings.getParam(settings.keyCustom1);    
+    trippy = settings.getParam(settings.keyCustom1);
+    setEyeLimits(trippy);
+    
     float speed = settings.getParam(settings.keySpeed);
 
-    float MAX_SECONDS_TO_FOCUS = 0.5;
-    float MIN_SECONDS_TO_FOCUS = 0.025;
+    float MAX_SECONDS_TO_FOCUS = 3.0;
+    float MIN_SECONDS_TO_FOCUS = 0.05;
     float totalSecondsForMovement = secondsForSpeed(MIN_SECONDS_TO_FOCUS, MAX_SECONDS_TO_FOCUS,1.0-speed);
     easing = 1.0/(totalSecondsForMovement * FRAME_RATE);
     
@@ -84,13 +91,11 @@ class EyeMotion extends Drawer {
     pg.fill(8, 74, 119);
     pg.ellipse(313, 220, 285, 187);
     
-    
     //iris
     color irisColor = color(3, 43, 62);
     color targetColor = getColor(getNumColors()/2);
     irisColor = fadeColor(irisColor,targetColor,0.2,0.8);
     pg.fill(irisColor);
-    
     
     pg.ellipse(mx, my - 10, 192, 179);
     
