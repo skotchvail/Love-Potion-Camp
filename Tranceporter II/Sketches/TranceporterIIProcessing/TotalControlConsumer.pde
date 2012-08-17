@@ -62,23 +62,53 @@ final int TC_CBUS_CLOCK = 8;   /* Use hardware for serial clock, not bitbang */
   int lastStat;
     
   int setupTotalControl(int numStrands, int pixelsPerStrand, boolean useBitBang) {
-    
+
+
+
     assert(numStrands <= 8);
     if (useBitBang && numStrands < 8) {
       numStrands += TC_CBUS_CLOCK;
     }
-    
-    for (int i = 3; i < numStrands; i++) {
-      //SKOTCH: I am really not sure what is supposed to happen here, are we
-      //supposed to set the same value to each strand, or are we supposed
-      //to set a differerent value for each strand?
-      //I guess we can try different ways and see what works
-      TotalControl.setStrandPin(i,TC_FTDI_CTS);
-    }
-    
+
+println("numStrands: " + numStrands);
+
+//TC_FTDI_TX
+//TC_FTDI_RX
+//TC_FTDI_RTS
+//TC_FTDI_CTS
+//TC_FTDI_DTR
+//TC_FTDI_DSR
+//TC_FTDI_DCD
+//TC_FTDI_RI
+if (useBitBang) {
+TotalControl.setStrandPin(0,TC_FTDI_TX);
+TotalControl.setStrandPin(1,TC_FTDI_RX);
+TotalControl.setStrandPin(2,TC_FTDI_RTS);
+TotalControl.setStrandPin(3,TC_FTDI_CTS);
+TotalControl.setStrandPin(4,TC_FTDI_DTR);
+TotalControl.setStrandPin(5,TC_FTDI_DSR);
+TotalControl.setStrandPin(6,TC_FTDI_DCD);
+TotalControl.setStrandPin(7,TC_FTDI_RI);
+}
+
+
+//    for (int i = 3; i < numStrands; i++) {
+//      //SKOTCH: I am really not sure what is supposed to happen here, are we
+//      //supposed to set the same value to each strand, or are we supposed
+//      //to set a differerent value for each strand?
+//      //I guess we can try different ways and see what works
+//      TotalControl.setStrandPin(i,TC_FTDI_CTS);
+//    }
+
     int error = TotalControl.open(numStrands, pixelsPerStrand);
+
+
     if(error != 0) {
+println("here I am");
       TotalControl.printError(lastError);
+    }
+    else {
+      println("success: TotalControl.open(" + numStrands + ", " + pixelsPerStrand + ")");
     }
     TotalControl.setGamma(main.DEFAULT_GAMMA);
     
