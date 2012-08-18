@@ -3,15 +3,17 @@
   For testing the hardware layout of the LED's
  */
 
-class HardwareTest extends Drawer {
+int cursorStrand;
+int cursorOrdinal;
 
+class HardwareTest extends Drawer {
+  
   HardwareTest(Pixels p, Settings s) {
     super(p, s, JAVA2D);
   }
     
   void setup(){
     colorMode(RGB,255);
-  
   }
 
   String getName() { return "Hardware Test"; }
@@ -25,7 +27,62 @@ class HardwareTest extends Drawer {
     color(0,255,0),     color(0,255,255),   color(0,0,255),
     color(255,0,255),   color(128, 50, 90), color(100,200,150)};
   
+  void keyPressed() {
 
+    if (key == '+') {
+      cursorOrdinal += 10;
+    }
+    else if (key == '_') {
+      cursorOrdinal -= 10;
+    }
+    else if (key == '=') {
+      cursorOrdinal++;
+    }
+    else if (key == '-') {
+      cursorOrdinal--;
+    }
+    if (cursorOrdinal < main.display.kPixelsPerStrand ) {
+      cursorOrdinal += main.display.kPixelsPerStrand;
+    }
+    cursorOrdinal %= main.display.kPixelsPerStrand;
+    
+    if (key == '>') {
+      cursorStrand++;
+    }
+    else if (key == '<') {
+      cursorStrand--;
+    }
+    cursorStrand %= main.display.kNumStrands;
+
+    
+    if (key == CODED) {
+    }
+    
+    println( "cursorStrand:"  + cursorStrand + "cursorOrdinal:" + cursorOrdinal);
+    
+//    println("key: " + (int)key + " keyCode: " + (int)keyCode);
+    
+    
+    //  if (key == CODED) {
+    //    if (keyCode == UP) {
+    //      fillVal = 255;
+    //    } else if (keyCode == DOWN) {
+    //      fillVal = 0;
+    //
+    //
+    
+    
+    
+  }
+  
+  String[] getTextLines() {
+    return new String[]{
+      
+      "cursorStrand: " + cursorStrand,
+      "cursorOrdinal: " + cursorOrdinal,
+      "x: ... y: ....",
+    };
+  }
   
   void draw() {
     colorMode(RGB,255);
@@ -126,6 +183,16 @@ class HardwareTest extends Drawer {
           int whichPixel = (movementPixelFast + 1) % 10;
           if (lastDigit == whichPixel)
             c = color(red(c)/2,green(c)/2,blue(c)/2);
+  
+          if (cursorOrdinal == ordinal && cursorStrand == whichStrand) {
+            final int FRAMES = 20;
+            float factor = (frameCount % ( FRAMES * 2))/ (FRAMES * 1.0);
+            
+            if (factor > 1.0) {
+              factor = 2 - factor;
+            }
+            c = color(255 * factor, 0 * factor, 0 * factor);
+          }
           
           pg.set(a.x,a.y,c);
         }

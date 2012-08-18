@@ -317,7 +317,7 @@ class LedMap extends Pixels {
 //  mapStrandA(sA);
 //  mapStrandB(sB);
     
-    ledMapDump(sB,sB); //set which strands you want to dump
+//    ledMapDump(sB,sB); //set which strands you want to dump
     
   }
 

@@ -251,6 +251,16 @@ class Pixels {
     if (draw3dSimulation) {
       drawMappedOntoBottle(pg);
     }
+    
+    int lineHeight = box2d.y * 2 + box2d.height + 10;
+    String[] textLines = main.currentMode().getTextLines();
+    if (textLines != null) {
+      for (String line: textLines) {
+        text(line,box2d.x, lineHeight);
+        lineHeight += 20;
+      }
+    }
+    fill(255);
   }
   
   Rectangle getBox2D() {return box2d;}
@@ -303,7 +313,7 @@ class Pixels {
   
   final boolean kUseBitBang = true;
   final int kNumStrands = 8;
-  final int kPixelsPerStrand = 50; //1300; //897;
+  final int kPixelsPerStrand = 70; //897;
   private int[] strandMap = new int[kNumStrands * kPixelsPerStrand];
   private int[] trainingStrandMap = new int[kNumStrands * kPixelsPerStrand];
   final boolean runConcurrent = true;
@@ -352,9 +362,12 @@ class Pixels {
     ledSetValue(whichStrand, ordinal, TC_PIXEL_UNUSED);
   }
   
+  int xOffsetter;
+  int yOffsetter;
+  
   void ledSet(int whichStrand, int ordinal, int x, int y) {
 //    ledSetValue(whichStrand, ordinal, c2i(x,y+20));
-      ledSetValue(whichStrand, ordinal, c2i(x,y));
+      ledSetValue(whichStrand, ordinal, c2i(x + xOffsetter, y + yOffsetter));
   }
   
   Point ledGet(int whichStrand, int ordinal) {
@@ -519,7 +532,6 @@ class Pixels {
     
     mapAllLeds();
 
-     
     ledInterpolate();
 //    ledMapDump(0,0); //set which strands you want to dump
     

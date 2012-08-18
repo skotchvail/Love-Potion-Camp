@@ -102,6 +102,13 @@ class Drawer {
     lastMouseY = my;
   }
   
+  void keyPressed() {
+  }
+  
+  String[] getTextLines() {
+    return null;
+  }
+  
   int getLastMouseX() { return lastMouseX; }
   int getLastMouseY() { return lastMouseY; }
   

@@ -218,7 +218,12 @@ class MainClass {
       needToFlushPrefs = true;
       println("3D grid: " + draw3dSimulation);
     }
-
+    
+    modes[modeCol][modeRow].keyPressed();
+  }
+  
+  Drawer currentMode() {
+    return modes[modeCol][modeRow];
   }
 
   void newPalette() {
