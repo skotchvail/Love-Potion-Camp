@@ -334,21 +334,6 @@ class Pixels {
     return p;
   }
   
-  void initStrand(int whichStrand, int numPixels) {
-    int start = whichStrand * kPixelsPerStrand;
-    int boundary = start + numPixels;
-    int j;
-    for (j = start; j < boundary; j++) {
-      strandMap[j] = TC_PIXEL_UNDEFINED;
-      trainingStrandMap[j] = j;
-      
-    }
-    int end = start + kPixelsPerStrand;
-    for (; j < end; j++) {
-      strandMap[j] = TC_PIXEL_DISCONNECTED;
-      trainingStrandMap[j] = TC_PIXEL_DISCONNECTED;
-    }
-  }
   
   void ledSetRawValue(int whichStrand, int ordinal, int value) {
     assert(whichStrand < kNumStrands) : "not this many strands";
@@ -475,35 +460,6 @@ class Pixels {
     }
   }
   
-  /*
-   
-   
-   
-   
-   ..   00      01      02      03      04      05      06      07      08      09      10      11      12      13      14
-   s0: (??,??) (??,??) (02,05)  UNUSED (11,04) (11,04) (05,05) (05,04) (11,02) (01,04)  DISC    DISC    DISC    DISC    DISC
-   s1: (02,02) (00,04) (00,02) (00,03) (11,03) (11,03) (03,03) (03,04) (??,??) (??,??) (??,??)  DISC    DISC    DISC    DISC
-   s2: (00,01) (11,03) (11,03) (03,01) (03,02) (04,02) (04,03)  DISC    DISC    DISC    DISC    DISC    DISC    DISC    DISC
-   
-   
-   writable(4) = abs(0 - 0) + abs(6 - 2)
-   writable(1) = abs(0 - 0) + abs(7 - 6)
-   writable(2) = abs(0 - 0) + abs(9 - 7)
-   writable(1) = abs(0 - 0) + abs(16 - 15)
-   writable(1) = abs(0 - 0) + abs(17 - 16)
-   writable(1) = abs(0 - 0) + abs(18 - 17)
-   writable(3) = abs(0 - 0) + abs(21 - 18)
-   writable(1) = abs(0 - 0) + abs(22 - 21)
-   writable(3) = abs(0 - 0) + abs(33 - 30)
-   writable(1) = abs(0 - 0) + abs(34 - 33)
-   writable(1) = abs(0 - 0) + abs(35 - 34)
-   writable(1) = abs(0 - 0) + abs(36 - 35)
-   
-   
-   
-
-   */
-  
   void ledMapDump(int minStrand, int maxStrand) {
     if (maxStrand < minStrand) {
       return;
@@ -562,9 +518,26 @@ class Pixels {
       return;
     }
     
-    for (int i = 0; i < kNumStrands; i++) {
-      int theSize = getStrandSize(i);
-      initStrand(i,theSize);
+    int stealPixel = 0;
+    //create the trainingStrandMap
+    for (int whichStrand = 0; whichStrand < kNumStrands; whichStrand++) {
+      int numPixels = getStrandSize(whichStrand);
+      int start = whichStrand * kPixelsPerStrand;
+      int boundary = start + numPixels;
+      int j;
+      for (j = start; j < boundary; j++) {
+        strandMap[j] = TC_PIXEL_UNDEFINED;
+        trainingStrandMap[j] = stealPixel++;
+        Point tester = i2c(trainingStrandMap[j]);
+        assert(tester.x < ledWidth && tester.y < ledHeight) : "Strings have more LEDs than we have pixels to assign them x:" + tester.x + " y:" + tester.y + " strand: " + whichStrand + " ordinal:" + (j-start)
+            + " rawValue:" + trainingStrandMap[j];
+        
+      }
+      int end = start + kPixelsPerStrand;
+      for (; j < end; j++) {
+        strandMap[j] = TC_PIXEL_DISCONNECTED;
+        trainingStrandMap[j] = TC_PIXEL_DISCONNECTED;
+      }
     }
     
     mapAllLeds();

@@ -102,8 +102,6 @@ class HardwareTest extends Drawer {
       }
     }
     
-    
-    
     println( "cursorStrand:"  + cursorStrand + "cursorOrdinal:" + cursorOrdinal);
   }
   
