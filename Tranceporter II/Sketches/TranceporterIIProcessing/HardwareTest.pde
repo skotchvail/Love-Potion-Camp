@@ -26,10 +26,15 @@ class HardwareTest extends Drawer {
   float lastTimeSwitched;
   int movementPixelFast;
   int[] strandColor = {
-  color(255,176,33),  color(255,0,0),     color(255,255,0),
-  color(0,255,0),     color(0,255,255),   color(0,0,255),
-  color(255,0,255),   color(128, 50, 90), color(100,200,150)};
-  
+  color(255,  176,    33),    // strand 0
+  color(0,    0,    200),    // strand 1
+  color(0,    220,  0),   // strand 2
+  color(0,    200,  200),     // strand 3
+  color(200,  0,    0),   // strand 4
+  color(200,  0,    150),     // strand 5
+  color(200,  100,  0),     // strand 6
+  color(200,  55,   100),   // strand 7
+  };
   void keyPressed() {
     
     int oldCursorOrdinal = cursorOrdinal;
@@ -189,7 +194,7 @@ class HardwareTest extends Drawer {
         
       }
     }
-    else if (setting > 0.29) {
+    else if (setting > 0.3) {
       //p.useTrainingMode = false;
       pg.background(0,30,0);
     }
