@@ -1,19 +1,24 @@
 class LedMap extends Pixels {
- 
- LedMap(PApplet p) {
-  super(p);
- }
- 
- 
- void mapStrandA(int sA) {
- 
-   //897?
-       
+  
+  LedMap(PApplet p) {
+    super(p);
+  }
+  
+  
+  void mapStrandA(int sA) {
+    
+    //897?
+    
     ledMissing(sA, 0);
     ledSet(sA, 1, 0, 25);
     ledSet(sA, 10, 0, 16);
     ledSet(sA, 11, 1, 16);
     ledSet(sA, 20, 1, 25);
+
+    if (true) {
+      return;
+    }
+    
     ledSet(sA, 21, 2, 25);
     ledSet(sA, 33, 2, 13);
     ledSet(sA, 34, 3, 13);
@@ -145,82 +150,86 @@ class LedMap extends Pixels {
     ledSet(sA, 883, 63, 8);
     ledSet(sA, 896, 63, 21);
     
-
-//    int extraY = 20;    
     
-//    ledMissing(sA,149);
-//    ledMissing(sA,148);
-//
-//    ledSet(sA,147,  0,0);
-//    ledSet(sA,133,  0,14);
-//
-//    ledMissing(sA,132);
-//
-//    
-//    ledSet(sA,131,  1,14);
-//    ledSet(sA,117,  1,0);
-//    ledSet(sA,103,  2,0);
-//    ledSet(sA,89,   2,14);
-//    ledMissing(sA, 88);
-//    ledSet(sA,87,   3,14);
-//    ledSet(sA,77,   3,4);
-//    ledMissing(sA,76);
-//    ledSet(sA,75,   4,4);
-//    ledSet(sA,65,   4,14);
-//    ledMissing(sA,64);
-//    ledMissing(sA,53);
-//    ledSet(sA,63,   5,14);
-//    ledSet(sA,54,   5,5);
-//    ledSet(sA,52,   6,6);
-//    ledSet(sA,44,   6,14);
-//    ledMissing(sA,43);
-//
-//    ledSet(sA,42,   7,14);
-//    ledSet(sA,33,   7,5);
-//    ledMissing(sA,32);
-//    ledMissing(sA,31);
-//    ledMissing(sA,30);
-//    ledMissing(sA,29);
-//    ledMissing(sA,28);
-//    ledMissing(sA,27);
-//    ledMissing(sA,26);
-//    ledMissing(sA,25);
-//    ledMissing(sA,24);
-//    ledMissing(sA,23);
-//    ledMissing(sA,22);
-//    ledMissing(sA,21);
-//    ledMissing(sA,20);
-//    ledMissing(sA,19);
-//    ledMissing(sA,18);
-//    ledMissing(sA,17);
-//    ledMissing(sA,16);
-//    ledMissing(sA,15);
-//    ledMissing(sA,14);
-//    ledMissing(sA,13);
-//    ledMissing(sA,12);
-//    ledMissing(sA,11);
-//
-//    ledSet(sA,10,   8,4);
-//    ledSet(sA,0,    8,14);
- }
-
-
- void mapStrandB(int sB) {
- 
-     ledSet(sB,0,    0,4);
-
+    //    int extraY = 20;
+    
+    //    ledMissing(sA,149);
+    //    ledMissing(sA,148);
+    //
+    //    ledSet(sA,147,  0,0);
+    //    ledSet(sA,133,  0,14);
+    //
+    //    ledMissing(sA,132);
+    //
+    //
+    //    ledSet(sA,131,  1,14);
+    //    ledSet(sA,117,  1,0);
+    //    ledSet(sA,103,  2,0);
+    //    ledSet(sA,89,   2,14);
+    //    ledMissing(sA, 88);
+    //    ledSet(sA,87,   3,14);
+    //    ledSet(sA,77,   3,4);
+    //    ledMissing(sA,76);
+    //    ledSet(sA,75,   4,4);
+    //    ledSet(sA,65,   4,14);
+    //    ledMissing(sA,64);
+    //    ledMissing(sA,53);
+    //    ledSet(sA,63,   5,14);
+    //    ledSet(sA,54,   5,5);
+    //    ledSet(sA,52,   6,6);
+    //    ledSet(sA,44,   6,14);
+    //    ledMissing(sA,43);
+    //
+    //    ledSet(sA,42,   7,14);
+    //    ledSet(sA,33,   7,5);
+    //    ledMissing(sA,32);
+    //    ledMissing(sA,31);
+    //    ledMissing(sA,30);
+    //    ledMissing(sA,29);
+    //    ledMissing(sA,28);
+    //    ledMissing(sA,27);
+    //    ledMissing(sA,26);
+    //    ledMissing(sA,25);
+    //    ledMissing(sA,24);
+    //    ledMissing(sA,23);
+    //    ledMissing(sA,22);
+    //    ledMissing(sA,21);
+    //    ledMissing(sA,20);
+    //    ledMissing(sA,19);
+    //    ledMissing(sA,18);
+    //    ledMissing(sA,17);
+    //    ledMissing(sA,16);
+    //    ledMissing(sA,15);
+    //    ledMissing(sA,14);
+    //    ledMissing(sA,13);
+    //    ledMissing(sA,12);
+    //    ledMissing(sA,11);
+    //
+    //    ledSet(sA,10,   8,4);
+    //    ledSet(sA,0,    8,14);
+  }
+  
+  
+  void mapStrandB(int sB) {
+    
+    ledSet(sB,0,    0,4);
+    
     ledSet(sB,4,    0,8);
     ledSet(sB,5,    1,8);
     
     ledSet(sB,9,    1,4);
     ledSet(sB,10,   2,4);
+
+    if (true) {
+      return;
+    }
     
     ledSet(sB,16,   2,10);
     ledSet(sB,17,   3,10);
-
+    
     ledSet(sB,22,   3,5);
     ledSet(sB,23,   4,5);
-
+    
     ledSet(sB,30,   4,12);
     ledSet(sB,31,   5,12);
     
@@ -232,31 +241,31 @@ class LedMap extends Pixels {
     
     ledSet(sB,58,   7,5);
     ledSet(sB,59,   8,5);
-
+    
     ledSet(sB,70,   8,16);
     ledSet(sB,71,   9,16);
-
+    
     ledSet(sB,82,   9,5);
     ledSet(sB,83,   10,5);
-
+    
     ledSet(sB,95,   10,17);
     ledSet(sB,96,   11,17);
-
+    
     ledSet(sB,108,  11,5);
     ledSet(sB,109,  12,5);
-
+    
     ledSet(sB,122,  12,18);
     ledSet(sB,123,  13,18);
-
+    
     ledSet(sB,137,  13,4);
     ledSet(sB,138,  14,4);
-
+    
     ledSet(sB,153,  14,19);
     ledSet(sB,154,  15,19);
-
+    
     ledSet(sB,169,  15,4);
     ledSet(sB,170,  16,4);
-
+    
     ledSet(sB,187,  16,21);
     ledSet(sB,188,  17,21);
     
@@ -267,60 +276,60 @@ class LedMap extends Pixels {
     ledSet(sB,225,  19,22);
     
     ledMissing(sB, 242);
-
+    
     ledSet(sB,244, 19,4);
     ledSet(sB,245, 20,4);
-
+    
     ledSet(sB,264, 20,23);
     ledSet(sB,265, 21,23);
-//    ledSet(sB,0,   21,0);
-//    ledSet(sB,0,   22,0);
-//    
-//    ledSet(sB,0,   22,0);
-//    ledSet(sB,0,   23,0);
-//    
-//    ledSet(sB,0,   23,0);
-//    ledSet(sB,0,   24,0);
-//    
-//    ledSet(sB,0,   24,0);
-//    ledSet(sB,0,   25,0);
-//    
-//    ledSet(sB,0,   25,0);
-//    ledSet(sB,0,   26,0);
-//    
-//    ledSet(sB,0,   26,0);
-//    ledSet(sB,0,   27,0);
-//    
-//    ledSet(sB,0,   27,0);
-//    ledSet(sB,0,   28,0);
-//    
-//    ledSet(sB,0,   28,0);
-//    ledSet(sB,0,   29,0);
-//    
-//    ledSet(sB,0,   29,0);
-//    ledSet(sB,0,   30,0);
-//    
-//    ledSet(sB,0,   0,0);
-//    ledSet(sB,0,   0,0);
-//    
-//
- }
- 
-
-  void mapAllLeds() {
+    //    ledSet(sB,0,   21,0);
+    //    ledSet(sB,0,   22,0);
+    //
+    //    ledSet(sB,0,   22,0);
+    //    ledSet(sB,0,   23,0);
+    //
+    //    ledSet(sB,0,   23,0);
+    //    ledSet(sB,0,   24,0);
+    //
+    //    ledSet(sB,0,   24,0);
+    //    ledSet(sB,0,   25,0);
+    //
+    //    ledSet(sB,0,   25,0);
+    //    ledSet(sB,0,   26,0);
+    //
+    //    ledSet(sB,0,   26,0);
+    //    ledSet(sB,0,   27,0);
+    //
+    //    ledSet(sB,0,   27,0);
+    //    ledSet(sB,0,   28,0);
+    //
+    //    ledSet(sB,0,   28,0);
+    //    ledSet(sB,0,   29,0);
+    //
+    //    ledSet(sB,0,   29,0);
+    //    ledSet(sB,0,   30,0);
+    //
+    //    ledSet(sB,0,   0,0);
+    //    ledSet(sB,0,   0,0);
+    //
+    //
+  }
   
+  
+  void mapAllLeds() {
+    
     final int sA = 0;
-    final int sB = 0;
+    final int sB = 1;
     final int sC = 2;
     final int sD = 3;
-
-//  mapStrandA(sA);
-//  mapStrandB(sB);
     
-//    ledMapDump(sB,sB); //set which strands you want to dump
+    mapStrandA(sA);
+    mapStrandB(sB);
+    
+    //    ledMapDump(sB,sB); //set which strands you want to dump
     
   }
-
-
-
+  
+  
+  
 }

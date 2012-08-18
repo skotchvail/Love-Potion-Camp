@@ -313,7 +313,7 @@ class Pixels {
   
   final boolean kUseBitBang = true;
   final int kNumStrands = 8;
-  final int kPixelsPerStrand = 70; //897;
+  final int kPixelsPerStrand = 1250; //897;
   private int[] strandMap = new int[kNumStrands * kPixelsPerStrand];
   private int[] trainingStrandMap = new int[kNumStrands * kPixelsPerStrand];
   final boolean runConcurrent = true;
@@ -349,7 +349,20 @@ class Pixels {
       trainingStrandMap[j] = TC_PIXEL_DISCONNECTED;
     }
   }
+  
+  void ledSetRawValue(int whichStrand, int ordinal, int value) {
+    assert(whichStrand < kNumStrands) : "not this many strands";
+    assert(ordinal < kPixelsPerStrand) : "whichStrand exceeds number of leds per strand";
+    int index = (whichStrand * kPixelsPerStrand) + ordinal;
+    strandMap[index] = value;
+    
+  }
 
+  void ledRawSet(int whichStrand, int ordinal, int x, int y) {
+    int value = c2i(x, y);
+    ledSetRawValue(whichStrand, ordinal, value);
+  }
+  
   void ledSetValue(int whichStrand, int ordinal, int value) {
     assert(whichStrand < kNumStrands) : "not this many strands";
     assert(ordinal < kPixelsPerStrand) : "whichStrand exceeds number of leds per strand";
@@ -369,16 +382,33 @@ class Pixels {
 //    ledSetValue(whichStrand, ordinal, c2i(x,y+20));
       ledSetValue(whichStrand, ordinal, c2i(x + xOffsetter, y + yOffsetter));
   }
+
   
-  Point ledGet(int whichStrand, int ordinal) {
+  int ledGetRawValue(int whichStrand, int ordinal, boolean useTrainingMode) {
     int[] map = useTrainingMode?trainingStrandMap:strandMap;
     
     int index = (whichStrand * kPixelsPerStrand) + ordinal;
     int value = map[index];
+    return value;
+  }
+  
+  Point ledGet(int whichStrand, int ordinal, boolean useTrainingMode) {
+    int value = ledGetRawValue(whichStrand, ordinal,useTrainingMode);
+    
     if (value < 0) {
       return new Point(-1,-1);
     }
     return i2c(value);
+  }
+
+//  void setColorDirectly(int whichStrand, int ordinal, color theColor) {
+//    int index = (whichStrand * kPixelsPerStrand) + ordinal;
+//    
+//  }
+//  
+//  
+  Point ledGet(int whichStrand, int ordinal) {
+    return ledGet(whichStrand,ordinal,useTrainingMode);
   }
   
   void ledInterpolate() {
@@ -514,7 +544,7 @@ class Pixels {
   }
 
   void mapAllLeds() {
-    
+    //overridden by LedMap
   }
 
   
