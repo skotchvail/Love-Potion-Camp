@@ -94,7 +94,7 @@ class MainClass {
       println("Error redirecting stdout/stderr: " + e);
     }
     
-    display = new Pixels(applet);
+    display = new LedMap(applet);
     
     modes = new Drawer[][] {
       //column 0

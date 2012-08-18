@@ -80,16 +80,16 @@ println("numStrands: " + numStrands);
 //TC_FTDI_DSR
 //TC_FTDI_DCD
 //TC_FTDI_RI
-if (useBitBang) {
-TotalControl.setStrandPin(0,TC_FTDI_TX);
-TotalControl.setStrandPin(1,TC_FTDI_RX);
-TotalControl.setStrandPin(2,TC_FTDI_RTS);
-TotalControl.setStrandPin(3,TC_FTDI_CTS);
-TotalControl.setStrandPin(4,TC_FTDI_DTR);
-TotalControl.setStrandPin(5,TC_FTDI_DSR);
-TotalControl.setStrandPin(6,TC_FTDI_DCD);
-TotalControl.setStrandPin(7,TC_FTDI_RI);
-}
+  if (useBitBang) {
+    TotalControl.setStrandPin(0,TC_FTDI_TX);
+    TotalControl.setStrandPin(1,TC_FTDI_RX);
+    TotalControl.setStrandPin(2,TC_FTDI_RTS);
+    TotalControl.setStrandPin(3,TC_FTDI_CTS);
+    TotalControl.setStrandPin(4,TC_FTDI_DTR);
+    TotalControl.setStrandPin(5,TC_FTDI_DSR);
+    TotalControl.setStrandPin(6,TC_FTDI_DCD);
+    TotalControl.setStrandPin(7,TC_FTDI_RI);
+  }
 
 
 //    for (int i = 3; i < numStrands; i++) {
