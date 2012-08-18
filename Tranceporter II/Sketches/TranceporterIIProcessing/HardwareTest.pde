@@ -57,6 +57,9 @@ class HardwareTest extends Drawer {
     else if (key == '<') {
       cursorStrand--;
     }
+    if (cursorStrand < 0) {
+      cursorStrand += p.kNumStrands;
+    }
     cursorStrand %= p.kNumStrands;
     if (cursorStrand != oldCursorStrand || cursorOrdinal != oldCursorOrdinal) {
       p.ledSetRawValue(oldCursorStrand, oldCursorOrdinal, cursorPreviousValue);

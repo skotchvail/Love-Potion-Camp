@@ -385,8 +385,9 @@ class Pixels {
 
   
   int ledGetRawValue(int whichStrand, int ordinal, boolean useTrainingMode) {
+    assert(whichStrand < kNumStrands) : "not this many strands";
+    assert(ordinal < kPixelsPerStrand) : "whichStrand exceeds number of leds per strand";
     int[] map = useTrainingMode?trainingStrandMap:strandMap;
-    
     int index = (whichStrand * kPixelsPerStrand) + ordinal;
     int value = map[index];
     return value;
@@ -543,6 +544,11 @@ class Pixels {
     
   }
 
+  int getStrandSize(int whichStrand) {
+    return 0;
+    //overridden by LedMap
+  }
+  
   void mapAllLeds() {
     //overridden by LedMap
   }
@@ -557,7 +563,8 @@ class Pixels {
     }
     
     for (int i = 0; i < kNumStrands; i++) {
-      initStrand(i,kPixelsPerStrand);
+      int theSize = getStrandSize(i);
+      initStrand(i,theSize);
     }
     
     mapAllLeds();

@@ -1,7 +1,161 @@
 class LedMap extends Pixels {
+
   
+  int[] strandSizes;
+
   LedMap(PApplet p) {
     super(p);
+  
+  }
+ 
+  void initTotalControl()
+  {
+    strandSizes = new int[]
+    {
+      1250, //strand 0
+      100, //strand 1
+      100, //strand 2
+      100, //strand 3
+      100, //strand 4
+      100, //strand 5
+      100, //strand 6
+      100, //strand 7
+    };
+
+    
+    super.initTotalControl();
+  }
+
+  void mapStrandC(int sC) {
+    xOffsetter = 0;
+    yOffsetter = 16;
+    
+    ledSet(sC,0, 0, 0);
+    ledSet(sC,4, 0, 4);
+    ledSet(sC,5, 1, 4);
+    ledSet(sC,9, 1, 0);
+    ledSet(sC,10, 2, 0);
+    ledSet(sC,16, 2, 6);
+    ledSet(sC,17, 3, 6);
+    ledSet(sC,22, 3, 1);
+    ledSet(sC,23, 4, 1);
+    ledSet(sC,30, 4, 8);
+    ledSet(sC,31, 5, 8);
+    ledSet(sC,38, 5, 1);
+    ledSet(sC,39, 6, 1);
+    ledSet(sC,48, 6, 10);
+    ledSet(sC,49, 7, 10);
+    ledSet(sC,58, 7, 1);
+    ledSet(sC,59, 8, 1);
+    ledSet(sC,70, 8, 12);
+    ledSet(sC,71, 9, 12);
+    ledSet(sC,82, 9, 1);
+    ledSet(sC,83, 10, 1);
+    ledSet(sC,95, 10, 13);
+    ledSet(sC,96, 11, 13);
+    ledSet(sC,108, 11, 1);
+    ledSet(sC,109, 12, 1);
+    ledSet(sC,122, 12, 14);
+    ledSet(sC,123, 13, 14);
+    ledSet(sC,137, 13, 0);
+    ledSet(sC,138, 14, 0);
+    ledSet(sC,153, 14, 15);
+    ledSet(sC,154, 15, 15);
+    ledSet(sC,169, 15, 0);
+    ledSet(sC,170, 16, 0);
+    ledSet(sC,187, 16, 17);
+    ledSet(sC,188, 17, 17);
+    ledSet(sC,205, 17, 0);
+    ledSet(sC,206, 18, 0);
+    ledSet(sC,224, 18, 18);
+    ledSet(sC,225, 19, 18);
+    ledSet(sC,241, 19, 2);
+    ledMissing(sC,242);
+    ledSet(sC,243, 19, 1);
+    ledSet(sC,244, 19, 0);
+    ledSet(sC,245, 20, 0);
+    ledSet(sC,264, 20, 19);
+    ledSet(sC,265, 21, 19);
+    ledSet(sC,285, 21, -1);
+    ledSet(sC,286, 22, -1);
+    ledSet(sC,306, 22, 19);
+    ledSet(sC,307, 23, 19);
+    ledSet(sC,327, 23, -1);
+    ledSet(sC,328, 24, -1);
+    ledSet(sC,349, 24, 20);
+    ledSet(sC,350, 25, 20);
+    ledSet(sC,372, 25, -2);
+    ledSet(sC,373, 26, -2);
+    ledSet(sC,396, 26, 21);
+    ledSet(sC,397, 27, 21);
+    ledSet(sC,420, 27, -2);
+    ledSet(sC,421, 28, -2);
+    ledSet(sC,445, 28, 22);
+    ledSet(sC,446, 29, 22);
+    ledSet(sC,470, 29, -2);
+    ledSet(sC,471, 30, -2);
+    ledSet(sC,495, 30, 22);
+    ledSet(sC,496, 31, 22);
+    ledSet(sC,520, 31, -2);
+    ledSet(sC,521, 32, -2);
+    ledSet(sC,546, 32, 23);
+    ledSet(sC,547, 33, 23);
+    ledSet(sC,572, 33, -2);
+    ledSet(sC,573, 34, -2);
+    ledSet(sC,598, 34, 23);
+    ledSet(sC,599, 35, 23);
+    ledSet(sC,625, 35, -3);
+    ledSet(sC,626, 36, -3);
+    ledSet(sC,652, 36, 23);
+    ledSet(sC,653, 37, 23);
+    ledSet(sC,679, 37, -3);
+    ledSet(sC,680, 38, -3);
+    ledSet(sC,706, 38, 23);
+    ledSet(sC,707, 39, 23);
+    ledSet(sC,733, 39, -3);
+    ledSet(sC,734, 40, -3);
+    ledSet(sC,760, 40, 23);
+    ledSet(sC,761, 41, 23);
+    ledSet(sC,787, 41, -3);
+    ledSet(sC,788, 42, -3);
+    ledSet(sC,814, 42, 23);
+    ledSet(sC,815, 43, 23);
+    ledSet(sC,841, 43, -3);
+    ledSet(sC,842, 44, -3);
+    ledSet(sC,868, 44, 23);
+    ledSet(sC,869, 45, 23);
+    ledSet(sC,895, 45, -3);
+    ledSet(sC,896, 46, -3);
+    ledSet(sC,922, 46, 23);
+    ledSet(sC,923, 47, 23);
+    ledSet(sC,949, 47, -3);
+    ledSet(sC,950, 48, -3);
+    ledSet(sC,975, 48, 22);
+    ledSet(sC,976, 49, 22);
+    ledSet(sC,999, 49, -1);
+    ledSet(sC,1000, 50, -1);
+    ledSet(sC,1023, 50, 22);
+    ledSet(sC,1024, 51, 22);
+    ledSet(sC,1048, 51, -2);
+    ledSet(sC,1049, 52, -2);
+    ledSet(sC,1073, 52, 22);
+    ledSet(sC,1074, 53, 22);
+    ledSet(sC,1099, 53, -3);
+    ledSet(sC,1100, 54, -3);
+    ledSet(sC,1124, 54, 21);
+    ledSet(sC,1125, 55, 21);
+    ledSet(sC,1149, 55, -3);
+    ledSet(sC,1150, 56, -3);
+    ledSet(sC,1173, 56, 20);
+    ledSet(sC,1174, 57, 20);
+    ledSet(sC,1195, 57, -1);
+    ledSet(sC,1196, 58, -1);
+    ledSet(sC,1216, 58, 19);
+    ledSet(sC,1217, 59, 19);
+    ledSet(sC,1237, 59, -1);
+    ledSet(sC,1238, 60, -1);
+    ledSet(sC,1249, 60, 10);
+
   }
   
   
@@ -316,6 +470,14 @@ class LedMap extends Pixels {
   }
   
   
+  
+  
+  int getStrandSize(int whichStrand) {
+    println("strandSizes:" + strandSizes + " whichStrand:" + whichStrand);
+    return strandSizes[whichStrand];
+  }
+
+  
   void mapAllLeds() {
     
     final int sA = 0;
@@ -323,8 +485,9 @@ class LedMap extends Pixels {
     final int sC = 2;
     final int sD = 3;
     
-    mapStrandA(sA);
-    mapStrandB(sB);
+//    mapStrandA(sC);
+//    mapStrandB(sB);
+    mapStrandC(sA);
     
     //    ledMapDump(sB,sB); //set which strands you want to dump
     
