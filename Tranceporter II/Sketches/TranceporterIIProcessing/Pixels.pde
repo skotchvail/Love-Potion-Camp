@@ -466,21 +466,24 @@ class Pixels {
 
     for (int whichStrand = minStrand; whichStrand <= maxStrand; whichStrand++) {
       int strandSize = getStrandSize(whichStrand);
-      StringBuffer s = new StringBuffer(strandSize * 12);
+      StringBuilder s = new StringBuilder(200);
       
       int start = whichStrand  * maxPixelsPerStrand;
       for (int ordinal = 0; ordinal < strandSize; ordinal++) {
         int index = ordinal + start;
         if ((ordinal % 10) == 0)
-          s.append("\n");
-        s.append(String.format(" %03d:",ordinal));
+        {
+          println(s);
+          s = new StringBuilder(200);
+        }
+        s.append(String.format(" %04d:",ordinal));
         int value = strandMap[index];
         if (value == TC_PIXEL_DISCONNECTED) {
-          s.append(" DISC   ");
+          s.append(" DISC  ");
         } else if (value == TC_PIXEL_UNUSED) {
-          s.append(" UNUSED ");
+          s.append("UNUSED ");
         } else if (value == TC_PIXEL_UNDEFINED) {
-          s.append("(??,??) ");
+          s.append("(??,??)");
         }
         else {
           assert (value >= 0) : "can't print unrecognized value " + value;
@@ -544,7 +547,7 @@ class Pixels {
     mapAllLeds();
 
     ledInterpolate();
-//    ledMapDump(0,0); //set which strands you want to dump
+    //ledMapDump(0,0); //set which strands you want to dump
     
     if (runConcurrent) {
       totalControlConcurrent = new TotalControlConcurrent(getNumStrands(),maxPixelsPerStrand, kUseBitBang);

@@ -49,6 +49,8 @@ class Drawer {
   boolean onsetOn3 = false;
   boolean onsetOn4 = false;
   
+  boolean manualFlash = false;
+  
   void update() {
 
     pg.beginDraw();
@@ -61,8 +63,8 @@ class Drawer {
     
     boolean flash = (flash1 && !onsetOn1) || (flash2 && !onsetOn2) || (flash3 && !onsetOn3) || (flash4 && !onsetOn4);
     
-    if (flash && settings.getParam(settings.keyFlash) == 1.0) {
-      //lastOnset = millis();
+    if (manualFlash || (flash && settings.getParam(settings.keyFlash) == 1.0)) {
+      manualFlash = false;
       colorMode(RGB);
       pg.background(255);
     }

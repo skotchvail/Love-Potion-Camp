@@ -174,7 +174,7 @@ class LedMap extends Pixels {
     return 3;
   }
 
-  
+
   void mapAllLeds() {
     
     final int s0 = 0;
@@ -190,9 +190,6 @@ class LedMap extends Pixels {
     mapDriverSideUpper(s1);
     mapPassengerSideLower(s2);
     mapPassengerSideUpper(s3);
-    
-//    ledMapDump(s0,s0); //set which strands you want to dump
-    
   }
   
   

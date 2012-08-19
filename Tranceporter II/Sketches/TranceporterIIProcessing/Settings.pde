@@ -120,6 +120,11 @@ class Settings {
             public void function() {
               main.reset();
             }});
+    actions.put("/pageAudio/instaFlash",new VoidFunction() {
+      public void function() {
+        main.currentMode().manualFlash = true;
+      }});
+    
     
     paramGlobalMap = new HashMap();
     setParam(keyGlobalAutoChangeSpeed, 1.0);
