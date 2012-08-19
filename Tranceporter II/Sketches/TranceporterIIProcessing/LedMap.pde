@@ -5,27 +5,25 @@ class LedMap extends Pixels {
 
   LedMap(PApplet p) {
     super(p);
-  
-  }
- 
-  void initTotalControl()
-  {
     strandSizes = new int[]
     {
       1250, //strand 0
-      100, //strand 1
-      100, //strand 2
+      900, //strand 1
+      900, //strand 2
       100, //strand 3
       100, //strand 4
       100, //strand 5
       100, //strand 6
       100, //strand 7
     };
+  }
+ 
+  void setup() {
+    super.setup();
 
-    
-    super.initTotalControl();
   }
 
+  
   void mapDriverSideLower(int panel) {
     xOffsetter = 0;
     yOffsetter = 16;
@@ -169,8 +167,11 @@ class LedMap extends Pixels {
 
   
   int getStrandSize(int whichStrand) {
-    println("strandSizes:" + strandSizes + " whichStrand:" + whichStrand);
     return strandSizes[whichStrand];
+  }
+
+  int getNumStrands() {
+    return 3;
   }
 
   

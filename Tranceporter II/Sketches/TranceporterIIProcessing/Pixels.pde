@@ -16,6 +16,13 @@ class Pixels {
 
   private Rectangle box2d, box3d;
   
+  int maxPixelsPerStrand;
+  final boolean kUseBitBang = true;
+  private int[] strandMap;
+  private int[] trainingStrandMap;
+  final boolean runConcurrent = true;
+  boolean useTotalControl = true;
+  boolean useTrainingMode = true;
   
   Pixels(PApplet p) {
     box2d = new Rectangle(10, 10, ledWidth * screenPixelSize, ledHeight * screenPixelSize);
@@ -28,13 +35,23 @@ class Pixels {
     objModel.enableDebug();
     
     objModel.scale(3);
-    
-    //noStroke();
-//    println("drawModes POINTS=" + POINTS + " LINES=" + LINES + " TRIANGLES=" + TRIANGLES + " TRIANGLE_FAN=" + TRIANGLE_FAN
-//            + " TRIANGLE_STRIP=" + TRIANGLE_STRIP + " QUADS=" + QUADS + " QUAD_STRIP=" + QUAD_STRIP);
-    
-    initTotalControl();
   }
+  
+  void setup() {
+    maxPixelsPerStrand = 0;
+    for (int i = 0; i < getNumStrands(); i++) {
+      int strandSize = getStrandSize(i);
+      if (strandSize > maxPixelsPerStrand) {
+        maxPixelsPerStrand = strandSize;
+      }
+    }
+    
+    strandMap = new int[getNumStrands() * maxPixelsPerStrand];
+    trainingStrandMap = new int[getNumStrands() * maxPixelsPerStrand];
+
+    initTotalControl();    
+  }
+  
 
   void setPixel(int x, int y, color c) {
     pixelData[c2i(x,y)] = c;
@@ -175,8 +192,6 @@ class Pixels {
       e.printStackTrace();
     }
   }
-
-
     
   void drawMappedOntoBottle(PGraphics pg) {
     
@@ -308,20 +323,6 @@ class Pixels {
    
    */
 
-  
-
-  
-  final boolean kUseBitBang = true;
-  final int kNumStrands = 8;
-  final int kPixelsPerStrand = 1250; //897;
-  private int[] strandMap = new int[kNumStrands * kPixelsPerStrand];
-  private int[] trainingStrandMap = new int[kNumStrands * kPixelsPerStrand];
-  final boolean runConcurrent = true;
-  boolean useTotalControl = true;
-
-  
-  boolean useTrainingMode = true;
-     
   //convert coordinates into index into pixel array index
   private int c2i(int x, int y) {
     return (y*ledWidth) + x;
@@ -334,11 +335,10 @@ class Pixels {
     return p;
   }
   
-  
   void ledSetRawValue(int whichStrand, int ordinal, int value) {
-    assert(whichStrand < kNumStrands) : "not this many strands";
-    assert(ordinal < kPixelsPerStrand) : "whichStrand exceeds number of leds per strand";
-    int index = (whichStrand * kPixelsPerStrand) + ordinal;
+    assert(whichStrand < getNumStrands()) : "not this many strands";
+    assert(ordinal < getStrandSize(whichStrand)) : "whichStrand exceeds number of leds per strand";
+    int index = (whichStrand * maxPixelsPerStrand) + ordinal;
     strandMap[index] = value;
     
   }
@@ -349,9 +349,11 @@ class Pixels {
   }
   
   void ledSetValue(int whichStrand, int ordinal, int value) {
-    assert(whichStrand < kNumStrands) : "not this many strands";
-    assert(ordinal < kPixelsPerStrand) : "whichStrand exceeds number of leds per strand";
-    int index = (whichStrand * kPixelsPerStrand) + ordinal;
+    assert(whichStrand < getNumStrands()) : "not this many strands";
+    assert(ordinal < getStrandSize(whichStrand)) : "whichStrand exceeds number of leds per strand";
+    assert(ordinal < getStrandSize(whichStrand)) : "Cannot set LED " + ordinal + " on strand " + whichStrand +
+      " because it is of length " + getStrandSize(whichStrand);
+    int index = (whichStrand * maxPixelsPerStrand) + ordinal;
     assert(strandMap[index] == TC_PIXEL_UNDEFINED) : "led " + ordinal + " on strand " + whichStrand + " is already defined: " + strandMap[index];
     strandMap[index] = value;
   }
@@ -370,10 +372,10 @@ class Pixels {
 
   
   int ledGetRawValue(int whichStrand, int ordinal, boolean useTrainingMode) {
-    assert(whichStrand < kNumStrands) : "not this many strands";
-    assert(ordinal < kPixelsPerStrand) : "whichStrand exceeds number of leds per strand";
+    assert(whichStrand < getNumStrands()) : "not this many strands";
+    assert(ordinal < getStrandSize(whichStrand)) : "whichStrand exceeds number of leds per strand";
     int[] map = useTrainingMode?trainingStrandMap:strandMap;
-    int index = (whichStrand * kPixelsPerStrand) + ordinal;
+    int index = (whichStrand * maxPixelsPerStrand) + ordinal;
     int value = map[index];
     return value;
   }
@@ -387,12 +389,6 @@ class Pixels {
     return i2c(value);
   }
 
-//  void setColorDirectly(int whichStrand, int ordinal, color theColor) {
-//    int index = (whichStrand * kPixelsPerStrand) + ordinal;
-//    
-//  }
-//  
-//  
   Point ledGet(int whichStrand, int ordinal) {
     return ledGet(whichStrand,ordinal,useTrainingMode);
   }
@@ -401,11 +397,12 @@ class Pixels {
     
     int available = 0;
     
-    for (int strand = 0; strand < kNumStrands; strand++) {
-      int start = strand * kPixelsPerStrand;
+    for (int strand = 0; strand < getNumStrands(); strand++) {
+      int start = strand * maxPixelsPerStrand;
       int lastIndexWithCoord = -1;
       available = 0;
-      for (int i = start; i < start + kPixelsPerStrand; i++) {
+      int strandSize = getStrandSize(strand);
+      for (int i = start; i < start + strandSize; i++) {
         int value = strandMap[i];
         if (value == TC_PIXEL_UNDEFINED) {
           available++;
@@ -464,15 +461,15 @@ class Pixels {
     if (maxStrand < minStrand) {
       return;
     }
-    assert(minStrand < kNumStrands);
-    assert(maxStrand <= kNumStrands);
+    assert(minStrand < getNumStrands());
+    assert(maxStrand <= getNumStrands());
 
-    
     for (int whichStrand = minStrand; whichStrand <= maxStrand; whichStrand++) {
-      StringBuffer s = new StringBuffer(kPixelsPerStrand * 12);
+      int strandSize = getStrandSize(whichStrand);
+      StringBuffer s = new StringBuffer(strandSize * 12);
       
-      int start = whichStrand  * kPixelsPerStrand;
-      for (int ordinal = 0; ordinal < kPixelsPerStrand; ordinal++) {
+      int start = whichStrand  * maxPixelsPerStrand;
+      for (int ordinal = 0; ordinal < strandSize; ordinal++) {
         int index = ordinal + start;
         if ((ordinal % 10) == 0)
           s.append("\n");
@@ -490,9 +487,7 @@ class Pixels {
           Point p = i2c(value);
           s.append(String.format("(%02d,%02d) ",p.x,p.y));
         }
-        
       }
-      
       s.append("\n");
       println(s);
 
@@ -500,6 +495,12 @@ class Pixels {
     
   }
 
+  int getNumStrands() {
+    return -1;
+    //overridden by LedMap
+  }
+  
+  
   int getStrandSize(int whichStrand) {
     return 0;
     //overridden by LedMap
@@ -520,20 +521,20 @@ class Pixels {
     
     int stealPixel = 0;
     //create the trainingStrandMap
-    for (int whichStrand = 0; whichStrand < kNumStrands; whichStrand++) {
+    for (int whichStrand = 0; whichStrand < getNumStrands(); whichStrand++) {
       int numPixels = getStrandSize(whichStrand);
-      int start = whichStrand * kPixelsPerStrand;
+      int start = whichStrand * maxPixelsPerStrand;
       int boundary = start + numPixels;
       int j;
       for (j = start; j < boundary; j++) {
         strandMap[j] = TC_PIXEL_UNDEFINED;
         trainingStrandMap[j] = stealPixel++;
         Point tester = i2c(trainingStrandMap[j]);
-        assert(tester.x < ledWidth && tester.y < ledHeight) : "Strings have more LEDs than we have pixels to assign them x:" + tester.x + " y:" + tester.y + " strand: " + whichStrand + " ordinal:" + (j-start)
+        assert(tester.x < ledWidth && tester.y < ledHeight) : "Strands have more LEDs than we have pixels to assign them\n" + " x:" + tester.x + " y:" + tester.y + " strand: " + whichStrand + " ordinal:" + (j-start)
             + " rawValue:" + trainingStrandMap[j];
         
       }
-      int end = start + kPixelsPerStrand;
+      int end = start + maxPixelsPerStrand;
       for (; j < end; j++) {
         strandMap[j] = TC_PIXEL_DISCONNECTED;
         trainingStrandMap[j] = TC_PIXEL_DISCONNECTED;
@@ -546,10 +547,10 @@ class Pixels {
 //    ledMapDump(0,0); //set which strands you want to dump
     
     if (runConcurrent) {
-      totalControlConcurrent = new TotalControlConcurrent(kNumStrands,kPixelsPerStrand, kUseBitBang);
+      totalControlConcurrent = new TotalControlConcurrent(getNumStrands(),maxPixelsPerStrand, kUseBitBang);
     }
     else {
-      int status = setupTotalControl(kNumStrands, kPixelsPerStrand, kUseBitBang);
+      int status = setupTotalControl(getNumStrands(), maxPixelsPerStrand, kUseBitBang);
       if (status != 0) {
         //useTotalControl = false;
         //println("turning off Total Control because of error during initialization");

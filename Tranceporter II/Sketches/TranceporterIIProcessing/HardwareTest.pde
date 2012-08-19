@@ -40,6 +40,26 @@ class HardwareTest extends Drawer {
     int oldCursorOrdinal = cursorOrdinal;
     int oldCursorStrand = cursorStrand;
     
+    //which strand
+    if (key == '>') {
+      cursorStrand++;
+    }
+    else if (key == '<') {
+      cursorStrand--;
+    }
+    if (cursorStrand < 0) {
+      cursorStrand += p.getNumStrands();
+    }
+    cursorStrand %= p.getNumStrands();
+    if (cursorStrand != oldCursorStrand || cursorOrdinal != oldCursorOrdinal) {
+      p.ledSetRawValue(oldCursorStrand, oldCursorOrdinal, cursorPreviousValue);
+      cursorPreviousValue = p.ledGetRawValue(cursorStrand, cursorOrdinal, p.useTrainingMode);
+      if (cursorPreviousValue < 0) {
+        p.ledRawSet(cursorStrand, cursorOrdinal,0,0);
+      }
+    }
+
+    //which pixel on strand
     if (key == '+') {
       cursorOrdinal += 10;
     }
@@ -52,27 +72,13 @@ class HardwareTest extends Drawer {
     else if (key == '-') {
       cursorOrdinal--;
     }
-    if (cursorOrdinal < p.kPixelsPerStrand ) {
-      cursorOrdinal += p.kPixelsPerStrand;
+    
+    int strandSize = p.getStrandSize(cursorStrand);
+    
+    if (cursorOrdinal < strandSize ) {
+      cursorOrdinal += strandSize;
     }
-    cursorOrdinal %= p.kPixelsPerStrand;
-    if (key == '>') {
-      cursorStrand++;
-    }
-    else if (key == '<') {
-      cursorStrand--;
-    }
-    if (cursorStrand < 0) {
-      cursorStrand += p.kNumStrands;
-    }
-    cursorStrand %= p.kNumStrands;
-    if (cursorStrand != oldCursorStrand || cursorOrdinal != oldCursorOrdinal) {
-      p.ledSetRawValue(oldCursorStrand, oldCursorOrdinal, cursorPreviousValue);
-      cursorPreviousValue = p.ledGetRawValue(cursorStrand, cursorOrdinal, p.useTrainingMode);
-      if (cursorPreviousValue < 0) {
-        p.ledRawSet(cursorStrand, cursorOrdinal,0,0);
-      }
-    }
+    cursorOrdinal %= strandSize;
 
     if (key == 'x') {
       //p.ledRawSet(cursorStrand, cursorOrdinal, -999999, -999999);
@@ -203,8 +209,9 @@ class HardwareTest extends Drawer {
       
       pg.background(color(220,238,191));
       
-      for (int whichStrand = 0; whichStrand < p.kNumStrands; whichStrand++) {
-        for (int ordinal = 0; ordinal < p.kPixelsPerStrand; ordinal++) {
+      for (int whichStrand = 0; whichStrand < p.getNumStrands(); whichStrand++) {
+        int strandSize = p.getStrandSize(whichStrand);
+        for (int ordinal = 0; ordinal < strandSize; ordinal++) {
           Point a = p.ledGet(whichStrand, ordinal);
           if (a.x < 0 || a.y < 0)
             continue;
