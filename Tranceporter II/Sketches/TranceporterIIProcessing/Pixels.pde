@@ -21,7 +21,7 @@ class Pixels {
   private int[] strandMap;
   private int[] trainingStrandMap;
   final boolean runConcurrent = true;
-  boolean useTotalControl = true;
+  boolean useTotalControl = false;
   boolean useTrainingMode = true;
   
   Pixels(PApplet p) {
@@ -364,10 +364,11 @@ class Pixels {
   
   int xOffsetter;
   int yOffsetter;
+  int ordinalOffsetter;
   
   void ledSet(int whichStrand, int ordinal, int x, int y) {
 //    ledSetValue(whichStrand, ordinal, c2i(x,y+20));
-      ledSetValue(whichStrand, ordinal, c2i(x + xOffsetter, y + yOffsetter));
+      ledSetValue(whichStrand, ordinal + ordinalOffsetter, c2i(x + xOffsetter, y + yOffsetter));
   }
 
   
@@ -461,10 +462,19 @@ class Pixels {
     if (maxStrand < minStrand) {
       return;
     }
+    
+    
     assert(minStrand < getNumStrands());
     assert(maxStrand <= getNumStrands());
 
     for (int whichStrand = minStrand; whichStrand <= maxStrand; whichStrand++) {
+      
+      int minX = 10000;
+      int minY = 10000;
+      int maxX = -10000;
+      int maxY = -10000;
+
+      println ("strand " + whichStrand);
       int strandSize = getStrandSize(whichStrand);
       StringBuilder s = new StringBuilder(200);
       
@@ -489,11 +499,17 @@ class Pixels {
           assert (value >= 0) : "can't print unrecognized value " + value;
           Point p = i2c(value);
           s.append(String.format("(%02d,%02d) ",p.x,p.y));
+          minX = min(minX,p.x);
+          minY = min(minY,p.y);
+          maxX = max(maxX,p.x);
+          maxY = max(maxY,p.y);
         }
       }
       s.append("\n");
       println(s);
 
+      
+      println("min (" + minX + "," + minY + ") max ("  + maxX + "," + maxY + ")");
     }
     
   }
@@ -547,7 +563,7 @@ class Pixels {
     mapAllLeds();
 
     ledInterpolate();
-    //ledMapDump(0,0); //set which strands you want to dump
+//    ledMapDump(0,2); //set which strands you want to dump
     
     if (runConcurrent) {
       totalControlConcurrent = new TotalControlConcurrent(getNumStrands(),maxPixelsPerStrand, kUseBitBang);

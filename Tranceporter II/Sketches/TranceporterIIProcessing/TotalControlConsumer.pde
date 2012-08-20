@@ -101,10 +101,16 @@ println("numStrands: " + numStrands);
 //    }
 
     int error = TotalControl.open(numStrands, pixelsPerStrand);
+    if (error != 0) {
+      println("could not open, retrying");
+      TotalControl.close();
+      error = TotalControl.open(numStrands, pixelsPerStrand);
+    }
 
 
     if(error != 0) {
       TotalControl.printError(lastError);
+      exit();
     }
     else {
       println("success: TotalControl.open(" + numStrands + ", " + pixelsPerStrand + ")");

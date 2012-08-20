@@ -36,6 +36,7 @@ class FastPlasma extends Drawer {
       s1=sin(i*PI/25);
       s2=sin(i*PI/50+PI/4);
       pal[i]=color(128+s1*128,128+s2*128,s1*128);
+      //getColor( x % getNumColors());
     }
     
     cls = new int[width*height];

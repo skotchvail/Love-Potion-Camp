@@ -8,13 +8,13 @@ class LedMap extends Pixels {
     strandSizes = new int[]
     {
       850, //strand 0(1)
-      850, //strand 1(2)
-      500, //strand 2(3)
-      100, //strand 3(4)
-      100, //strand 4(5)
-      100, //strand 5(6)
-      100, //strand 6(7)
-      100, //strand 7(8)
+      400, //strand 1(2)
+      800, //strand 2(3)
+      200, //strand 3(4)
+      200, //strand 4(5)
+      200, //strand 5(6)
+      200, //strand 6(7)
+      200, //strand 7(8)
     };
   }
  
@@ -26,8 +26,10 @@ class LedMap extends Pixels {
   void mapDriverSideLowerPart1(int panel) {
     assert (panel < getNumStrands());
 
+    //highest y is 28
+    
     xOffsetter = 0;
-    yOffsetter = 16;
+    yOffsetter = 23+3;
     
     ledSet(panel,0, 0, 0);
     ledSet(panel,4, 0, 4);
@@ -128,7 +130,7 @@ class LedMap extends Pixels {
     assert (panel < getNumStrands());
 
     xOffsetter = 0;
-    yOffsetter = 16;
+    yOffsetter = 23+3;
     
     ledSet(panel,0, 44, 5);
     ledSet(panel,18, 44, 23);
@@ -167,46 +169,131 @@ class LedMap extends Pixels {
   }
 
   void mapDriverSideUpper(int panel) {
+    //800 pixels
     assert (panel < getNumStrands());
 
-    /*
-     
-     */
+    xOffsetter = 0;
+    yOffsetter = 10;
+    ordinalOffsetter = -1;
     
-//    ledSet(panel,0, 0, 0);
-//    ledSet(panel,0, 0, 0);
-//    ledSet(panel,0, 0, 0);
-//    ledSet(panel,0, 0, 0);
-//    ledSet(panel,0, 0, 0);
-//    ledSet(panel,0, 0, 0);
-//    ledSet(panel,0, 0, 0);
-//    ledSet(panel,0, 0, 0);
-//    ledSet(panel,0, 0, 0);
-//    ledSet(panel,0, 0, 0);
-//    ledSet(panel,0, 0, 0);
-//    ledSet(panel,0, 0, 0);
-//    ledSet(panel,0, 0, 0);
-//    ledSet(panel,0, 0, 0);
-//    ledSet(panel,0, 0, 0);
-//    ledSet(panel,0, 0, 0);
-//    ledSet(panel,0, 0, 0);
-//    ledSet(panel,0, 0, 0);
-//    ledSet(panel,0, 0, 0);
-//    ledSet(panel,0, 0, 0);
-//    ledSet(panel,0, 0, 0);
-//    ledSet(panel,0, 0, 0);
-//    ledSet(panel,0, 0, 0);
-//    ledSet(panel,0, 0, 0);
-//    ledSet(panel,0, 0, 0);
-//    ledSet(panel,0, 0, 0);
-//    ledSet(panel,0, 0, 0);
-//    ledSet(panel,0, 0, 0);
-//    ledSet(panel,0, 0, 0);
-//    ledSet(panel,0, 0, 0);
-//    ledSet(panel,0, 0, 0);
-//    ledSet(panel,0, 0, 0);
-//    ledSet(panel,0, 0, 0);
-//    ledSet(panel,0, 0, 0);
+    ledSet(panel,1, 5, 12);
+    ledSet(panel,5, 5, 16);
+    ledSet(panel,6, 6, 16);
+    ledSet(panel,15, 6, 7);
+    ledSet(panel,16, 7, 7);
+    ledSet(panel,25, 7, 16);
+    ledSet(panel,26, 8, 16);
+    ledSet(panel,36, 8, 6);
+    ledSet(panel,37, 9, 6);
+    ledSet(panel,47, 9, 16);
+    ledSet(panel,48, 10, 16);
+    ledSet(panel,59, 10, 5);
+    ledSet(panel,60, 11, 5);
+    ledSet(panel,71, 11, 16);
+    ledSet(panel,72, 12, 16);
+    ledSet(panel,85, 12, 3);
+    ledSet(panel,86, 13, 3);
+    ledSet(panel,97, 13, 14);
+    ledSet(panel,98, 14, 14);
+    ledSet(panel,110, 14, 2);
+    ledSet(panel,111, 15, 2);
+    ledSet(panel,123, 15, 14);
+    ledSet(panel,124, 16, 14);
+    ledSet(panel,138, 16, 0);
+    ledSet(panel,139, 17, 0);
+    ledSet(panel,153, 17, 14);
+    ledSet(panel,154, 18, 14);
+    ledSet(panel,168, 18, 0);
+    ledSet(panel,169, 19, 0);
+    ledSet(panel,183, 19, 14);
+    ledSet(panel,184, 20, 14);
+    ledSet(panel,198, 20, 0);
+    ledSet(panel,199, 21, 0);
+    ledSet(panel,213, 21, 14);
+    ledSet(panel,214, 22, 14);
+    ledSet(panel,228, 22, 0);
+    ledSet(panel,229, 23, 0);
+    ledSet(panel,242, 23, 13);
+    ledSet(panel,243, 24, 13);
+    ledSet(panel,255, 24, 1);
+    ledSet(panel,256, 25, 1);
+    ledSet(panel,267, 25, 12);
+    ledSet(panel,268, 26, 12);
+    ledSet(panel,279, 26, 1);
+    ledSet(panel,280, 27, 1);
+    ledSet(panel,291, 27, 12);
+    ledSet(panel,292, 28, 12);
+    ledSet(panel,301, 28, 3);
+    ledSet(panel,302, 29, 3);
+    ledSet(panel,311, 29, 12);
+    ledSet(panel,312, 30, 12);
+    ledSet(panel,322, 30, 2);
+    ledSet(panel,323, 31, 2);
+    ledSet(panel,333, 31, 12);
+    ledSet(panel,334, 32, 12);
+    ledSet(panel,346, 32, 0);
+    ledSet(panel,347, 33, 0);
+    ledSet(panel,359, 33, 12);
+    ledSet(panel,360, 34, 12);
+    ledSet(panel,371, 34, 1);
+    ledSet(panel,372, 35, 1);
+    ledSet(panel,383, 35, 12);
+    ledSet(panel,384, 36, 12);
+    ledSet(panel,394, 36, 2);
+    ledSet(panel,395, 37, 2);
+    ledSet(panel,405, 37, 12);
+    ledSet(panel,406, 38, 12);
+    ledSet(panel,415, 38, 3);
+    ledSet(panel,416, 39, 3);
+    ledSet(panel,425, 39, 12);
+    ledSet(panel,426, 40, 12);
+    ledSet(panel,435, 40, 3);
+    ledSet(panel,436, 41, 3);
+    ledSet(panel,445, 41, 12);
+    ledSet(panel,446, 42, 12);
+    ledSet(panel,454, 42, 4);
+    ledSet(panel,455, 43, 4);
+    ledSet(panel,463, 43, 12);
+    ledSet(panel,464, 44, 12);
+    ledSet(panel,472, 44, 4);
+    ledSet(panel,473, 45, 4);
+    ledSet(panel,481, 45, 12);
+    ledSet(panel,482, 46, 12);
+    ledSet(panel,490, 46, 4);
+    ledSet(panel,491, 47, 4);
+    ledSet(panel,499, 47, 12);
+    ledSet(panel,500, 48, 12);
+    ledSet(panel,509, 48, 3);
+    ledSet(panel,510, 49, 3);
+    ledSet(panel,521, 49, 14);
+    ledSet(panel,522, 50, 14);
+    ledSet(panel,546, 50, -10);
+    ledSet(panel,547, 51, -10);
+    ledSet(panel,570, 51, 13);
+    ledSet(panel,571, 52, 13);
+    ledSet(panel,593, 52, -9);
+    ledSet(panel,594, 53, -9);
+    ledSet(panel,615, 53, 12);
+    ledSet(panel,616, 54, 12);
+    ledSet(panel,636, 54, -8);
+    ledSet(panel,637, 55, -8);
+    ledSet(panel,657, 55, 12);
+    ledSet(panel,658, 56, 12);
+    ledSet(panel,676, 56, -6);
+    ledSet(panel,677, 57, -6);
+    ledSet(panel,695, 57, 12);
+    ledSet(panel,696, 58, 12);
+    ledSet(panel,713, 58, -5);
+    ledSet(panel,714, 59, -5);
+    ledSet(panel,733, 59, 14);
+    ledSet(panel,734, 60, 14);
+    ledSet(panel,752, 60, -4);
+    ledSet(panel,753, 61, -4);
+    ledSet(panel,770, 61, 13);
+    ledSet(panel,771, 62, 13);
+    ledSet(panel,786, 62, -2);
+    ledSet(panel,787, 63, -2);
+    ledSet(panel,800, 63, 11);
 
     
     

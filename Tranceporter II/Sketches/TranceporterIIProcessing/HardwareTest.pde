@@ -104,7 +104,7 @@ class HardwareTest extends Drawer {
         int whichOrdinal = cursorOrdinal;
         Point a;
         do {
-          assert(whichOrdinal > 0);
+          assert(whichOrdinal > 0) : "bad whichOrdinal: " + whichOrdinal;
           a = p.ledGet(cursorStrand, whichOrdinal, false);
           whichOrdinal--;
         } while (a.x < 0);
@@ -125,7 +125,7 @@ class HardwareTest extends Drawer {
     return new String[]{
       
       "cursorStrand: " + (cursorStrand + 1),
-      "cursorOrdinal: " + (cursorOrdinal + 1),
+      "cursorOrdinal: " + (cursorOrdinal + 0),
       a.x >= 0?("x:" + a.x + " y:" + a.y):"missingLed",
     };
   }
@@ -201,7 +201,7 @@ class HardwareTest extends Drawer {
         
       }
     }
-    else if (setting > 0.3) {
+    else if (setting >= 0.3) {
       //p.useTrainingMode = false;
       pg.background(0,30,0);
     }

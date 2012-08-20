@@ -11,9 +11,9 @@ import java.util.prefs.Preferences;
 
 //ADJUSTABLE PARAMS
 String iPadIP = "10.0.1.8";
-int ledWidth = 60;
+int ledWidth = 65;
 int ledHeight = 60;
-int screenPixelSize = 5;
+int screenPixelSize = 2;
 int screenWidth = 700;
 int screenHeight = 400;
 
@@ -103,7 +103,8 @@ class MainClass {
         new Tunnel(display,settings),             //0,0
         new Bzr3(display, settings),              //0,1
         new Fire(display, settings),              //0,2
-        new Equalizer3d(display, settings),       //0,32
+        new Equalizer3d(display, settings),       //0,3
+        new FastPlasma(display, settings),        //0,4
       },
       //column 1
       {
