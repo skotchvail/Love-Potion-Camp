@@ -35,6 +35,7 @@ class HardwareTest extends Drawer {
   color(200,  100,  0),     // strand 6
   color(200,  55,   100),   // strand 7
   };
+  
   void keyPressed() {
     
     int oldCursorOrdinal = cursorOrdinal;
@@ -113,7 +114,7 @@ class HardwareTest extends Drawer {
       }
     }
     
-    println( "cursorStrand:"  + cursorStrand + "cursorOrdinal:" + cursorOrdinal);
+    println( "keyPressed cursorStrand:"  + (cursorStrand + 1) +  "cursorOrdinal:" + (cursorOrdinal + 1));
   }
   
   String[] getTextLines() {
@@ -123,8 +124,8 @@ class HardwareTest extends Drawer {
     
     return new String[]{
       
-      "cursorStrand: " + cursorStrand,
-      "cursorOrdinal: " + cursorOrdinal,
+      "cursorStrand: " + (cursorStrand + 1),
+      "cursorOrdinal: " + (cursorOrdinal + 1),
       a.x >= 0?("x:" + a.x + " y:" + a.y):"missingLed",
     };
   }
@@ -246,7 +247,7 @@ class HardwareTest extends Drawer {
       float factor = (frameCount % ( FRAMES * 2)) / (FRAMES * 1.0);
       
       if (factor > 1.0) {
-        factor = 2 - factor;
+        factor = 2.0 - factor;
       }
       color c = color(255 * factor, 0 * factor, 0 * factor);
 

@@ -104,7 +104,6 @@ println("numStrands: " + numStrands);
 
 
     if(error != 0) {
-println("here I am");
       TotalControl.printError(lastError);
     }
     else {

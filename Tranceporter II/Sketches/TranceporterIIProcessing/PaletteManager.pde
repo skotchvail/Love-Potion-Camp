@@ -32,10 +32,47 @@ class PaletteManager {
     k.setKey("5F5D21FE5CA6CBE00A40BD4457BAF3BA");
     k.setNumResults(20);
       
-    KulerTheme[] kt = (KulerTheme[]) k.getHighestRated();
-    for (int i=0; i<kt.length; i++) {
-      kPs[i+1] = kt[i];
-      kPs[i+1].addColor(kPs[i+1].getColor(0));
+    KulerTheme[] kt = null;
+    
+    
+    try {
+      kt = (KulerTheme[]) k.getHighestRated();
+      int count = 0;
+      if (kt != null) {
+        
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        ObjectOutput out = new ObjectOutputStream(bos) ;
+        
+        out.writeInt(kt.length);
+        for (int i = 0; i < kt.length; i++) {
+          out.writeObject(kt[i]);
+        }
+        out.close();
+        
+        // Get the bytes of the serialized object
+        byte[] buf = bos.toByteArray();
+        
+        ByteArrayInputStream bis = new ByteArrayInputStream(buf);
+        ObjectInput in = new ObjectInputStream(bis);
+        count = in.readInt();
+        for (int i = 0; i < count; i++) {
+          kt[i] = (KulerTheme)in.readObject();
+        }
+        in.close();
+        
+        
+      }
+      println("read count = " + count  + " KulerThemes");
+    }
+    catch (Exception e) {
+      println("could not read in KulerTheme's:\n" + e);
+    }
+    
+    if (kt != null) {
+      for (int i=0; i<kt.length; i++) {
+        kPs[i+1] = kt[i];
+        kPs[i+1].addColor(kPs[i+1].getColor(0));
+      }
     }
   }
   
