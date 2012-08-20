@@ -85,6 +85,10 @@ class Drawer {
     }
   }
   
+  boolean isTrainingMode() {
+    return false;
+  }
+  
   int getWidth() {
     return ledWidth;
   }

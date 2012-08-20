@@ -22,7 +22,6 @@ class Pixels {
   private int[] trainingStrandMap;
   final boolean runConcurrent = true;
   boolean useTotalControl = true;
-  boolean useTrainingMode = true;
   
   Pixels(PApplet p) {
     box2d = new Rectangle(10, 10, ledWidth * screenPixelSize, ledHeight * screenPixelSize);
@@ -391,7 +390,7 @@ class Pixels {
   }
 
   Point ledGet(int whichStrand, int ordinal) {
-    return ledGet(whichStrand,ordinal,useTrainingMode);
+    return ledGet(whichStrand,ordinal,main.currentMode().isTrainingMode());
   }
   
   void ledInterpolate() {
@@ -583,7 +582,7 @@ class Pixels {
     if (!useTotalControl) {
       return;
     }
-    int[] theStrandMap = useTrainingMode?trainingStrandMap:strandMap;
+    int[] theStrandMap = main.currentMode().isTrainingMode()?trainingStrandMap:strandMap;
 
     //println("sending pixelData: " + pixelData.length + " strandMap: " + theStrandMap.length);
     if (runConcurrent) {

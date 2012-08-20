@@ -60,57 +60,35 @@ final int TC_CBUS_CLOCK = 8;   /* Use hardware for serial clock, not bitbang */
   
   int lastError;
   int lastStat;
-    
+  
   int setupTotalControl(int numStrands, int pixelsPerStrand, boolean useBitBang) {
-
-
-
+    
     assert(numStrands <= 8);
     if (useBitBang && numStrands < 8) {
       numStrands += TC_CBUS_CLOCK;
     }
-
-println("numStrands: " + numStrands);
-
-//TC_FTDI_TX
-//TC_FTDI_RX
-//TC_FTDI_RTS
-//TC_FTDI_CTS
-//TC_FTDI_DTR
-//TC_FTDI_DSR
-//TC_FTDI_DCD
-//TC_FTDI_RI
-  if (useBitBang) {
-    TotalControl.setStrandPin(0,TC_FTDI_TX);
-    TotalControl.setStrandPin(1,TC_FTDI_RX);
-    TotalControl.setStrandPin(2,TC_FTDI_RTS);
-    TotalControl.setStrandPin(3,TC_FTDI_CTS);
-    TotalControl.setStrandPin(4,TC_FTDI_DTR);
-    TotalControl.setStrandPin(5,TC_FTDI_DSR);
-    TotalControl.setStrandPin(6,TC_FTDI_DCD);
-    TotalControl.setStrandPin(7,TC_FTDI_RI);
-  }
-
-
-//    for (int i = 3; i < numStrands; i++) {
-//      //SKOTCH: I am really not sure what is supposed to happen here, are we
-//      //supposed to set the same value to each strand, or are we supposed
-//      //to set a differerent value for each strand?
-//      //I guess we can try different ways and see what works
-//      TotalControl.setStrandPin(i,TC_FTDI_CTS);
-//    }
-
+    
+    if (useBitBang) {
+      TotalControl.setStrandPin(0,TC_FTDI_TX);
+      TotalControl.setStrandPin(1,TC_FTDI_RX);
+      TotalControl.setStrandPin(2,TC_FTDI_RTS);
+      TotalControl.setStrandPin(3,TC_FTDI_CTS);
+      TotalControl.setStrandPin(4,TC_FTDI_DTR);
+      TotalControl.setStrandPin(5,TC_FTDI_DSR);
+      TotalControl.setStrandPin(6,TC_FTDI_DCD);
+      TotalControl.setStrandPin(7,TC_FTDI_RI);
+    }
+    
     int error = TotalControl.open(numStrands, pixelsPerStrand);
     if (error != 0) {
       println("could not open, retrying");
       TotalControl.close();
       error = TotalControl.open(numStrands, pixelsPerStrand);
     }
-
-
+    
     if(error != 0) {
       TotalControl.printError(lastError);
-      exit();
+      //exit();
     }
     else {
       println("success: TotalControl.open(" + numStrands + ", " + pixelsPerStrand + ")");
@@ -121,8 +99,8 @@ println("numStrands: " + numStrands);
   }
   
   int writeOneFrame(color[] pixelData, int[] strandMap) {
-//    println("pixelData:" + pixelData.length + " strandMap:" + strandMap.length);
-
+    //    println("pixelData:" + pixelData.length + " strandMap:" + strandMap.length);
+    
     int status = TotalControl.refresh(pixelData, strandMap);
     if(status != lastError) {
       lastError = status;
@@ -133,7 +111,7 @@ println("numStrands: " + numStrands);
       TotalControl.printStats();
     }
     return status;
-
+    
   }
   
 //}
@@ -165,13 +143,25 @@ class TotalControlConcurrent implements Runnable {
     q.put(pixelData, strandMap);
   }
   
+  int[] lastStrandMap;
+  
   public void run() {
     setupTotalControl(numStrands, pixelsPerStrand, useBitBang);
     
     while(true) {
       PixelDataAndMap dm = q.get();
       assert(dm != null) : "no data to write to TotalControl";
-      //println("writing dm.pixelData: " + dm.pixelData.length + " dm.strandMap: " + dm.strandMap.length);
+      
+      if (dm.strandMap != lastStrandMap) {
+        lastStrandMap = dm.strandMap;
+        println("New strandMap. dm.pixelData: " + dm.pixelData.length + " dm.strandMap: " + dm.strandMap.length
+                + "\n   [0]=" + dm.strandMap[0]
+                + "\n   [1]=" + dm.strandMap[1]
+                + "\n   [2]=" + dm.strandMap[2]
+                + "\n   [3]=" + dm.strandMap[3]
+                );
+      }
+      
       writeOneFrame(dm.pixelData, dm.strandMap);
     }
   }

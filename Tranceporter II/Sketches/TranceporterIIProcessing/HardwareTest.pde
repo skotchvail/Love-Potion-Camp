@@ -3,7 +3,6 @@
  For testing the hardware layout of the LED's
  */
 
-int cursorPreviousValue;
 int cursorStrand;
 int cursorOrdinal;
 
@@ -16,7 +15,6 @@ class HardwareTest extends Drawer {
   void setup(){
     colorMode(RGB,255);
     settings.setParam(settings.keyFlash,0.0);
-    cursorPreviousValue = p.ledGetRawValue(cursorStrand, cursorOrdinal, p.useTrainingMode);
   }
   
   String getName() { return "Hardware Test"; }
@@ -52,13 +50,6 @@ class HardwareTest extends Drawer {
       cursorStrand += p.getNumStrands();
     }
     cursorStrand %= p.getNumStrands();
-    if (cursorStrand != oldCursorStrand || cursorOrdinal != oldCursorOrdinal) {
-      p.ledSetRawValue(oldCursorStrand, oldCursorOrdinal, cursorPreviousValue);
-      cursorPreviousValue = p.ledGetRawValue(cursorStrand, cursorOrdinal, p.useTrainingMode);
-      if (cursorPreviousValue < 0) {
-        p.ledRawSet(cursorStrand, cursorOrdinal,0,0);
-      }
-    }
 
     //which pixel on strand
     if (key == '+') {
@@ -129,6 +120,18 @@ class HardwareTest extends Drawer {
       a.x >= 0?("x:" + a.x + " y:" + a.y):"missingLed",
     };
   }
+
+  final float kLevelGrid = 0.4;
+  final float kLevelGreen = 0.2;
+  
+  boolean isTrainingMode() {
+    float setting = settings.getParam(settings.keyCustom1);
+    if (setting > kLevelGrid) {
+      return false;
+    }
+    return true;
+  }
+
   
   void draw() {
     colorMode(RGB,255);
@@ -147,12 +150,8 @@ class HardwareTest extends Drawer {
     int chunkX = 255 / ledWidth;
     int chunkY = 255 / ledHeight;
     
-    if (setting > 0.4) {
-      p.useTrainingMode = false;
-      
+    if (setting > kLevelGrid) {
       pg.background(color(0,0,0));
-      
-      //      println("setting=" + setting);
       
       int unit = 10;
       if (setting > 0.95)
@@ -197,17 +196,12 @@ class HardwareTest extends Drawer {
           pg.stroke(color(0,0,0));
           pg.line(x,0,x,ledHeight);
         }
-        
-        
       }
     }
-    else if (setting >= 0.3) {
-      //p.useTrainingMode = false;
+    else if (setting >= kLevelGreen) {
       pg.background(0,30,0);
     }
     else {
-      p.useTrainingMode = true;
-      
       pg.background(color(220,238,191));
       
       for (int whichStrand = 0; whichStrand < p.getNumStrands(); whichStrand++) {
@@ -240,7 +234,6 @@ class HardwareTest extends Drawer {
       }
     }
     
-//    if (p.useTrainingMode) {
     if (true) {
       Point a = p.ledGet(cursorStrand, cursorOrdinal);
       final int FRAMES = 10;
