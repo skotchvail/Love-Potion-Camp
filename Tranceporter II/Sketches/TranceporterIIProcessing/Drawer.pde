@@ -118,7 +118,7 @@ class Drawer {
     lastTouchTimes[touchNum] = millis();
     if (touchNum == 1) {
       touchX = mouseX = round(x * width);
-      touchY = mouseY = round(y * width);
+      touchY = mouseY = round(y * height);
     }
     
     xTouches[touchNum] = x;

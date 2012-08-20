@@ -13,7 +13,7 @@ import java.util.prefs.Preferences;
 String iPadIP = "10.0.1.8";
 int ledWidth = 65;
 int ledHeight = 60;
-int screenPixelSize = 2;
+int screenPixelSize = 3;
 int screenWidth = 700;
 int screenHeight = 400;
 

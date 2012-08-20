@@ -18,7 +18,10 @@ class EyeMotion extends Drawer {
   int MAXX, MAXY;
   int lastLookChange;
   boolean readyToBlink;
-  
+  float dX, dY;
+  int translateX = 60;
+  int translateY = 90;
+
   
   EyeMotion(Pixels p, Settings s) {
     super(p, s, JAVA2D);
@@ -41,11 +44,16 @@ class EyeMotion extends Drawer {
   }
   
   void setEyeLimits(float scale) {
-    MINX = (int)(inner + 50 - 15 * scale);
-    MAXX = (int)(width/SCALE - inner - 35 + 20 * scale);
     
-    MINY = (int)(inner - 10 - 25 * scale);
-    MAXY = (int)(height/SCALE - inner + 40 + 30 * scale);
+    float percent = 1.0 - scale * 0.2;
+    
+    MINX = (int)(276 * percent);
+    MINY = (int)(210 * percent);
+    
+    percent = 1.0 + scale * 0.2;
+    
+    MAXX = (int)(340 * percent);
+    MAXY = (int)(235 * percent);
   }
   
   
@@ -65,7 +73,7 @@ class EyeMotion extends Drawer {
     pg.scale(SCALE);
     pg.noStroke();
     pg.smooth();
-    pg.translate(40,0);
+    pg.translate(translateX,translateY);
     pg.background(14, 37, 62);
     
     handleTouches(touchX,touchY);
@@ -221,6 +229,17 @@ class EyeMotion extends Drawer {
     pg.fill(144, 187, 204, 50);
     pg.ellipse(253, 205, 13, 21);
     
+//    pg.stroke(0,255,0,255);
+//    pg.noFill();
+//    
+//    pg.rect(MINX,MINY,MAXX - MINX, MAXY-MINY);
+//    
+//    pg.rect(dX,dY,10,10);
+  
+//    pg.fill(255,0,255,255);
+//    pg.rect(mx,my,50,50);
+//  
+//    println("dX:" + dX + " dY:" + dY);
   }
  
   float secondsForSpeed(float min_seconds, float max_seconds, float speed) {
@@ -232,8 +251,11 @@ class EyeMotion extends Drawer {
   
   void handleTouches(float touchX, float touchY)
   {
-    float targetX = touchX/SCALE;
-    float targetY = touchY/SCALE;
+    float targetX = touchX/SCALE - translateX;
+    float targetY = touchY/SCALE - translateY;
+
+    dX = targetX;
+    dY = targetY;
     
     if (abs(targetX - mx) > 0.1) {
       mx = mx + (targetX - mx) * easing;

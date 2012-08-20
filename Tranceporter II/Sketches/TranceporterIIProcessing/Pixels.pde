@@ -21,7 +21,7 @@ class Pixels {
   private int[] strandMap;
   private int[] trainingStrandMap;
   final boolean runConcurrent = true;
-  boolean useTotalControl = false;
+  boolean useTotalControl = true;
   boolean useTrainingMode = true;
   
   Pixels(PApplet p) {
