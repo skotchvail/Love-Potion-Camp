@@ -45,6 +45,9 @@ void setup() {
 }
 
 void draw() {
+  if (frameCount == 2) {
+    frame.setLocation(0, 0);
+  }
   main.draw();
 }
 

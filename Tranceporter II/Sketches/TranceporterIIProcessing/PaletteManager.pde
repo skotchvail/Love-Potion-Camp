@@ -31,46 +31,61 @@ class PaletteManager {
     k = new Kuler(pa);
     k.setKey("5F5D21FE5CA6CBE00A40BD4457BAF3BA");
     k.setNumResults(20);
-      
-    KulerTheme[] kt = null;
     
-    
-    try {
-      kt = (KulerTheme[]) k.getHighestRated();
-      int count = 0;
-      if (kt != null) {
-        
-        ByteArrayOutputStream bos = new ByteArrayOutputStream();
-        ObjectOutput out = new ObjectOutputStream(bos) ;
-        
-        out.writeInt(kt.length);
-        for (int i = 0; i < kt.length; i++) {
-          out.writeObject(kt[i]);
+    Palette[] palettes = null;
+    {
+      KulerTheme[] kt = null;
+      try {
+        kt = (KulerTheme[]) k.getHighestRated();
+      }
+      catch (Exception e) {
+        println("cannot get highest rated\n" + e);
+        e.printStackTrace();
+      }
+      try {
+        if (kt == null) {
+          println("reading palettes from prefs");
+          byte[] buf = prefs.getByteArray("Palettes", new byte[0]);
+          if (buf.length > 0) {
+            ByteArrayInputStream bis = new ByteArrayInputStream(buf);
+            ObjectInput in = new ObjectInputStream(bis);
+            int count = in.readInt();
+            palettes = new Palette[count];
+            for (int i = 0; i < count; i++) {
+              int[] colors = (int[])in.readObject();
+              palettes[i] = new Palette(pa,colors);
+            }
+            in.close();
+          }
         }
-        out.close();
-        
-        // Get the bytes of the serialized object
-        byte[] buf = bos.toByteArray();
-        
-        ByteArrayInputStream bis = new ByteArrayInputStream(buf);
-        ObjectInput in = new ObjectInputStream(bis);
-        count = in.readInt();
-        for (int i = 0; i < count; i++) {
-          kt[i] = (KulerTheme)in.readObject();
+        else {
+          ByteArrayOutputStream bos = new ByteArrayOutputStream();
+          ObjectOutput out = new ObjectOutputStream(bos) ;
+          out.writeInt(kt.length);
+          palettes = new Palette[kt.length];
+          for (int i = 0; i < kt.length; i++) {
+            int[] colors = kt[i].getColors();
+            out.writeObject(colors);
+            palettes[i] = new Palette(pa,colors);
+          }
+          out.close();
+          // Get the bytes of the serialized object
+          byte[] buf = bos.toByteArray();
+          prefs.putByteArray("Palettes",buf);
+          prefs.flush();
         }
-        in.close();
-        
         
       }
-      println("read count = " + count  + " KulerThemes");
+      catch (Exception e) {
+        println("could not read in Palettes:\n" + e);
+        e.printStackTrace();
+      }
     }
-    catch (Exception e) {
-      println("could not read in KulerTheme's:\n" + e);
-    }
+    println("read count = " + (palettes == null? 0: palettes.length)  + " Palettes");
     
-    if (kt != null) {
-      for (int i=0; i<kt.length; i++) {
-        kPs[i+1] = kt[i];
+    if (palettes != null) {
+      for (int i=0; i<palettes.length; i++) {
+        kPs[i+1] = palettes[i];
         kPs[i+1].addColor(kPs[i+1].getColor(0));
       }
     }
