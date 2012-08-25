@@ -19,8 +19,8 @@ class EyeMotion extends Drawer {
   int lastLookChange;
   boolean readyToBlink;
   float dX, dY;
-  int translateX = 60;
-  int translateY = 90;
+  int translateX = (int)(10 * SCALE);
+  int translateY = (int)(15 * SCALE);
 
   
   EyeMotion(Pixels p, Settings s) {
@@ -60,6 +60,12 @@ class EyeMotion extends Drawer {
   
   
   void draw() {
+    
+//    SCALE = ((frameCount % 500) + 1) / 1000.0;
+//    translateX = (int)(10 * SCALE);
+//    translateY = (int)(15 * SCALE);
+//    println("scale = " + SCALE);
+
     
     trippy = settings.getParam(settings.keyCustom1);
     setEyeLimits(trippy);

@@ -10,7 +10,6 @@ int MAX_RGB = 255;
 
 class Pixels {
   private color[] pixelData;
-  private int rotation = 0;
   private OBJModel objModel;
   private PGraphics pg3D;
 
@@ -217,7 +216,7 @@ class Pixels {
     //println("rX = " + rX + " rY = " + rY);
     
     int fullRevolution = FRAME_RATE * 60; //X seconds
-    rotation = (rotation  + 1) % fullRevolution;
+    int rotation = (frameCount + fullRevolution / 7) % fullRevolution;
     float rX = PI/2;
     float rY = map(rotation, 0, fullRevolution, -PI, PI);
     

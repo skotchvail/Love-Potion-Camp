@@ -19,7 +19,8 @@ int screenHeight = 400;
 
 int SAMPLE_RATE = 44100;
 int SAMPLE_SIZE = 1024;
-int FRAME_RATE = SAMPLE_RATE/SAMPLE_SIZE;
+//int FRAME_RATE = SAMPLE_RATE/SAMPLE_SIZE;
+int FRAME_RATE = 24;
 
 
 boolean draw2dGrid;
