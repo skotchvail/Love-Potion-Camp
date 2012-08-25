@@ -35,12 +35,14 @@ class EyeMotion extends Drawer {
     pg.noStroke();
     pg.smooth();
     
-    touchX = 33;
-    touchY = 22;
+    touchX = (int)(0.585 * ledWidth);
+    touchY = (int)(0.366 * ledHeight);
     setMouseCoords(touchX*screenPixelSize,touchY*screenPixelSize);
     settings.setParam(settings.keyCustom1,0.1);
     settings.setParam(settings.keyFlash,0.0);
     setEyeLimits(0);
+    mx = MINX;
+    my = MINY;
   }
   
   void setEyeLimits(float scale) {
@@ -90,8 +92,8 @@ class EyeMotion extends Drawer {
     int timeSinceLastMove = millis() - lastLookChange;
     if ((timeSinceLastMove/1000 > timeBeforeMoveEyes) && (trippy > 0) && settings.isBeat(2)) {
       lastLookChange = millis();
-      touchX = (int)round(random(MINX,MAXX)*SCALE);
-      touchY = (int)round(random(MINY,MAXY)*SCALE);
+      touchX = (int)round(random(0,ledWidth));
+      touchY = (int)round(random(0,ledHeight));
       println("time before move:" + timeBeforeMoveEyes + " timeSinceLastMove:" + timeSinceLastMove);
     }
         
@@ -231,7 +233,6 @@ class EyeMotion extends Drawer {
     
 //    pg.stroke(0,255,0,255);
 //    pg.noFill();
-//    
 //    pg.rect(MINX,MINY,MAXX - MINX, MAXY-MINY);
 //    
 //    pg.rect(dX,dY,10,10);
@@ -251,21 +252,22 @@ class EyeMotion extends Drawer {
   
   void handleTouches(float touchX, float touchY)
   {
-    float targetX = touchX/SCALE - translateX;
-    float targetY = touchY/SCALE - translateY;
+    
+    float targetX = map(touchX,0,ledWidth,(MINX+translateX)*SCALE,(MAXX+translateX)*SCALE);
+    float targetY = map(touchY,0,ledHeight,(MINY+translateY)*SCALE,(MAXY+translateY)*SCALE);
+
+    targetX = targetX/SCALE - translateX;
+    targetY = targetY/SCALE - translateY;
 
     dX = targetX;
     dY = targetY;
     
     if (abs(targetX - mx) > 0.1) {
-      mx = mx + (targetX - mx) * easing;
+      mx += (targetX - mx) * easing;
     }
     if (abs(targetY - my) > 0.1) {
-      my = my + (targetY - my) * easing;
-    }
-    
-    mx = constrain(mx, MINX, MAXX);
-    my = constrain(my, MINY, MAXY);
+      my += (targetY - my) * easing;
+    }    
   }
 
   
