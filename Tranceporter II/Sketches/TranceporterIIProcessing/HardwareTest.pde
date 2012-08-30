@@ -19,6 +19,7 @@ class HardwareTest extends Drawer {
   
   String getName() { return "Hardware Test"; }
   String getCustom1Label() { return "Strand/Checks";}
+  String getCustom2Label() { return "Cursor Finder";}
   
   
   float lastTimeSwitched;
@@ -50,7 +51,7 @@ class HardwareTest extends Drawer {
       cursorStrand += p.getNumStrands();
     }
     cursorStrand %= p.getNumStrands();
-
+    
     //which pixel on strand
     if (key == '+') {
       cursorOrdinal += 10;
@@ -71,7 +72,7 @@ class HardwareTest extends Drawer {
       cursorOrdinal += strandSize;
     }
     cursorOrdinal %= strandSize;
-
+    
     if (key == 'x') {
       //p.ledRawSet(cursorStrand, cursorOrdinal, -999999, -999999);
     }
@@ -120,7 +121,7 @@ class HardwareTest extends Drawer {
       a.x >= 0?("x:" + a.x + " y:" + a.y):"missingLed",
     };
   }
-
+  
   final float kLevelGrid = 0.4;
   final float kLevelGreen = 0.2;
   
@@ -131,7 +132,7 @@ class HardwareTest extends Drawer {
     }
     return true;
   }
-
+  
   
   void draw() {
     colorMode(RGB,255);
@@ -145,7 +146,7 @@ class HardwareTest extends Drawer {
     int movementPixelSlow = movementPixelFast / 10;
     
     float setting = settings.getParam(settings.keyCustom1);
-//    println("setting = " + setting);
+    //    println("setting = " + setting);
     
     int chunkX = 255 / ledWidth;
     int chunkY = 255 / ledHeight;
@@ -235,6 +236,29 @@ class HardwareTest extends Drawer {
     }
     
     if (true) {
+ 
+      int cursorFinder = (int)(settings.getParam(settings.keyCustom2) * 20);
+      
+      //if (setting >= kLevelGreen && setting < kLevelGrid) {
+      if (cursorFinder > 0) {
+        for (int i = cursorOrdinal - cursorFinder; i < cursorOrdinal + cursorFinder; i++) {
+          if (i < 0) {
+            continue;
+          }
+          if (i >= p.getStrandSize(cursorStrand)) {
+            continue;
+          }
+          Point a = p.ledGet(cursorStrand, i);
+          color c = color(255,255,0);
+          
+          if (a.x >= 0 && a.y >= 0) {
+            pg.set(a.x,a.y,c);
+          }
+          
+        }
+      }
+      
+      
       Point a = p.ledGet(cursorStrand, cursorOrdinal);
       final int FRAMES = 10;
       float factor = (frameCount % ( FRAMES * 2)) / (FRAMES * 1.0);
@@ -242,13 +266,15 @@ class HardwareTest extends Drawer {
       if (factor > 1.0) {
         factor = 2.0 - factor;
       }
-      color c = color(255 * factor, 0 * factor, 0 * factor);
-
+      color c = color(0 * factor, 0 * factor, 255 * factor);
+      
       if (a.x >= 0 && a.y >= 0) {
         pg.set(a.x,a.y,c);
       }
+      
+      
     }
-
+    
     
   }
   

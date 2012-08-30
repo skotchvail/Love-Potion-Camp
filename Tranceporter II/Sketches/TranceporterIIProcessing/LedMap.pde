@@ -7,14 +7,15 @@ class LedMap extends Pixels {
     super(p);
     strandSizes = new int[]
     {
-      850, //mapDriverSideLowerPart1
-      400, //mapDriverSideLowerPart2
-      800, //mapDriverSideUpper
-      849, //mapPassengerSideLower1
-      250, //mapPassengerSideLower2
-      997, //mapLowerHalfTopDriverSide
-      973, //mapLowerHalfTopPassengerSide
       1001, //mapUpperHalfTopDriverSide
+      400, //mapDriverSideLowerPart2
+      850, //mapDriverSideLowerPart1
+      997, //mapLowerHalfTopDriverSide
+//      800, //mapDriverSideUpper
+      849, //mapPassengerSideLower1
+      775, //mapPassengerSideUpperTop1
+      250, //mapPassengerSideLower2
+      973, //mapLowerHalfTopPassengerSide
     };
   }
   
@@ -28,8 +29,8 @@ class LedMap extends Pixels {
     
     //highest y is 28
     
-    xOffsetter = 0;
-    yOffsetter = 23+3;
+    xOffsetter = 21;
+    yOffsetter = 32;
     ordinalOffsetter = 0;
     
     ledSet(panel,0, 0, 0);
@@ -130,8 +131,8 @@ class LedMap extends Pixels {
   void mapDriverSideLowerPart2(int panel) {
     assert (panel < getNumStrands());
     
-    xOffsetter = 0;
-    yOffsetter = 23+3;
+    xOffsetter = 21;
+    yOffsetter = 32;
     ordinalOffsetter = 0;
     
     ledSet(panel,0, 44, 5);
@@ -173,6 +174,8 @@ class LedMap extends Pixels {
   void mapDriverSideUpper(int panel) {
     //800 pixels
     assert (panel < getNumStrands());
+ 
+    //OBSOLETE?????
     
     xOffsetter = 0;
     yOffsetter = 10;
@@ -960,6 +963,136 @@ class LedMap extends Pixels {
   }
   
   
+  void mapPassengerSideUpperTop1(int panel) {
+    assert (panel < getNumStrands());
+    
+    //top of top driver side
+    xOffsetter = 0;
+    yOffsetter = 0;
+    ordinalOffsetter = 0;
+    
+    ledMissing(panel,0);
+    ledMissing(panel,1);
+    ledMissing(panel,2);
+    
+    ledSet(panel,3, 14, 4);
+    ledSet(panel,4, 13, 4);
+    ledSet(panel,5, 12, 5);
+    ledSet(panel,16, 12, 16);
+    ledSet(panel,17, 13, 16);
+    ledSet(panel,29, 13, 5);
+    ledSet(panel,30, 14, 5);
+    ledSet(panel,41, 14, 16);
+    ledSet(panel,42, 15, 16);
+    ledSet(panel,54, 15, 4);
+    ledSet(panel,55, 16, 4);
+    ledSet(panel,66, 16, 15);
+    ledSet(panel,67, 17, 15);
+    ledSet(panel,78, 17, 4);
+    ledSet(panel,79, 18, 3);
+    ledSet(panel,91, 18, 15);
+    ledSet(panel,92, 19, 15);
+    ledSet(panel,106, 19, 1);
+    ledSet(panel,107, 20, 1);
+    ledSet(panel,121, 20, 15);
+    ledSet(panel,122, 21, 15);
+    ledSet(panel,136, 21, 1);
+    ledSet(panel,137, 22, 1);
+    ledSet(panel,151, 22, 15);
+    ledSet(panel,152, 23, 15);
+    ledSet(panel,166, 23, 1);
+    ledSet(panel,167, 24, 1);
+    ledSet(panel,183, 24, 17);
+    ledSet(panel,184, 25, 17);
+    ledSet(panel,200, 25, 1);
+    ledSet(panel,201, 26, 1);
+    ledSet(panel,217, 26, 17);
+    ledSet(panel,218, 27, 17);
+    ledSet(panel,235, 27, 0);
+    ledSet(panel,236, 28, 0);
+    ledSet(panel,252, 28, 16);
+    ledSet(panel,253, 29, 16);
+    ledSet(panel,269, 29, 0);
+    ledSet(panel,270, 30, 0);
+    ledSet(panel,285, 30, 15);
+    ledSet(panel,286, 31, 15);
+    ledSet(panel,301, 31, 0);
+    ledSet(panel,302, 32, 0);
+    ledSet(panel,316, 32, 14);
+    ledSet(panel,317, 33, 14);
+    ledSet(panel,331, 33, 0);
+    ledSet(panel,332, 34, 0);
+    ledSet(panel,346, 34, 14);
+    ledSet(panel,347, 35, 14);
+    ledSet(panel,361, 35, 0);
+    ledSet(panel,362, 36, 0);
+    ledSet(panel,376, 36, 14);
+    ledSet(panel,377, 37, 14);
+    ledSet(panel,391, 37, 0);
+    ledSet(panel,392, 38, 0);
+    ledSet(panel,406, 38, 14);
+    ledSet(panel,407, 39, 14);
+    ledSet(panel,421, 39, 0);
+    ledSet(panel,422, 40, 0);
+    ledSet(panel,436, 40, 14);
+    ledSet(panel,437, 41, 14);
+    ledSet(panel,451, 41, 0);
+    ledSet(panel,452, 42, 0);
+    ledSet(panel,467, 42, 15);
+    ledSet(panel,468, 43, 15);
+    ledSet(panel,483, 43, 0);
+    ledSet(panel,484, 44, 0);
+    ledSet(panel,498, 44, 14);
+    ledSet(panel,499, 45, 14);
+    ledSet(panel,513, 45, 0);
+    ledSet(panel,514, 45, 0);
+    ledSet(panel,528, 46, 14);
+    ledSet(panel,529, 46, 14);
+    ledSet(panel,542, 47, 1);
+    ledSet(panel,543, 47, 1);
+    ledSet(panel,557, 48, 15);
+    ledSet(panel,558, 48, 15);
+    ledSet(panel,573, 49, 1);
+    ledSet(panel,574, 49, 1);
+    ledSet(panel,587, 50, 15);
+    ledSet(panel,588, 50, 15);
+    ledSet(panel,602, 51, 1);
+    ledSet(panel,603, 51, 1);
+    ledSet(panel,617, 52, 15);
+    ledSet(panel,618, 52, 15);
+    ledSet(panel,631, 53, 2);
+    ledSet(panel,632, 53, 2);
+    ledSet(panel,645, 54, 15);
+    ledSet(panel,646, 54, 15);
+    ledSet(panel,658, 55, 3);
+    ledSet(panel,659, 55, 3);
+    ledSet(panel,671, 56, 15);
+    ledSet(panel,672, 56, 15);
+    ledSet(panel,684, 57, 3);
+    ledSet(panel,685, 57, 3);
+    
+    ledSet(panel,697, 58, 15);
+    ledMissing(panel, 698);
+    ledSet(panel,699, 58, 14);
+    ledSet(panel,710, 59, 3);
+    ledSet(panel,711, 59, 4);
+    ledSet(panel,719, 60, 12);
+    ledSet(panel,720, 60, 12);
+    ledSet(panel,728, 61, 4);
+    ledSet(panel,729, 61, 4);
+    ledSet(panel,735, 62, 10);
+    ledSet(panel,736, 62, 10);
+    ledSet(panel,741, 63, 5);
+    ledSet(panel,742, 63, 5);
+    ledSet(panel,749, 64, 12);
+    ledSet(panel,750, 64, 12);
+    ledSet(panel,756, 65, 6);
+    for (int i = 757; i <= 774; i++) {
+      ledMissing(panel,i);
+    }
+
+  }
+  
   int getStrandSize(int whichStrand) {
     return strandSizes[whichStrand];
   }
@@ -969,15 +1102,17 @@ class LedMap extends Pixels {
   }
   
   void mapAllLeds() {
-    
-    mapDriverSideLowerPart1(0);
+
+    mapUpperHalfTopDriverSide(0);
     mapDriverSideLowerPart2(1);
-    mapDriverSideUpper(2);
-    mapPassengerSideLower1(3);
-    mapPassengerSideLower2(4);
-    mapLowerHalfTopDriverSide(5);
-    mapLowerHalfTopPassengerSide(6);
-    mapUpperHalfTopDriverSide(7);
+    mapDriverSideLowerPart1(2);
+    mapLowerHalfTopDriverSide(3);
+    
+//    mapDriverSideUpper(4);
+    mapPassengerSideLower1(4);
+    mapPassengerSideUpperTop1(5);
+    mapPassengerSideLower2(6);
+    mapLowerHalfTopPassengerSide(7);
   }
   
   

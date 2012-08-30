@@ -348,7 +348,7 @@ class Pixels {
   
   void ledSetValue(int whichStrand, int ordinal, int value) {
     assert(whichStrand < getNumStrands()) : "not this many strands";
-    assert(ordinal < getStrandSize(whichStrand)) : "whichStrand exceeds number of leds per strand";
+    assert(ordinal < getStrandSize(whichStrand)) : "" + ordinal + " exceeds number of leds per strand " + getStrandSize(whichStrand) + " on strand " + whichStrand;
     assert(ordinal < getStrandSize(whichStrand)) : "Cannot set LED " + ordinal + " on strand " + whichStrand +
       " because it is of length " + getStrandSize(whichStrand);
     int index = (whichStrand * maxPixelsPerStrand) + ordinal;
