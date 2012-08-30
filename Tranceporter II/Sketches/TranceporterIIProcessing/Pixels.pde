@@ -581,6 +581,8 @@ class Pixels {
     if (!useTotalControl) {
       return;
     }
+ //   setPixel(ledWidth-1,ledHeight-1,color(255));
+    
     int[] theStrandMap = main.currentMode().isTrainingMode()?trainingStrandMap:strandMap;
 
     //println("sending pixelData: " + pixelData.length + " strandMap: " + theStrandMap.length);

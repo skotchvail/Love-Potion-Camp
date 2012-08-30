@@ -11,9 +11,8 @@ class LedMap extends Pixels {
       400, //mapDriverSideLowerPart2
       850, //mapDriverSideLowerPart1
       997, //mapLowerHalfTopDriverSide
-//      800, //mapDriverSideUpper
-      849, //mapPassengerSideLower1
       775, //mapPassengerSideUpperTop1
+      849, //mapPassengerSideLower1
       250, //mapPassengerSideLower2
       973, //mapLowerHalfTopPassengerSide
     };
@@ -304,8 +303,8 @@ class LedMap extends Pixels {
   void mapPassengerSideLower1(int panel) {
     assert (panel < getNumStrands());
     //    Passenger Side Part 1:
-    xOffsetter = 0;
-    yOffsetter = 10;
+    xOffsetter = 20;
+    yOffsetter = 32;
     ordinalOffsetter = 0;
     
     ledMissing(panel,0);
@@ -631,8 +630,8 @@ class LedMap extends Pixels {
   
   void mapLowerHalfTopPassengerSide(int panel) {
     assert (panel < getNumStrands());
-    xOffsetter = 0;
-    yOffsetter = 0;
+    xOffsetter = 18;
+    yOffsetter = 15;
     ordinalOffsetter = 0;
     
     //    all offsets=?
@@ -784,7 +783,7 @@ class LedMap extends Pixels {
     assert (panel < getNumStrands());
 
     //top of top driver side
-    xOffsetter = 0;
+    xOffsetter = 15;
     yOffsetter = 0;
     ordinalOffsetter = 0;
     
@@ -1093,6 +1092,20 @@ class LedMap extends Pixels {
 
   }
   
+  void allOnePixel(int panel) {
+    assert (panel < getNumStrands());
+    
+    //top of top driver side
+    xOffsetter = 0;
+    yOffsetter = 0;
+    ordinalOffsetter = 0;
+
+    for (int i = 0; i < getStrandSize(panel); i++) {
+      ledSet(panel,i,ledWidth-1,ledHeight-1);
+    }
+  }
+  
+  
   int getStrandSize(int whichStrand) {
     return strandSizes[whichStrand];
   }
@@ -1108,11 +1121,12 @@ class LedMap extends Pixels {
     mapDriverSideLowerPart1(2);
     mapLowerHalfTopDriverSide(3);
     
-//    mapDriverSideUpper(4);
-    mapPassengerSideLower1(4);
-    mapPassengerSideUpperTop1(5);
+    mapPassengerSideUpperTop1(4);
+    mapPassengerSideLower1(5);
     mapPassengerSideLower2(6);
     mapLowerHalfTopPassengerSide(7);
+    
+    
   }
   
   
