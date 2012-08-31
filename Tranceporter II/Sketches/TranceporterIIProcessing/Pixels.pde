@@ -10,6 +10,7 @@ int MAX_RGB = 255;
 
 class Pixels {
   private color[] pixelData;
+//  private color[] trainingPixelData;
   private OBJModel objModel;
   private PGraphics pg3D;
 
@@ -25,7 +26,6 @@ class Pixels {
   Pixels(PApplet p) {
     box2d = new Rectangle(10, 10, ledWidth * screenPixelSize, ledHeight * screenPixelSize);
     box3d = new Rectangle(box2d.x * 2 + box2d.width,box2d.y,360,300);
-    pixelData = new color[ledWidth * ledHeight];
     pg3D = createGraphics(box3d.width, box3d.height, P3D);
     
     objModel = new OBJModel(p, "tranceporter.obj");
@@ -36,14 +36,19 @@ class Pixels {
   }
   
   void setup() {
+    int totalPixels = 0;
     maxPixelsPerStrand = 0;
     for (int i = 0; i < getNumStrands(); i++) {
       int strandSize = getStrandSize(i);
       if (strandSize > maxPixelsPerStrand) {
         maxPixelsPerStrand = strandSize;
       }
+      totalPixels += strandSize;
     }
     
+    pixelData = new color[totalPixels];
+    //trainingPixelData = new color[totalPixels];
+
     strandMap = new int[getNumStrands() * maxPixelsPerStrand];
     trainingStrandMap = new int[getNumStrands() * maxPixelsPerStrand];
 
@@ -560,7 +565,7 @@ class Pixels {
         strandMap[j] = TC_PIXEL_UNDEFINED;
         trainingStrandMap[j] = stealPixel++;
         Point tester = i2c(trainingStrandMap[j]);
-        assert(tester.x < ledWidth && tester.y < ledHeight) : "Strands have more LEDs than we have pixels to assign them\n" + " x:" + tester.x + " y:" + tester.y + " strand: " + whichStrand + " ordinal:" + (j-start)
+        assert(tester.x < ledWidth && trainingStrandMap[j] < pixelData.length) : "Strands have more LEDs than we have pixels to assign them\n" + " x:" + tester.x + " y:" + tester.y + " strand: " + whichStrand + " ordinal:" + (j-start)
             + " rawValue:" + trainingStrandMap[j];
         
       }
@@ -601,13 +606,14 @@ class Pixels {
  //   setPixel(ledWidth-1,ledHeight-1,color(255));
     
     int[] theStrandMap = main.currentMode().isTrainingMode()?trainingStrandMap:strandMap;
-
+    //color[] thePixelData = main.currentMode().isTrainingMode()?trainingPixelData:pixelData;
+    color[] thePixelData = pixelData;
     //println("sending pixelData: " + pixelData.length + " strandMap: " + theStrandMap.length);
     if (runConcurrent) {
-      totalControlConcurrent.put(pixelData, theStrandMap);
+      totalControlConcurrent.put(thePixelData, theStrandMap);
     }
     else {
-      int status = writeOneFrame(pixelData, theStrandMap);
+      int status = writeOneFrame(thePixelData, theStrandMap);
     }
   }
 }
