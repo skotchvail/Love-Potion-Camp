@@ -364,9 +364,14 @@ class Pixels {
   int yOffsetter;
   int ordinalOffsetter;
   
+  int biggestX = -1;
+  int biggestY = -1;
+  
   void ledSet(int whichStrand, int ordinal, int x, int y) {
-//    ledSetValue(whichStrand, ordinal, c2i(x,y+20));
-      ledSetValue(whichStrand, ordinal + ordinalOffsetter, c2i(x + xOffsetter, y + yOffsetter));
+    //    ledSetValue(whichStrand, ordinal, c2i(x,y+20));
+    biggestX = max(x,biggestX);
+    biggestY = max(y,biggestY);
+    ledSetValue(whichStrand, ordinal + ordinalOffsetter, c2i(x + xOffsetter, y + yOffsetter));
   }
 
   
@@ -537,11 +542,19 @@ class Pixels {
     }
     
     int stealPixel = 0;
+    int boundary = 0;
     //create the trainingStrandMap
     for (int whichStrand = 0; whichStrand < getNumStrands(); whichStrand++) {
       int numPixels = getStrandSize(whichStrand);
-      int start = whichStrand * maxPixelsPerStrand;
-      int boundary = start + numPixels;
+      int start = 0;
+      if (true) {
+        start = whichStrand * maxPixelsPerStrand;
+        boundary = start + numPixels;
+      }
+      else {
+        start = boundary;
+        boundary = start + numPixels;
+      }
       int j;
       for (j = start; j < boundary; j++) {
         strandMap[j] = TC_PIXEL_UNDEFINED;
@@ -551,10 +564,12 @@ class Pixels {
             + " rawValue:" + trainingStrandMap[j];
         
       }
-      int end = start + maxPixelsPerStrand;
-      for (; j < end; j++) {
-        strandMap[j] = TC_PIXEL_DISCONNECTED;
-        trainingStrandMap[j] = TC_PIXEL_DISCONNECTED;
+      if (true) {
+        int end = start + maxPixelsPerStrand;
+        for (; j < end; j++) {
+          strandMap[j] = TC_PIXEL_DISCONNECTED;
+          trainingStrandMap[j] = TC_PIXEL_DISCONNECTED;
+        }
       }
     }
     
@@ -562,6 +577,8 @@ class Pixels {
 
     ledInterpolate();
 //    ledMapDump(0,2); //set which strands you want to dump
+    
+    println("biggestX:" + biggestX + " biggestY:" + biggestY);
     
     if (runConcurrent) {
       totalControlConcurrent = new TotalControlConcurrent(getNumStrands(),maxPixelsPerStrand, kUseBitBang);

@@ -11,7 +11,7 @@ class LedMap extends Pixels {
       400, //mapDriverSideLowerPart2
       850, //mapDriverSideLowerPart1
       997, //mapLowerHalfTopDriverSide
-      775, //mapPassengerSideUpperTop1
+      775, //1150, //TODO: mapPassengerSideUpperTop1
       849, //mapPassengerSideLower1
       250, //mapPassengerSideLower2
       973, //mapLowerHalfTopPassengerSide
@@ -393,6 +393,8 @@ class LedMap extends Pixels {
     ledSet(panel,753, 41, 25);
     ledSet(panel,779, 41, -1);
     ledSet(panel,780, 42, -1);
+    //TODO: disappeared
+    
     ledSet(panel,805, 42, 24);
     ledSet(panel,806, 43, 24);
     ledSet(panel,831, 43, -1);
@@ -630,8 +632,8 @@ class LedMap extends Pixels {
   
   void mapLowerHalfTopPassengerSide(int panel) {
     assert (panel < getNumStrands());
-    xOffsetter = 18;
-    yOffsetter = 15;
+    xOffsetter = 0;
+    yOffsetter = 0;
     ordinalOffsetter = 0;
     
     //    all offsets=?
@@ -746,6 +748,9 @@ class LedMap extends Pixels {
     ledSet(panel,  769, 52, 16);
     ledSet(panel,  782, 52, 29);
     ledSet(panel,  783, 53, 29);
+    
+    //TODO: messed up?
+    
     ledSet(panel,  796, 53, 16);
     ledSet(panel,  797, 54, 16);
     ledSet(panel,  810, 54, 29);
@@ -1043,52 +1048,55 @@ class LedMap extends Pixels {
     ledSet(panel,484, 44, 0);
     ledSet(panel,498, 44, 14);
     ledSet(panel,499, 45, 14);
+    
+    //TODO: disappear?
     ledSet(panel,513, 45, 0);
-    ledSet(panel,514, 45, 0);
+    ledSet(panel,514, 46, 0);
     ledSet(panel,528, 46, 14);
-    ledSet(panel,529, 46, 14);
+    ledSet(panel,529, 47, 14);
     ledSet(panel,542, 47, 1);
-    ledSet(panel,543, 47, 1);
+    ledSet(panel,543, 48, 1);
     ledSet(panel,557, 48, 15);
-    ledSet(panel,558, 48, 15);
+    ledSet(panel,558, 49, 15);
     ledSet(panel,573, 49, 1);
-    ledSet(panel,574, 49, 1);
+    ledSet(panel,574, 50, 1);
     ledSet(panel,587, 50, 15);
-    ledSet(panel,588, 50, 15);
+    ledSet(panel,588, 51, 15);
     ledSet(panel,602, 51, 1);
-    ledSet(panel,603, 51, 1);
+    ledSet(panel,603, 52, 1);
     ledSet(panel,617, 52, 15);
-    ledSet(panel,618, 52, 15);
+    ledSet(panel,618, 53, 15);
     ledSet(panel,631, 53, 2);
-    ledSet(panel,632, 53, 2);
+    ledSet(panel,632, 54, 2);
     ledSet(panel,645, 54, 15);
-    ledSet(panel,646, 54, 15);
+    ledSet(panel,646, 55, 15);
     ledSet(panel,658, 55, 3);
-    ledSet(panel,659, 55, 3);
+    ledSet(panel,659, 56, 3);
     ledSet(panel,671, 56, 15);
-    ledSet(panel,672, 56, 15);
+    ledSet(panel,672, 57, 15);
     ledSet(panel,684, 57, 3);
-    ledSet(panel,685, 57, 3);
+    ledSet(panel,685, 58, 3);
     
     ledSet(panel,697, 58, 15);
     ledMissing(panel, 698);
-    ledSet(panel,699, 58, 14);
+    ledSet(panel,699, 59, 14);
     ledSet(panel,710, 59, 3);
-    ledSet(panel,711, 59, 4);
+    ledSet(panel,711, 60, 4);
     ledSet(panel,719, 60, 12);
-    ledSet(panel,720, 60, 12);
+    ledSet(panel,720, 61, 12);
     ledSet(panel,728, 61, 4);
-    ledSet(panel,729, 61, 4);
+    ledSet(panel,729, 62, 4);
     ledSet(panel,735, 62, 10);
-    ledSet(panel,736, 62, 10);
+    ledSet(panel,736, 63, 10);
     ledSet(panel,741, 63, 5);
-    ledSet(panel,742, 63, 5);
+    ledSet(panel,742, 64, 5);
     ledSet(panel,749, 64, 12);
-    ledSet(panel,750, 64, 12);
+    ledSet(panel,750, 65, 12);
     ledSet(panel,756, 65, 6);
     for (int i = 757; i <= 774; i++) {
       ledMissing(panel,i);
     }
+    //ledSet(panel,756, 65, 6);
 
   }
   
