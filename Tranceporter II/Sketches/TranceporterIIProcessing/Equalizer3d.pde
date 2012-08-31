@@ -29,7 +29,7 @@ class Equalizer3d extends Drawer
     settings.setParam(settings.keyBeatLength,0.25);
   }
   
-  float factor = 0.2;
+  float factor = 0.1;
 
   void draw() {
     colorMode(RGB,255);

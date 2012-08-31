@@ -11,7 +11,7 @@ class EyeMotion extends Drawer {
   int edge = 200;
   int inner = edge + radius;
   int i = 10;
-  float SCALE = 0.1;
+  float SCALE = 0.07;
   float trippy;
   float lastmx, lastmy;
   int MINX, MINY;
@@ -19,8 +19,8 @@ class EyeMotion extends Drawer {
   int lastLookChange;
   boolean readyToBlink;
   float dX, dY;
-  int translateX = (int)(10 * SCALE);
-  int translateY = (int)(15 * SCALE);
+  int translateX;
+  int translateY;
   
   //colors
   color irisColor = color(3, 43, 62);
@@ -69,8 +69,8 @@ class EyeMotion extends Drawer {
   void draw() {
     
  //   SCALE = ((frameCount % 250) + 25) / 1000.0;
-    translateX = (int)(-1000 * SCALE) + 200;
-    translateY = (int)(-1200 * SCALE) + 280;
+    translateX = (int)(-100 * SCALE) + 350;
+    translateY = (int)(-2500 * SCALE) + 280;
  //   println("scale = " + SCALE);
 
     

@@ -24,18 +24,14 @@ class Pixels {
   boolean useTotalControl = true;
   
   Pixels(PApplet p) {
-    box2d = new Rectangle(10, 10, ledWidth * screenPixelSize, ledHeight * screenPixelSize);
-    box3d = new Rectangle(box2d.x * 2 + box2d.width,box2d.y,360,300);
-    pg3D = createGraphics(box3d.width, box3d.height, P3D);
-    
     objModel = new OBJModel(p, "tranceporter.obj");
     // turning on the debug output (it's all the stuff that spews out in the black box down the bottom)
     objModel.enableDebug();
-    
     objModel.scale(3);
   }
   
   void setup() {
+    
     int totalPixels = 0;
     maxPixelsPerStrand = 0;
     for (int i = 0; i < getNumStrands(); i++) {
@@ -47,8 +43,15 @@ class Pixels {
     }
     
     pixelData = new color[totalPixels];
-    //trainingPixelData = new color[totalPixels];
-
+    
+    int newHeight = (int)round(pixelData.length / (float)ledWidth);
+    newHeight = ledHeight;
+    assert(newHeight >= ledHeight);
+    
+    box2d = new Rectangle(10, 10, ledWidth * screenPixelSize, newHeight * screenPixelSize);
+    box3d = new Rectangle(box2d.x * 2 + box2d.width,box2d.y,360,300);
+    pg3D = createGraphics(box3d.width, box3d.height, P3D);
+    
     strandMap = new int[getNumStrands() * maxPixelsPerStrand];
     trainingStrandMap = new int[getNumStrands() * maxPixelsPerStrand];
 

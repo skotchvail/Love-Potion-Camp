@@ -191,12 +191,14 @@ class Gust
   }
   
   void draw() {
-    drawsLeft --;
+    drawsLeft--;
     color c = this.fillColor;
     float intensity = 1 - settings.getParam(settings.keyCustom1);
     intensity *= intensity;
     intensity = 255 * (1 - intensity);
-    c = replaceAlpha(c, intensity * drawsLeft / MAX_FRAMES);
+    intensity *= drawsLeft * 1.5 / MAX_FRAMES;
+    intensity = min(intensity,255);
+    c = replaceAlpha(c, intensity);
     pg.fill(c);
     pg.ellipse(location.x, location.y, 20, 20);
   }
@@ -407,7 +409,7 @@ class vsquare {
       c = color(0);
     }
     else {
-      c = replaceAlpha(#00FF00,tcol * 1.5);
+      c = replaceAlpha(#40FF40,tcol * 1.9);
     }
 
     pg.fill(c);
