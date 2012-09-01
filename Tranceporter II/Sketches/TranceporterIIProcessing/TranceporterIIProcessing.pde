@@ -11,8 +11,8 @@ import java.util.prefs.Preferences;
 
 //ADJUSTABLE PARAMS
 String iPadIP = "10.0.1.8";
-int ledWidth = 77; //120; //76; //80;
-int ledHeight = 39; //54; //38; //80;
+int ledWidth = 92;
+int ledHeight = 58;
 int screenPixelSize = 3;
 int screenWidth = 700;
 int screenHeight = 400;
@@ -129,8 +129,12 @@ class MainClass {
     settings.initOSC();
     pm.init(applet);
 
-    modeCol = prefs.getInt("modeCol",1);
+    modeCol = prefs.getInt("modeCol",2);
     modeRow = prefs.getInt("modeRow",0);
+    
+//    modeCol = 2;
+//    modeRow = 0;
+    
     
     // Audio features
     minim = new Minim(applet);

@@ -70,7 +70,7 @@ class EyeMotion extends Drawer {
     
  //   SCALE = ((frameCount % 250) + 25) / 1000.0;
     translateX = (int)(-100 * SCALE) + 350;
-    translateY = (int)(-2500 * SCALE) + 280;
+    translateY = (int)(-100 * SCALE) + 280;
  //   println("scale = " + SCALE);
 
     

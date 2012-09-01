@@ -458,7 +458,7 @@ class LedMap extends Pixels {
     ledSet(panel,12, 11, 32);
     ledSet(panel,15, 11, 35);
     ledSet(panel,16, 10, 35);
-    ledSet(panel,19, 19, 32);
+    ledSet(panel,19, 10, 32);
     ledSet(panel,20, 9, 32);
     ledSet(panel,24, 9, 36);
     ledSet(panel,25, 8, 36);

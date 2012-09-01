@@ -58,7 +58,7 @@ class Heart extends Drawer
     
 
     // JJ - LOOK AT POSITIONING......
-    pg.image(images[frame], (3*width - (images[frame].width*scalex)), (height*2.6 - (images[frame].height*scalex))/2);
+    pg.image(images[frame], (4.0*width - (images[frame].width*scalex)), (height*5.0 - (images[frame].height*scalex))/2);
     
     
     // JJ Look at looping on the beat...

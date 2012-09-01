@@ -42,7 +42,8 @@ class Pixels {
       totalPixels += strandSize;
     }
     
-    pixelData = new color[totalPixels];
+    int pixelDataSize = max(totalPixels, ledWidth * ledHeight);
+    pixelData = new color[pixelDataSize];
     
     int newHeight = (int)round(pixelData.length / (float)ledWidth);
     newHeight = ledHeight;
@@ -377,8 +378,8 @@ class Pixels {
   
   void ledSet(int whichStrand, int ordinal, int x, int y) {
     //    ledSetValue(whichStrand, ordinal, c2i(x,y+20));
-    biggestX = max(x,biggestX);
-    biggestY = max(y,biggestY);
+    biggestX = max(x + xOffsetter, biggestX);
+    biggestY = max(y + yOffsetter, biggestY);
     ledSetValue(whichStrand, ordinal + ordinalOffsetter, c2i(x + xOffsetter, y + yOffsetter));
   }
 
@@ -586,7 +587,7 @@ class Pixels {
     ledInterpolate();
 //    ledMapDump(0,2); //set which strands you want to dump
     
-    println("biggestX:" + biggestX + " biggestY:" + biggestY);
+    println("biggestX:" + (biggestX + 1) + " biggestY:" + (biggestY + 1));
     
     if (runConcurrent) {
       totalControlConcurrent = new TotalControlConcurrent(getNumStrands(),maxPixelsPerStrand, kUseBitBang);
