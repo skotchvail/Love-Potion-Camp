@@ -36,7 +36,7 @@ class PaletteManager {
     {
       KulerTheme[] kt = null;
       try {
-        kt = (KulerTheme[]) k.getHighestRated();
+        //kt = (KulerTheme[]) k.getHighestRated();
       }
       catch (Exception e) {
         println("cannot get highest rated\n" + e);
