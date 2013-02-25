@@ -110,7 +110,7 @@ class BeatDetect {
     return fftBandMap[fftBand];
   }
 
-  void setFFTWindow(int window) {
+  void setFFTWindow(WindowFunction window) {
     fft.window(window);
   }
   

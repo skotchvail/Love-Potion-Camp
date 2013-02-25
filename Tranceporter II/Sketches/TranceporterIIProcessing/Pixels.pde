@@ -122,7 +122,7 @@ class Pixels {
         for (int f = 0; f < tmpModelSegment.getFaceCount(); f++) {
           tmpModelElement = (tmpModelSegment.getFace(f));
           if (tmpModelElement.getVertIndexCount() > 0) {
-            pg3D.textureMode(NORMALIZED);
+            pg3D.textureMode(NORMAL);
             //println("face=" + f + " drawMode = " + objModel.getDrawMode());
             pg3D.beginShape(objModel.getDrawMode()); // specify render mode
             boolean useTexture = false;

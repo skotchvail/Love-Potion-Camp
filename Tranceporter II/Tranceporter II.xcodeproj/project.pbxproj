@@ -1,0 +1,277 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXFileReference section */
+		E00ECDCE15D0D8290099F4BF /* Smoke.pde */ = {isa = PBXFileReference; lastKnownFileType = text; path = Smoke.pde; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.java; };
+		E02F9B2815C37B19003EDFDA /* AlienBlob.pde */ = {isa = PBXFileReference; lastKnownFileType = text; lineEnding = 0; path = AlienBlob.pde; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.java; };
+		E02F9B4A15C37B19003EDFDA /* BeatDetect.pde */ = {isa = PBXFileReference; lastKnownFileType = text; path = BeatDetect.pde; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.java; };
+		E02F9B4B15C37B19003EDFDA /* BouncingBalls2D.pde */ = {isa = PBXFileReference; lastKnownFileType = text; path = BouncingBalls2D.pde; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.java; };
+		E02F9B4C15C37B19003EDFDA /* BouncingBalls3D.pde */ = {isa = PBXFileReference; lastKnownFileType = text; path = BouncingBalls3D.pde; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.java; };
+		E02F9B4D15C37B19003EDFDA /* BouncingBallsToAudio.pde */ = {isa = PBXFileReference; lastKnownFileType = text; path = BouncingBallsToAudio.pde; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.java; };
+		E02F9B4E15C37B19003EDFDA /* BZR.pde */ = {isa = PBXFileReference; lastKnownFileType = text; lineEnding = 0; path = BZR.pde; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.java; };
+		E02F9B4F15C37B19003EDFDA /* CircularArray.pde */ = {isa = PBXFileReference; lastKnownFileType = text; path = CircularArray.pde; sourceTree = "<group>"; };
+		E02F9B5015C37B19003EDFDA /* Console.pde */ = {isa = PBXFileReference; lastKnownFileType = text; path = Console.pde; sourceTree = "<group>"; };
+		E02F9B5115C37B19003EDFDA /* Drawer.pde */ = {isa = PBXFileReference; lastKnownFileType = text; lineEnding = 0; path = Drawer.pde; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.java; };
+		E02F9B5215C37B19003EDFDA /* Fire.pde */ = {isa = PBXFileReference; lastKnownFileType = text; lineEnding = 0; path = Fire.pde; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.java; };
+		E02F9B5315C37B19003EDFDA /* Paint.pde */ = {isa = PBXFileReference; lastKnownFileType = text; path = Paint.pde; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.java; };
+		E02F9B5415C37B19003EDFDA /* PaletteManager.pde */ = {isa = PBXFileReference; lastKnownFileType = text; path = PaletteManager.pde; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.java; };
+		E02F9B5515C37B19003EDFDA /* Pixels.pde */ = {isa = PBXFileReference; lastKnownFileType = text; lineEnding = 0; path = Pixels.pde; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.java; };
+		E02F9B5715C37B19003EDFDA /* TranceporterIIProcessing.pde */ = {isa = PBXFileReference; lastKnownFileType = text; path = TranceporterIIProcessing.pde; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.java; };
+		E03AFC1115CF02680088360C /* HardwareTest.pde */ = {isa = PBXFileReference; lastKnownFileType = text; path = HardwareTest.pde; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.java; };
+		E0406C3715C8C8DC00F6A29D /* BoundingBox.java */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.java; path = BoundingBox.java; sourceTree = "<group>"; };
+		E0406C3815C8C8DC00F6A29D /* Debug.java */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.java; path = Debug.java; sourceTree = "<group>"; };
+		E0406C3915C8C8DC00F6A29D /* Face.java */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.java; path = Face.java; sourceTree = "<group>"; };
+		E0406C3A15C8C8DC00F6A29D /* Group.java */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.java; path = Group.java; sourceTree = "<group>"; };
+		E0406C3B15C8C8DC00F6A29D /* Material.java */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.java; path = Material.java; sourceTree = "<group>"; };
+		E0406C3C15C8C8DC00F6A29D /* OBJModel.java */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.java; path = OBJModel.java; sourceTree = "<group>"; };
+		E0406C3D15C8C8DC00F6A29D /* Segment.java */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.java; path = Segment.java; sourceTree = "<group>"; };
+		E0467EEF15CE210D00F6C823 /* TotalControl.java */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.java; name = TotalControl.java; path = ../../common/p9813/processing/TotalControl.java; sourceTree = "<group>"; };
+		E05002FE15D2E93900DC28FF /* Settings.pde */ = {isa = PBXFileReference; lastKnownFileType = text; path = Settings.pde; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.java; };
+		E058EA7715D494A400843748 /* ImportingSketches.md */ = {isa = PBXFileReference; lastKnownFileType = text; name = ImportingSketches.md; path = ../ImportingSketches.md; sourceTree = "<group>"; };
+		E058EA7815D494A400843748 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = text; name = README.md; path = ../README.md; sourceTree = "<group>"; };
+		E058EA8015D4A3CE00843748 /* Tunnel.pde */ = {isa = PBXFileReference; lastKnownFileType = text; path = Tunnel.pde; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.java; };
+		E078182B15D5EE55008D537F /* Heart.pde */ = {isa = PBXFileReference; lastKnownFileType = text; path = Heart.pde; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.java; };
+		E078182D15D6E00A008D537F /* Equalizer3d.pde */ = {isa = PBXFileReference; lastKnownFileType = text; path = Equalizer3d.pde; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.java; };
+		E078183215D868C3008D537F /* DroppingParticles.pde */ = {isa = PBXFileReference; lastKnownFileType = text; path = DroppingParticles.pde; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.java; };
+		E09481ED15DB3629009DA376 /* calibration.h */ = {isa = PBXFileReference; indentWidth = 4; lastKnownFileType = sourcecode.c.h; name = calibration.h; path = ../../common/p9813/calibration.h; sourceTree = "<group>"; tabWidth = 4; };
+		E09481EE15DB3629009DA376 /* p9813.h */ = {isa = PBXFileReference; indentWidth = 4; lastKnownFileType = sourcecode.c.h; name = p9813.h; path = ../../common/p9813/p9813.h; sourceTree = "<group>"; tabWidth = 4; };
+		E09481EF15DB3629009DA376 /* demo.c */ = {isa = PBXFileReference; indentWidth = 4; lastKnownFileType = sourcecode.c.c; name = demo.c; path = ../../common/p9813/demo.c; sourceTree = "<group>"; tabWidth = 4; };
+		E09481F015DB3629009DA376 /* gamma.c */ = {isa = PBXFileReference; indentWidth = 4; lastKnownFileType = sourcecode.c.c; name = gamma.c; path = ../../common/p9813/gamma.c; sourceTree = "<group>"; tabWidth = 4; };
+		E09481F115DB3629009DA376 /* p9813.c */ = {isa = PBXFileReference; indentWidth = 4; lastKnownFileType = sourcecode.c.c; name = p9813.c; path = ../../common/p9813/p9813.c; sourceTree = "<group>"; tabWidth = 4; };
+		E09481F215DB3629009DA376 /* random.c */ = {isa = PBXFileReference; indentWidth = 4; lastKnownFileType = sourcecode.c.c; name = random.c; path = ../../common/p9813/random.c; sourceTree = "<group>"; tabWidth = 4; };
+		E09481F315DB3629009DA376 /* rgb.c */ = {isa = PBXFileReference; indentWidth = 4; lastKnownFileType = sourcecode.c.c; name = rgb.c; path = ../../common/p9813/rgb.c; sourceTree = "<group>"; tabWidth = 4; };
+		E09481F415DB3629009DA376 /* TotalControl.c */ = {isa = PBXFileReference; indentWidth = 4; lastKnownFileType = sourcecode.c.c; name = TotalControl.c; path = ../../common/p9813/processing/TotalControl.c; sourceTree = "<group>"; tabWidth = 4; };
+		E09481F515DB497B009DA376 /* TotalControlConsumer.pde */ = {isa = PBXFileReference; lastKnownFileType = text; path = TotalControlConsumer.pde; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.java; };
+		E0A5030715E20BB00066A5E4 /* FastPlasma.pde */ = {isa = PBXFileReference; lastKnownFileType = text; path = FastPlasma.pde; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.java; };
+		E0BD413215D8CA7000FFE2E7 /* EyeMotion.pde */ = {isa = PBXFileReference; lastKnownFileType = text; path = EyeMotion.pde; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.java; };
+		E0D83E3B16DB15F20097A9A0 /* run.sh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; path = run.sh; sourceTree = "<group>"; };
+		E0F13A0C15DF215300F69CDA /* LedMap.pde */ = {isa = PBXFileReference; lastKnownFileType = text; lineEnding = 0; path = LedMap.pde; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.java; };
+/* End PBXFileReference section */
+
+/* Begin PBXGroup section */
+		E02F9B1B15C37AD1003EDFDA = {
+			isa = PBXGroup;
+			children = (
+				E0D83E3B16DB15F20097A9A0 /* run.sh */,
+				E09481EB15DB35F9009DA376 /* p9813 */,
+				E058EA7715D494A400843748 /* ImportingSketches.md */,
+				E058EA7815D494A400843748 /* README.md */,
+				E0467EEF15CE210D00F6C823 /* TotalControl.java */,
+				E0406C3615C8C77E00F6A29D /* objloader */,
+				E02F9B2715C37B19003EDFDA /* TranceporterIIProcessing */,
+			);
+			indentWidth = 2;
+			sourceTree = "<group>";
+			tabWidth = 2;
+		};
+		E02F9B2715C37B19003EDFDA /* TranceporterIIProcessing */ = {
+			isa = PBXGroup;
+			children = (
+				E02F9B2815C37B19003EDFDA /* AlienBlob.pde */,
+				E02F9B4A15C37B19003EDFDA /* BeatDetect.pde */,
+				E02F9B4B15C37B19003EDFDA /* BouncingBalls2D.pde */,
+				E02F9B4C15C37B19003EDFDA /* BouncingBalls3D.pde */,
+				E02F9B4D15C37B19003EDFDA /* BouncingBallsToAudio.pde */,
+				E02F9B4E15C37B19003EDFDA /* BZR.pde */,
+				E02F9B4F15C37B19003EDFDA /* CircularArray.pde */,
+				E02F9B5015C37B19003EDFDA /* Console.pde */,
+				E02F9B5115C37B19003EDFDA /* Drawer.pde */,
+				E078183215D868C3008D537F /* DroppingParticles.pde */,
+				E078182D15D6E00A008D537F /* Equalizer3d.pde */,
+				E0BD413215D8CA7000FFE2E7 /* EyeMotion.pde */,
+				E0A5030715E20BB00066A5E4 /* FastPlasma.pde */,
+				E02F9B5215C37B19003EDFDA /* Fire.pde */,
+				E03AFC1115CF02680088360C /* HardwareTest.pde */,
+				E078182B15D5EE55008D537F /* Heart.pde */,
+				E0F13A0C15DF215300F69CDA /* LedMap.pde */,
+				E02F9B5315C37B19003EDFDA /* Paint.pde */,
+				E02F9B5415C37B19003EDFDA /* PaletteManager.pde */,
+				E02F9B5515C37B19003EDFDA /* Pixels.pde */,
+				E05002FE15D2E93900DC28FF /* Settings.pde */,
+				E00ECDCE15D0D8290099F4BF /* Smoke.pde */,
+				E058EA8015D4A3CE00843748 /* Tunnel.pde */,
+				E02F9B5715C37B19003EDFDA /* TranceporterIIProcessing.pde */,
+				E09481F515DB497B009DA376 /* TotalControlConsumer.pde */,
+			);
+			name = TranceporterIIProcessing;
+			path = Sketches/TranceporterIIProcessing;
+			sourceTree = "<group>";
+		};
+		E0406C3615C8C77E00F6A29D /* objloader */ = {
+			isa = PBXGroup;
+			children = (
+				E0406C3715C8C8DC00F6A29D /* BoundingBox.java */,
+				E0406C3815C8C8DC00F6A29D /* Debug.java */,
+				E0406C3915C8C8DC00F6A29D /* Face.java */,
+				E0406C3A15C8C8DC00F6A29D /* Group.java */,
+				E0406C3B15C8C8DC00F6A29D /* Material.java */,
+				E0406C3C15C8C8DC00F6A29D /* OBJModel.java */,
+				E0406C3D15C8C8DC00F6A29D /* Segment.java */,
+			);
+			name = objloader;
+			path = ../../../Processing/libraries/OBJLoader/src/saito/objloader;
+			sourceTree = "<group>";
+		};
+		E09481EB15DB35F9009DA376 /* p9813 */ = {
+			isa = PBXGroup;
+			children = (
+				E09481ED15DB3629009DA376 /* calibration.h */,
+				E09481EE15DB3629009DA376 /* p9813.h */,
+				E09481EF15DB3629009DA376 /* demo.c */,
+				E09481F015DB3629009DA376 /* gamma.c */,
+				E09481F115DB3629009DA376 /* p9813.c */,
+				E09481F215DB3629009DA376 /* random.c */,
+				E09481F315DB3629009DA376 /* rgb.c */,
+				E09481F415DB3629009DA376 /* TotalControl.c */,
+			);
+			name = p9813;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXLegacyTarget section */
+		E0D83E3716DAF7BC0097A9A0 /* TranceporterII */ = {
+			isa = PBXLegacyTarget;
+			buildArgumentsString = "$(ACTION)";
+			buildConfigurationList = E0D83E3A16DAF7BC0097A9A0 /* Build configuration list for PBXLegacyTarget "TranceporterII" */;
+			buildPhases = (
+			);
+			buildToolPath = pwd;
+			buildWorkingDirectory = "";
+			dependencies = (
+			);
+			name = TranceporterII;
+			passBuildSettingsInEnvironment = 1;
+			productName = TranceporterII;
+		};
+/* End PBXLegacyTarget section */
+
+/* Begin PBXProject section */
+		E02F9B1D15C37AD1003EDFDA /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 0440;
+			};
+			buildConfigurationList = E02F9B2015C37AD1003EDFDA /* Build configuration list for PBXProject "Tranceporter II" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+			);
+			mainGroup = E02F9B1B15C37AD1003EDFDA;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				E0D83E3716DAF7BC0097A9A0 /* TranceporterII */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin XCBuildConfiguration section */
+		E02F9B2215C37AD1003EDFDA /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+			};
+			name = Debug;
+		};
+		E02F9B2315C37AD1003EDFDA /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+			};
+			name = Release;
+		};
+		E0D83E3816DAF7BC0097A9A0 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUGGING_SYMBOLS = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.8;
+				OTHER_CFLAGS = "";
+				OTHER_LDFLAGS = "";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+			};
+			name = Debug;
+		};
+		E0D83E3916DAF7BC0097A9A0 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.8;
+				OTHER_CFLAGS = "";
+				OTHER_LDFLAGS = "";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		E02F9B2015C37AD1003EDFDA /* Build configuration list for PBXProject "Tranceporter II" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				E02F9B2215C37AD1003EDFDA /* Debug */,
+				E02F9B2315C37AD1003EDFDA /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		E0D83E3A16DAF7BC0097A9A0 /* Build configuration list for PBXLegacyTarget "TranceporterII" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				E0D83E3816DAF7BC0097A9A0 /* Debug */,
+				E0D83E3916DAF7BC0097A9A0 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = E02F9B1D15C37AD1003EDFDA /* Project object */;
+}
