@@ -35,7 +35,7 @@ interface VoidFunction { void function(); }
 interface FunctionFloatFloat { void function(float x, float y); }
   
 void setup() {
-  size(screenWidth, screenHeight);
+  size(screenWidth, screenHeight, P2D);
   
   println("target FRAME_RATE:" + FRAME_RATE);
   utility = new Utility();

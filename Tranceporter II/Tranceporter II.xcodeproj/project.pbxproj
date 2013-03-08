@@ -49,7 +49,6 @@
 		E09481F515DB497B009DA376 /* TotalControlConsumer.pde */ = {isa = PBXFileReference; lastKnownFileType = text; path = TotalControlConsumer.pde; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.java; };
 		E0A5030715E20BB00066A5E4 /* FastPlasma.pde */ = {isa = PBXFileReference; lastKnownFileType = text; path = FastPlasma.pde; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.java; };
 		E0BD413215D8CA7000FFE2E7 /* EyeMotion.pde */ = {isa = PBXFileReference; lastKnownFileType = text; path = EyeMotion.pde; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.java; };
-		E0D83E3B16DB15F20097A9A0 /* run.sh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; path = run.sh; sourceTree = "<group>"; };
 		E0F13A0C15DF215300F69CDA /* LedMap.pde */ = {isa = PBXFileReference; lastKnownFileType = text; lineEnding = 0; path = LedMap.pde; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.java; };
 /* End PBXFileReference section */
 
@@ -57,7 +56,6 @@
 		E02F9B1B15C37AD1003EDFDA = {
 			isa = PBXGroup;
 			children = (
-				E0D83E3B16DB15F20097A9A0 /* run.sh */,
 				E09481EB15DB35F9009DA376 /* p9813 */,
 				E058EA7715D494A400843748 /* ImportingSketches.md */,
 				E058EA7815D494A400843748 /* README.md */,

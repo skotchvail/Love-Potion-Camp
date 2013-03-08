@@ -273,7 +273,7 @@ class Pixels {
     }
     
     PGraphics pg = drawFlat2DVersion();
-    if (draw3dSimulation) {
+    if (draw3dSimulation && pg3D != null) {
       drawMappedOntoBottle(pg);
     }
 
