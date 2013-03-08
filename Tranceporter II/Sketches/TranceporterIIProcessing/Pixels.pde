@@ -58,7 +58,10 @@ class Pixels {
     initTotalControl();    
   }
   
-
+  void copyPixels(int[] pixels) {
+    System.arraycopy(pixels, 0, pixelData, 0, pixels.length);
+  }
+  
   void setPixel(int x, int y, color c) {
     pixelData[c2i(x,y)] = c;
   }

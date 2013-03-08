@@ -78,11 +78,8 @@ class Drawer {
     onsetOn3 = flash3;
     onsetOn4 = flash4;
     
-    for (int x = 0; x < width; x++) {
-      for (int y = 0; y < height; y++) {
-        p.setPixel(x, y, pg.get(x, y));
-      }
-    }
+    pg.loadPixels();
+    p.copyPixels(pg.pixels);
   }
   
   boolean isTrainingMode() {
