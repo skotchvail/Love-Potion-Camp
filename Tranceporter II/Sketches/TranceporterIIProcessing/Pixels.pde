@@ -50,7 +50,7 @@ class Pixels {
     assert(newHeight >= ledHeight);
     
     box2d = new Rectangle(10, 10, ledWidth * screenPixelSize, newHeight * screenPixelSize);
-    box3d = new Rectangle(box2d.x * 2 + box2d.width,box2d.y,360,300);
+    box3d = new Rectangle(box2d.x * 2 + box2d.width, box2d.y, 360, 180);
     pg3D = createGraphics(box3d.width, box3d.height, P3D);
     
     strandMap = new int[getNumStrands() * maxPixelsPerStrand];
@@ -217,24 +217,28 @@ class Pixels {
     colorMode(RGB,255);
     pg3D.background(color(6,25,41)); //dark blue color
     pg3D.lights();
-        
-    pg3D.pushMatrix();
+
+    float magicNum = 300; // Not sure how this affects the drawing, but it can be adjusted to make the field of view seem closer or further
     
-//    float rX = map(mouseY, 0, height, -PI, PI);
-//    float rY = map(mouseX, 0, width, -PI, PI);
-    //println("rX = " + rX + " rY = " + rY);
+    float maxZ = 10000;
+    float fov = PI/3.9;
+    float cameraZ = (box3d.height/2.0) / tan(fov/2.0);
+    pg3D.perspective(fov, float(box3d.width)/float(box3d.height),
+                     cameraZ/maxZ, cameraZ*maxZ);
+
+    pg3D.pushMatrix();
     
     int fullRevolution = FRAME_RATE * 60; //X seconds
     int rotation = (frameCount + fullRevolution / 7) % fullRevolution;
     float rX = PI/2;
     float rY = map(rotation, 0, fullRevolution, -PI, PI);
     
-    pg3D.translate(pg3D.height * 0.5, pg3D.height * 2.2, pg3D.height * -4.2);
+    pg3D.translate(magicNum * 0.5, magicNum * 2.2, magicNum * -4.2);
     
     pg3D.rotateY(rY);
     pg3D.rotateX(rX);
     
-    pg3D.translate(pg3D.height * 0,pg3D.height * 1, pg3D.height * 0);
+    pg3D.translate(magicNum * 0, magicNum * 1, magicNum * 0);
     
     drawModel(img);
     pg3D.popMatrix();
