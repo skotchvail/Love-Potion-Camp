@@ -30,6 +30,7 @@ boolean needToFlushPrefs;
 MainClass main;
 Utility utility;
 Preferences prefs;
+Point location;
 
 interface VoidFunction { void function(); }
 interface FunctionFloatFloat { void function(float x, float y); }
@@ -48,9 +49,6 @@ void setup() {
 }
 
 void draw() {
-  if (frameCount == 2) {
-    frame.setLocation(0, 0);
-  }
   main.draw();
 }
 
@@ -87,6 +85,7 @@ class MainClass {
   int modeCol;
   int modeRow;
   float lastModeChangeTimeStamp;
+  Point screenLocation = new Point();
   
   PaletteManager pm = new PaletteManager();
   Settings settings = new Settings(NUM_BANDS);
@@ -167,6 +166,19 @@ class MainClass {
         prefs.flush();
       } catch(Exception e) {
         println("main flushing prefs: " + e);
+      }
+    }
+    
+    if (frameCount == 2) {
+      screenLocation.x = prefs.getInt("screenLocationX", 0);
+      screenLocation.y = prefs.getInt("screenLocationY", 0);
+      frame.setLocation(screenLocation);
+    }
+    else if (frameCount % 60 == 58) {
+      if (!screenLocation.equals(frame.getLocation())) {
+        screenLocation = frame.getLocation();
+        prefs.putInt("screenLocationX", screenLocation.x);
+        prefs.putInt("screenLocationY", screenLocation.y);
       }
     }
     
