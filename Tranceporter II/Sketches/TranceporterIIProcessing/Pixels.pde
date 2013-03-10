@@ -208,11 +208,8 @@ class Pixels {
     PImage img = createImage(pg.width, pg.height, RGB);
     img.loadPixels();
     pg.loadPixels();
-    for (int i = 0; i < img.pixels.length; i++) {
-      img.pixels[i] = pg.pixels[i];
-    }
+    System.arraycopy(pg.pixels, 0, img.pixels, 0, img.pixels.length);
     img.updatePixels();
-    pg.updatePixels();
 
     pg3D.beginDraw();
     pg3D.noStroke();
@@ -221,7 +218,6 @@ class Pixels {
     pg3D.lights();
 
     float magicNum = 300; // Not sure how this affects the drawing, but it can be adjusted to make the field of view seem closer or further
-    
     float maxZ = 10000;
     float fov = PI/3.9;
     float cameraZ = (box3d.height/2.0) / tan(fov/2.0);
@@ -249,13 +245,8 @@ class Pixels {
     // copy onto the display window
     pg3D.loadPixels();
     loadPixels();
-    for (int x = 0; x < pg3D.width; x++) {
-      for (int y = 0; y < pg3D.height; y++) {
-        pixels[(y + box2d.y) * screenWidth + x + box3d.x] = pg3D.pixels[y * pg3D.width + x];
-      }
-    }
+    copy(pg3D, 0, 0, pg3D.width, pg3D.height,  box3d.x, box2d.y, pg3D.width, pg3D.height);
     updatePixels();
-    pg3D.updatePixels(); // is it necessary to call updatePixels when nothing changed?
   }
 
   boolean wasDrawing2D = true;
