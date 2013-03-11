@@ -208,6 +208,18 @@ class MainClass {
   }
   
   
+  ArrayList<String> getKeymapLines() {
+
+    ArrayList<String> myStrings = new ArrayList();
+    myStrings.add(new String("n      select next pattern"));
+    myStrings.add(new String("2      show/hide 2d display"));
+    myStrings.add(new String("3      show/hide 3d display"));
+
+    return myStrings;
+
+  }
+
+
   void keyPressed() {
     
     if (key == 'n') {

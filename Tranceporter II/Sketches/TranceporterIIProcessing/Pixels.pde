@@ -277,7 +277,8 @@ class Pixels {
     if (draw3dSimulation) {
       drawMappedOntoBottle(pg);
     }
-    
+
+    // print led coordinate state to screen
     int lineHeight = box2d.y * 2 + box2d.height + 10;
     String[] textLines = main.currentMode().getTextLines();
     if (textLines != null) {
@@ -286,6 +287,19 @@ class Pixels {
         lineHeight += 20;
       }
     }
+
+    // print keymapping info to screen
+    lineHeight = box2d.y * 2 + box2d.height + 10;
+    ArrayList<String> keyMapLines = main.currentMode().getKeymapLines();
+    if (keyMapLines != null) {
+      for(int i=0; i<keyMapLines.size();i++) {
+        text(keyMapLines.get(i), box2d.x + 200, lineHeight);
+        lineHeight += 20;
+      }
+    }
+
+
+
     fill(255);
   }
   
