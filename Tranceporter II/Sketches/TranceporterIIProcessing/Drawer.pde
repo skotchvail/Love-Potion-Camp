@@ -115,6 +115,10 @@ class Drawer {
     return null;
   }
   
+  ArrayList<String> getKeymapLines() {
+    return main.getKeymapLines();
+  }
+
   int getLastMouseX() { return lastMouseX; }
   int getLastMouseY() { return lastMouseY; }
   
