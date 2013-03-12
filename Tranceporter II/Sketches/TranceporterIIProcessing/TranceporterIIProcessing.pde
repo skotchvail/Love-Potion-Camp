@@ -207,7 +207,6 @@ class MainClass {
     }
   }
   
-  
   ArrayList<String> getKeymapLines() {
 
     ArrayList<String> myStrings = new ArrayList();
@@ -216,9 +215,7 @@ class MainClass {
     myStrings.add(new String("3      show/hide 3d display"));
 
     return myStrings;
-
   }
-
 
   void keyPressed() {
     

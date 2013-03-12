@@ -77,7 +77,7 @@ class HardwareTest extends Drawer {
       //p.ledRawSet(cursorStrand, cursorOrdinal, -999999, -999999);
     }
     
-    // read arrow keys - I'm not sure this is actually useful - it doesn't seem to work
+    // TOOD: Ralph says: read arrow keys - I'm not sure this is actually useful - it doesn't seem to work
     if (key == CODED) {
       if (keyCode == UP || keyCode == DOWN || keyCode == LEFT || keyCode == RIGHT) {
         int xChange = 0;
@@ -135,13 +135,12 @@ class HardwareTest extends Drawer {
     myStrings.add(new String("_ +      select next/previous pixel * 10 "));
     myStrings.add(new String("- =      select next/previous pixel"));
     
-    // this doesn't seem to work, so let's not display it for now
+    // TODO: this doesn't seem to work, so let's not display it for now
     // myStrings.add(new String("arrows   select pixel in indicated direction"));
 
     return myStrings;
   }
 
-  
   final float kLevelGrid = 0.4;
   final float kLevelGreen = 0.2;
   

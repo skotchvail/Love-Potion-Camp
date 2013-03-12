@@ -298,8 +298,6 @@ class Pixels {
       }
     }
 
-
-
     fill(255);
   }
   
