@@ -33,17 +33,23 @@ class Tunnel extends Drawer {
   public PImage im;
   
   void setup() {
-    pg.strokeWeight(1);
+    pg.smooth();
     im = loadImage("light.png");
+    if (!ORIGINAL_COLORS) {
+      im.resize(round(im.width * 1.5), 0);
+    }
     pg.smooth();
     factor = width / 600.0;
     NUMBER_OF_LAYERS = int(59 * factor) + 7;
-    DEPTH = int (900 * factor) + 100;
+    DEPTH = int (1000 * factor) + 0;
   }
   
   void draw() {
     pg.noFill();
-    pg.strokeWeight(2);
+    if (ORIGINAL_COLORS)
+      pg.strokeWeight(1);
+    else
+      pg.strokeWeight(settings.isBeat(0)?2:1);
     noiseDetail(1, NOISE_FALLOFF);
     if (ORIGINAL_COLORS) {
       colorMode(HSB, NUMBER_OF_LAYERS, 1, 1, NUMBER_OF_LAYERS);
@@ -80,8 +86,7 @@ class Tunnel extends Drawer {
   private void performCamera()
   {
     CircleLayer layer0 = lCol.list.get(0);
-    CircleLayer layer5 = lCol.list.size() <= 5 ? layer0 : lCol.list.get(5);
-    
+    CircleLayer layer5 = lCol.list.size() > 5 ? lCol.list.get(5) : layer0;
     
     pg.camera(layer0.getCenter().x, layer0.getCenter().y,
            0, layer5.getCenter().x, layer5.getCenter().y,
@@ -104,19 +109,26 @@ class Tunnel extends Drawer {
     }
   }
   
-  public int getColorForLayer(int layerNumber, int transCoef)
+  public color getColorForLayer(int layerNumber, int transCoef)
   {
+    int colorJump = 0;
+    float brightness = 1;
+    
+    if (!ORIGINAL_COLORS) {
+      if (layerNumber == NUMBER_OF_LAYERS - 2)
+        brightness = settings.isBeat(1)?0.5:1;
+    }
+    
+//    println ("layerNumber =" + layerNumber);
     if (ORIGINAL_COLORS) {
-        return color(-(layerNumber - colorIndex) / COLOR_AMPLITUDE % NUMBER_OF_LAYERS, 1, 1,layerNumber / TRANSPARENCY_COEF*transCoef);
+      return color(((colorJump + colorIndex - layerNumber) / COLOR_AMPLITUDE) % NUMBER_OF_LAYERS, 1, brightness, layerNumber / TRANSPARENCY_COEF*transCoef);
     }
     else {
-      float layerRange = (getNumColors()/1.0) / NUMBER_OF_LAYERS + 1;
-      layerRange = 2;
-      color result = getColor(round((layerRange + transCoef) * layerNumber) % getNumColors());
-      float alpha;
-      alpha = 50 * transCoef;
-      assert(alpha >= 0 && alpha <= 255.0) : "invalid alpha: " + alpha + " layerNumber: " + layerNumber;
+      int index = colorIndex + layerNumber;
+      color result = getColor(index % getNumColors());
+      float alpha = ((layerNumber / TRANSPARENCY_COEF*transCoef) / NUMBER_OF_LAYERS) * 255;
       result = replaceAlpha(result, alpha);
+      println("alpha = " + alpha(result));
       return result;
     }
   }
@@ -143,7 +155,7 @@ class Tunnel extends Drawer {
   }
   
   class Glow {
-    int curLayerNum;
+    float curLayerNum;
     int curCircle;
     
     int speed;
@@ -163,7 +175,13 @@ class Tunnel extends Drawer {
     }
     
     public void update(LayerCollection col) {
-      curLayerNum += speed;
+      if (ORIGINAL_COLORS) {
+        curLayerNum += speed;
+      }
+      else {
+        float factor = settings.getParam(settings.keySpeed) + 0.1;
+        curLayerNum += speed * factor;
+      }
       if (curLayerNum > col.list.size() - 1) {
         curLayerNum = 0;
         this.speed = (int)random(1,maxSpeed);
@@ -171,10 +189,14 @@ class Tunnel extends Drawer {
     }
     
     public void drawIt(LayerCollection col) {
-      pg.tint(getColorForLayer(NUMBER_OF_LAYERS - curLayerNum, 5));
+      int layerNum = round(curLayerNum);
+
+      if (ORIGINAL_COLORS) {
+        pg.tint(getColorForLayer(NUMBER_OF_LAYERS - layerNum, 5));
+      }
       pg.pushMatrix();
       
-      CircleLayer c = col.list.get(curLayerNum);
+      CircleLayer c = col.list.get(layerNum);
       pg.translate(c.getOneCenter(curCircle).x + dev.x,
                 c.getOneCenter(curCircle).y + dev.y,
                 c.getLayer().get(0).get(0).z);
@@ -217,7 +239,10 @@ class Tunnel extends Drawer {
     }
     
     public CircleLayer getShape() {
-      final int CIRCLE_RADIUS = int(220 * factor);
+      float extraShrink = 1.0;
+      if (width < 150)
+        extraShrink = 0.45;
+      final int CIRCLE_RADIUS = int(220 * factor * extraShrink);
 
       CircleLayer layer = new CircleLayer(circles.length);
       Area area = circles[0].getShape(CIRCLE_RADIUS, CIRCLE_DETAIL, CIRCLE_OVAL, rotAngle);
@@ -269,8 +294,24 @@ class Tunnel extends Drawer {
       offset.x += increment.x;
       offset.y += increment.y;
       
-      center.x = w / 2 - noise(offset.x * 0.05f) * w;
-      center.y = h / 2 - noise(offset.y * 0.05f) * h;
+      if (ORIGINAL_COLORS) {
+        center.x = w / 2 - noise(offset.x * 0.05f) * w;
+        center.y = h / 2 - noise(offset.y * 0.05f) * h;
+      }
+      else {
+        float noiseX = noise(offset.x * 0.05f);
+        float noiseY = noise(offset.y * 0.05f);
+        
+        if (settings.isBeat(0)) {
+          noiseX *= 1.5;
+        }
+        if (settings.isBeat(2)) {
+          noiseY *= 1.5;
+        }
+        
+        center.x = w / 2 - noiseX * w;
+        center.y = h / 2 - noiseY * h;
+      }
     }
     
     public Area getShape(float rad, float det, float oval, float rot) {
