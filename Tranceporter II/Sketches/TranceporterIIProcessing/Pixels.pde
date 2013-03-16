@@ -559,12 +559,15 @@ class Pixels {
 
   
   TotalControlConcurrent totalControlConcurrent;
+  boolean hardwareAlreadySetup = false;
 
   void initTotalControl()
   {
     if (!useTotalControl) {
       return;
     }
+    
+    hardwareAlreadySetup = true;
     
     int stealPixel = 0;
     int boundary = 0;
@@ -624,6 +627,10 @@ class Pixels {
       return;
     }
  //   setPixel(ledWidth-1,ledHeight-1,color(255));
+    
+    if (!hardwareAlreadySetup) {
+      initTotalControl();
+    }
     
     int[] theStrandMap = main.currentMode().isTrainingMode()?trainingStrandMap:strandMap;
     //color[] thePixelData = main.currentMode().isTrainingMode()?trainingPixelData:pixelData;

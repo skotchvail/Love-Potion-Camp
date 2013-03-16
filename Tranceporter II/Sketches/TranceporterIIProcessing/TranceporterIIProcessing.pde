@@ -210,9 +210,11 @@ class MainClass {
   ArrayList<String> getKeymapLines() {
 
     ArrayList<String> myStrings = new ArrayList();
-    myStrings.add(new String("n      select next pattern"));
-    myStrings.add(new String("2      show/hide 2d display"));
-    myStrings.add(new String("3      show/hide 3d display"));
+    myStrings.add(new String("space: freeze"));
+    myStrings.add(new String("n: select next pattern"));
+    myStrings.add(new String("t: use Hardware"));
+    myStrings.add(new String("2: show/hide 2d display"));
+    myStrings.add(new String("3: show/hide 3d display"));
 
     return myStrings;
   }
@@ -236,6 +238,10 @@ class MainClass {
       prefs.putBoolean("draw3dSimulation", draw3dSimulation);
       needToFlushPrefs = true;
       println("3D grid: " + draw3dSimulation);
+    }
+    
+    if (key == 't') {
+      display.useTotalControl = !display.useTotalControl;
     }
     
     modes[modeCol][modeRow].keyPressed();
