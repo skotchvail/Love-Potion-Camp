@@ -11,9 +11,14 @@ class Tunnel extends Drawer {
   final float NOISE_FALLOFF = 0.5f;
   final int NUMBER_OF_CIRCLES = 4;
   final int NUMBER_OF_GLOWS = 21;
-  final public int NUMBER_OF_LAYERS = 20;//65;
+  final float TRANSPARENCY_COEF = 1.5f;
+  final int COLOR_AMPLITUDE = 10;
+  final boolean ORIGINAL_COLORS = true;
 
-  
+  float factor;
+  int NUMBER_OF_LAYERS;
+  int DEPTH;
+
   Tunnel(Pixels p, Settings s) {
     super(p, s, P3D);
   }
@@ -25,39 +30,46 @@ class Tunnel extends Drawer {
   
   int colorIndex = (int)random(1000);
   
-  //help Variable
-  final int layerDev = lCol.DEPTH / NUMBER_OF_LAYERS;
-  
   public PImage im;
   
   void setup() {
-    noCursor();
-    pg.strokeWeight(2);
+    pg.strokeWeight(1);
     im = loadImage("light.png");
+    pg.smooth();
+    factor = width / 600.0;
+    NUMBER_OF_LAYERS = int(59 * factor) + 7;
+    DEPTH = int (900 * factor) + 100;
   }
   
   void draw() {
     pg.noFill();
     pg.strokeWeight(2);
     noiseDetail(1, NOISE_FALLOFF);
-    colorMode(RGB,255);
-    pg.colorMode(RGB,255);
+    if (ORIGINAL_COLORS) {
+      colorMode(HSB, NUMBER_OF_LAYERS, 1, 1, NUMBER_OF_LAYERS);
+      pg.colorMode(HSB, NUMBER_OF_LAYERS, 1, 1, NUMBER_OF_LAYERS);
+    }
+    else {
+      colorMode(RGB,255);
+      pg.colorMode(RGB,255);
+    }
 
     lCol.nextStep();
     performCamera();
     //draw Light Glows
     if (lCol.list.size() > NUMBER_OF_LAYERS) {
+      pg.hint(DISABLE_DEPTH_TEST);
       glowCol.nextStep(lCol);
       glowCol.drawIt(lCol);
+      pg.hint(ENABLE_DEPTH_TEST);
     }
-    //draw Tunnel
-    pg.smooth();
+    
     drawTunnel();
-    pg.noSmooth();
+    pg.perspective();
+
     //make delay effect
     pg.camera();
-    pg.noStroke();
-    pg.fill(0, 50);
+    pg.fill(0, 20 * NUMBER_OF_LAYERS / 65.0);
     pg.rect(0, 0, width, height);
     //"Clean" lCol of layers
     if (lCol.list.size() > NUMBER_OF_LAYERS)
@@ -67,17 +79,13 @@ class Tunnel extends Drawer {
   
   private void performCamera()
   {
-    float X_OFFSET = -100;
-    float Y_OFFSET = -50;
-    //sorry for this...
-    if(lCol.list.size()>5)
-      pg.camera(lCol.list.get(0).getCenter().x, lCol.list.get(0).getCenter().y, 0,
-                lCol.list.get(5).getCenter().x + X_OFFSET, lCol.list.get(5).getCenter().y + Y_OFFSET, -lCol.DEPTH/ 2,
-                0, 1, 0);
-    else
-      pg.camera(lCol.list.get(0).getCenter().x, lCol.list.get(0).getCenter().y, 0,
-                lCol.list.get(0).getCenter().x + X_OFFSET, lCol.list.get(0).getCenter().y + Y_OFFSET, -lCol.DEPTH/ 2,
-                0, 1, 0);
+    CircleLayer layer0 = lCol.list.get(0);
+    CircleLayer layer5 = lCol.list.size() <= 5 ? layer0 : lCol.list.get(5);
+    
+    
+    pg.camera(layer0.getCenter().x, layer0.getCenter().y,
+           0, layer5.getCenter().x, layer5.getCenter().y,
+           -DEPTH / 2.0, 0, 1, 0);
   }
   
   public void drawTunnel() {
@@ -89,7 +97,7 @@ class Tunnel extends Drawer {
         pg.beginShape();
         for (PVector p : l) {
           pg.vertex(p.x, p.y, p.z);
-          p.z += layerDev;
+          p.z += DEPTH / NUMBER_OF_LAYERS;
         }
         pg.endShape(CLOSE);
       }
@@ -98,15 +106,19 @@ class Tunnel extends Drawer {
   
   public int getColorForLayer(int layerNumber, int transCoef)
   {
-    float layerRange = (getNumColors()/1.0) / NUMBER_OF_LAYERS + 1;
-    layerRange = 2;
-    color result = getColor(round((layerRange + transCoef) * layerNumber) % getNumColors());
-    float alpha;
-    alpha = 50 * transCoef;
-    assert(alpha >= 0 && alpha <= 255.0) : "invalid alpha: " + alpha + " layerNumber: " + layerNumber;
-    result = replaceAlpha(result, alpha);
-    return result;
-
+    if (ORIGINAL_COLORS) {
+        return color(-(layerNumber - colorIndex) / COLOR_AMPLITUDE % NUMBER_OF_LAYERS, 1, 1,layerNumber / TRANSPARENCY_COEF*transCoef);
+    }
+    else {
+      float layerRange = (getNumColors()/1.0) / NUMBER_OF_LAYERS + 1;
+      layerRange = 2;
+      color result = getColor(round((layerRange + transCoef) * layerNumber) % getNumColors());
+      float alpha;
+      alpha = 50 * transCoef;
+      assert(alpha >= 0 && alpha <= 255.0) : "invalid alpha: " + alpha + " layerNumber: " + layerNumber;
+      result = replaceAlpha(result, alpha);
+      return result;
+    }
   }
   
   //Just paints Light Glows flying along the tunnel
@@ -116,7 +128,7 @@ class Tunnel extends Drawer {
     public GlowCollection(int numGlows) {
       this.list = new ArrayList<Glow>();
       for (int i = 0; i < numGlows; i++)
-        list.add(new Glow((int)random(2), 10, 225, 0.3f));
+        list.add(new Glow((int)random(2), 10, 225));
     }
     
     public void nextStep(LayerCollection col) {
@@ -131,14 +143,14 @@ class Tunnel extends Drawer {
   }
   
   class Glow {
-    float curLayerNum;
+    int curLayerNum;
     int curCircle;
     
     int speed;
     PVector dev;
     int maxSpeed;
     
-    public Glow(int ccurCircle, int cmaxSpeed, int rad, float oval) {
+    public Glow(int ccurCircle, int cmaxSpeed, int rad) {
       this.curLayerNum = 0;
       this.curCircle = ccurCircle;
       
@@ -151,8 +163,7 @@ class Tunnel extends Drawer {
     }
     
     public void update(LayerCollection col) {
-      float factor = settings.getParam(settings.keySpeed) + 0.1;
-      curLayerNum += speed * factor;
+      curLayerNum += speed;
       if (curLayerNum > col.list.size() - 1) {
         curLayerNum = 0;
         this.speed = (int)random(1,maxSpeed);
@@ -160,33 +171,22 @@ class Tunnel extends Drawer {
     }
     
     public void drawIt(LayerCollection col) {
-      int layerNum = round(curLayerNum);
-
-      //pg.tint(getColorForLayer(NUMBER_OF_LAYERS - layerNum, 5));
+      pg.tint(getColorForLayer(NUMBER_OF_LAYERS - curLayerNum, 5));
       pg.pushMatrix();
       
-      //hard to read, but easy to understand
-      pg.translate(col.list.get(layerNum).getOneCenter(curCircle).x + dev.x,
-                   col.list.get(layerNum).getOneCenter(curCircle).y + dev.y,
-                   col.list.get(layerNum).getLayer().get(0).get(0).z);
+      CircleLayer c = col.list.get(curLayerNum);
+      pg.translate(c.getOneCenter(curCircle).x + dev.x,
+                c.getOneCenter(curCircle).y + dev.y,
+                c.getLayer().get(0).get(0).z);
       
-      float imgScale = 1.5;
-      pg.image(im, 0, 0, im.width * imgScale, im.height * imgScale);
-
+      pg.image(im, 0, 0);
       pg.popMatrix();
     }
   }
   
-  
-  
   public class LayerCollection {
-    public final float BORDERS_WIDTH = 800;
-    public final float BORDERS_HEIGHT = 600;
-    
-    public final int CIRCLE_RADIUS = 220;
     public final int CIRCLE_DETAIL = 5;
     public final float CIRCLE_OVAL = 0.7f;
-    public final int DEPTH = 1000;
     public final float ROT_DEV = PI / 100;
     
     public List<CircleLayer> list = new ArrayList<CircleLayer>();
@@ -202,6 +202,9 @@ class Tunnel extends Drawer {
     }
     
     public void nextStep() {
+      final float BORDERS_WIDTH = width;
+      final float BORDERS_HEIGHT = height;
+      
       refreshCircles(BORDERS_WIDTH, BORDERS_WIDTH);
       list.add(getShape());
     }
@@ -214,12 +217,14 @@ class Tunnel extends Drawer {
     }
     
     public CircleLayer getShape() {
+      final int CIRCLE_RADIUS = int(220 * factor);
+
       CircleLayer layer = new CircleLayer(circles.length);
-      Area area = circles[0].getShape(CIRCLE_RADIUS, CIRCLE_DETAIL,CIRCLE_OVAL,rotAngle);
+      Area area = circles[0].getShape(CIRCLE_RADIUS, CIRCLE_DETAIL, CIRCLE_OVAL, rotAngle);
       layer.initCenter(0, circles[0].center);
       
       for (int i = 1; i < circles.length; i++) {
-        area.add(circles[i].getShape(CIRCLE_RADIUS, CIRCLE_DETAIL, CIRCLE_OVAL,rotAngle));
+        area.add(circles[i].getShape(CIRCLE_RADIUS, CIRCLE_DETAIL, CIRCLE_OVAL, rotAngle));
         layer.initCenter(i, circles[i].center);
       }
       
@@ -264,18 +269,8 @@ class Tunnel extends Drawer {
       offset.x += increment.x;
       offset.y += increment.y;
       
-      float noiseX = noise(offset.x * 0.05f);
-      float noiseY = noise(offset.y * 0.05f);
-
-      if (settings.isBeat(0)) {
-        noiseX *= 0.75;
-      }
-      if (settings.isBeat(2)) {
-        noiseY *= 0.75;
-      }
-      
-      center.x = w / 2 - noiseX * w;
-      center.y = h / 2 - noiseY * h;
+      center.x = w / 2 - noise(offset.x * 0.05f) * w;
+      center.y = h / 2 - noise(offset.y * 0.05f) * h;
     }
     
     public Area getShape(float rad, float det, float oval, float rot) {
@@ -328,7 +323,7 @@ class Tunnel extends Drawer {
       list.clear();
       super.finalize();
     }
-  }
+  };
   
   
 }
