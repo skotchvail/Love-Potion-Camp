@@ -2,7 +2,6 @@
 
 import oscP5.*;
 import netP5.*;
-import ddf.minim.analysis.*;
 import ddf.minim.*;
 import java.util.Arrays;
 import java.util.List;
@@ -145,7 +144,7 @@ class MainClass {
     bd = new BeatDetect(fft, NUM_BANDS, HISTORY_SIZE);
     for (int i=0; i<NUM_BANDS; i++)
       bd.analyzeBand(i, analyzeBands[i]);
-    bd.setFFTWindow(FFT.HAMMING);
+    bd.setFFTWindow();
     
     newEffectFirstTime();
     

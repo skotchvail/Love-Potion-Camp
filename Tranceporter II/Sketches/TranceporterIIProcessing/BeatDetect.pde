@@ -4,6 +4,7 @@
 // ( http://www.dafx.ca/proceedings/papers/p_133.pdf )
 
 import java.util.HashMap;
+import ddf.minim.analysis.*;
 
 class BeatDetect {
   String[] metricNames = {"spectralFlux", "spectrum"}; 
@@ -110,8 +111,8 @@ class BeatDetect {
     return fftBandMap[fftBand];
   }
 
-  void setFFTWindow(WindowFunction window) {
-    fft.window(window);
+  void setFFTWindow() {
+    fft.window(FFT.HAMMING);
   }
   
   void update(AudioBuffer data) {
