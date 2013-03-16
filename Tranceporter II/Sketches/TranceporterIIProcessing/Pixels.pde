@@ -21,7 +21,6 @@ class Pixels {
   private int[] strandMap;
   private int[] trainingStrandMap;
   final boolean runConcurrent = true;
-  boolean useTotalControl = true;
   
   Pixels(PApplet p) {
     objModel = new OBJModel(p, "tranceporter.obj");
@@ -563,7 +562,7 @@ class Pixels {
 
   void initTotalControl()
   {
-    if (!useTotalControl) {
+    if (!useTotalControlHardware) {
       return;
     }
     
@@ -614,7 +613,7 @@ class Pixels {
     else {
       int status = setupTotalControl(getNumStrands(), maxPixelsPerStrand, kUseBitBang);
       if (status != 0) {
-        //useTotalControl = false;
+        //useTotalControlHardware = false;
         //println("turning off Total Control because of error during initialization");
       }
       
@@ -623,7 +622,7 @@ class Pixels {
   
   // This function loads the screen-buffer and sends it to the TotalControl p9813 driver
   void drawToLeds() {
-    if (!useTotalControl) {
+    if (!useTotalControlHardware) {
       return;
     }
  //   setPixel(ledWidth-1,ledHeight-1,color(255));

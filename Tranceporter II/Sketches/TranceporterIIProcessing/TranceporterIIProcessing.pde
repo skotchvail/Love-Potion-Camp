@@ -25,6 +25,7 @@ int FRAME_RATE = 24;
 
 boolean draw2dGrid;
 boolean draw3dSimulation;
+boolean useTotalControlHardware;
 boolean needToFlushPrefs;
 MainClass main;
 Utility utility;
@@ -40,6 +41,7 @@ void setup() {
   utility = new Utility();
   prefs = Preferences.userNodeForPackage(this.getClass());
   draw2dGrid = prefs.getBoolean("draw2dGrid", true);
+  useTotalControlHardware = prefs.getBoolean("useTotalControlHardware", true);
   draw3dSimulation = prefs.getBoolean("draw3dSimulation", true);
   main = new MainClass();
   main.setup(this);
@@ -211,7 +213,7 @@ class MainClass {
 
     ArrayList<String> myStrings = new ArrayList();
     myStrings.add(new String("space: freeze"));
-    myStrings.add(new String("n: select next pattern"));
+    myStrings.add(new String("n: next Sketch"));
     myStrings.add(new String("t: use Hardware"));
     myStrings.add(new String("2: show/hide 2d display"));
     myStrings.add(new String("3: show/hide 3d display"));
@@ -241,7 +243,10 @@ class MainClass {
     }
     
     if (key == 't') {
-      display.useTotalControl = !display.useTotalControl;
+      useTotalControlHardware = !useTotalControlHardware;
+      prefs.putBoolean("useTotalControlHardware", useTotalControlHardware);
+      needToFlushPrefs = true;
+      println("useTotalControlHardware: " + useTotalControlHardware);
     }
     
     modes[modeCol][modeRow].keyPressed();
