@@ -10,6 +10,7 @@ int MAX_RGB = 255;
 
 class Pixels {
   private color[] pixelData;
+  private color[] maskPixels;
 //  private color[] trainingPixelData;
   private OBJModel objModel;
   private PGraphics pg3D;
@@ -62,52 +63,64 @@ class Pixels {
     System.arraycopy(pixels, 0, pixelData, 0, pixels.length);
   }
   
-  void setPixel(int x, int y, color c) {
-    pixelData[c2i(x,y)] = c;
+  void updateMaskPixels() {
+    maskPixels = null;
   }
-
-  void setAll(color c) {
-    for (int x=0; x<ledWidth; x++) {
-      for (int y=0; y<ledHeight; y++) {
-        setPixel(x, y, c);
-      }
-    }
-  }
-    
+  
+//  void setPixel(int x, int y, color c) {
+//    pixelData[c2i(x,y)] = c;
+//  }
+//
+//  void setAll(color c) {
+//    for (int x=0; x<ledWidth; x++) {
+//      for (int y=0; y<ledHeight; y++) {
+//        setPixel(x, y, c);
+//      }
+//    }
+//  }
+  
   PGraphics drawFlat2DVersion() {
     
-    // render into offscreen buffer so that we can blur it, and then copy it
-    // onto the display window
-    int expandedWidth = box2d.width;
-    int expandedHeight = box2d.height;
-
-    PGraphics pg = createGraphics(expandedWidth, expandedHeight, JAVA2D);
-    pg.beginDraw();
-    pg.noStroke();
-    for (int x=0; x<ledWidth; x++) {
-      for (int y=0; y<ledHeight; y++) {
-        color pixelColor = pixelData[c2i(x,y)];
-        pg.fill(pixelColor);
-        pg.rect(x*screenPixelSize,y*screenPixelSize, screenPixelSize, screenPixelSize);
+    color white = color(255);
+    
+    if (maskPixels == null) {
+      // Mask out any pixels that are not mapped
+      maskPixels = new color[ledWidth * ledHeight];
+      for (int whichStrand = 0; whichStrand < getNumStrands(); whichStrand++) {
+        int strandSize = getStrandSize(whichStrand);
+        int start = whichStrand * maxPixelsPerStrand;
+        for (int ordinal = 0; ordinal < strandSize; ordinal++) {
+          int index = ordinal + start;
+          int value = strandMap[index];
+          if (value >= 0) {
+            Point p = i2c(value);
+            maskPixels[p.y * ledWidth + p.x] = white;
+          }
+        }
       }
     }
-    pg.filter(BLUR, 2.5);
-    pg.endDraw();
+
+    PImage image = createImage(ledWidth, ledHeight, RGB);
+    arrayCopy(pixelData, image.pixels, image.pixels.length);
+    image.updatePixels();
+    image.mask(maskPixels);
+    
+    // Render into offscreen buffer so that we can blur it, and then copy it
+    // onto the display window
+    PGraphics result = createGraphics(box2d.width, box2d.height, JAVA2D);
+    result.beginDraw();
+    {
+      result.image(image, 0, 0, result.width, result.height);
+      result.filter(BLUR, 2.5);
+    }
+    result.endDraw();
     
     if (!draw2dGrid)
-      return pg;
+      return result;
     
-    // copy onto the display window
-    pg.loadPixels();
-    loadPixels();
-    for (int x = 0; x < expandedWidth; x++) {
-      for (int y = 0; y < expandedHeight; y++) {
-        pixels[(y + box2d.y)*screenWidth + x + box2d.x] = pg.pixels[y*expandedWidth + x];
-      }
-    }
-    updatePixels();
-    pg.updatePixels();
-    return pg;
+    // Copy onto the display window
+    image(result, box2d.x, box2d.y);
+    return result;
   }
 
   void drawModel(PImage texture) {
@@ -556,12 +569,6 @@ class Pixels {
 
   void initTotalControl()
   {
-    if (!useTotalControlHardware) {
-      return;
-    }
-    
-    hardwareAlreadySetup = true;
-    
     int stealPixel = 0;
     int boundary = 0;
     //create the trainingStrandMap
@@ -601,6 +608,13 @@ class Pixels {
     
     println("biggestX:" + (biggestX + 1) + " biggestY:" + (biggestY + 1));
     
+    
+    if (!useTotalControlHardware) {
+      return;
+    }
+    
+    hardwareAlreadySetup = true;
+
     if (runConcurrent) {
       totalControlConcurrent = new TotalControlConcurrent(getNumStrands(),maxPixelsPerStrand, kUseBitBang);
     }
