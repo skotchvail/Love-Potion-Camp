@@ -7,22 +7,22 @@
 	objects = {
 
 /* Begin PBXFileReference section */
-		E00ECDCE15D0D8290099F4BF /* Smoke.pde */ = {isa = PBXFileReference; lastKnownFileType = text; path = Smoke.pde; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.java; };
-		E02F9B2815C37B19003EDFDA /* AlienBlob.pde */ = {isa = PBXFileReference; lastKnownFileType = text; lineEnding = 0; path = AlienBlob.pde; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.java; };
-		E02F9B4A15C37B19003EDFDA /* BeatDetect.pde */ = {isa = PBXFileReference; lastKnownFileType = text; path = BeatDetect.pde; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.java; };
-		E02F9B4B15C37B19003EDFDA /* BouncingBalls2D.pde */ = {isa = PBXFileReference; lastKnownFileType = text; path = BouncingBalls2D.pde; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.java; };
-		E02F9B4C15C37B19003EDFDA /* BouncingBalls3D.pde */ = {isa = PBXFileReference; lastKnownFileType = text; path = BouncingBalls3D.pde; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.java; };
-		E02F9B4D15C37B19003EDFDA /* BouncingBallsToAudio.pde */ = {isa = PBXFileReference; lastKnownFileType = text; path = BouncingBallsToAudio.pde; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.java; };
-		E02F9B4E15C37B19003EDFDA /* BZR.pde */ = {isa = PBXFileReference; lastKnownFileType = text; lineEnding = 0; path = BZR.pde; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.java; };
-		E02F9B4F15C37B19003EDFDA /* CircularArray.pde */ = {isa = PBXFileReference; lastKnownFileType = text; path = CircularArray.pde; sourceTree = "<group>"; };
-		E02F9B5015C37B19003EDFDA /* Console.pde */ = {isa = PBXFileReference; lastKnownFileType = text; path = Console.pde; sourceTree = "<group>"; };
-		E02F9B5115C37B19003EDFDA /* Drawer.pde */ = {isa = PBXFileReference; lastKnownFileType = text; lineEnding = 0; path = Drawer.pde; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.java; };
-		E02F9B5215C37B19003EDFDA /* Fire.pde */ = {isa = PBXFileReference; lastKnownFileType = text; lineEnding = 0; path = Fire.pde; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.java; };
-		E02F9B5315C37B19003EDFDA /* Paint.pde */ = {isa = PBXFileReference; lastKnownFileType = text; path = Paint.pde; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.java; };
-		E02F9B5415C37B19003EDFDA /* PaletteManager.pde */ = {isa = PBXFileReference; lastKnownFileType = text; path = PaletteManager.pde; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.java; };
-		E02F9B5515C37B19003EDFDA /* Pixels.pde */ = {isa = PBXFileReference; lastKnownFileType = text; lineEnding = 0; path = Pixels.pde; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.java; };
-		E02F9B5715C37B19003EDFDA /* TranceporterIIProcessing.pde */ = {isa = PBXFileReference; lastKnownFileType = text; path = TranceporterIIProcessing.pde; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.java; };
-		E03AFC1115CF02680088360C /* HardwareTest.pde */ = {isa = PBXFileReference; lastKnownFileType = text; path = HardwareTest.pde; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.java; };
+		E00ECDCE15D0D8290099F4BF /* Smoke.pde */ = {isa = PBXFileReference; explicitFileType = sourcecode.java; path = Smoke.pde; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.java; };
+		E02F9B2815C37B19003EDFDA /* AlienBlob.pde */ = {isa = PBXFileReference; explicitFileType = sourcecode.java; lineEnding = 0; path = AlienBlob.pde; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.java; };
+		E02F9B4A15C37B19003EDFDA /* BeatDetect.pde */ = {isa = PBXFileReference; explicitFileType = sourcecode.java; path = BeatDetect.pde; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.java; };
+		E02F9B4B15C37B19003EDFDA /* BouncingBalls2D.pde */ = {isa = PBXFileReference; explicitFileType = sourcecode.java; path = BouncingBalls2D.pde; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.java; };
+		E02F9B4C15C37B19003EDFDA /* BouncingBalls3D.pde */ = {isa = PBXFileReference; explicitFileType = sourcecode.java; path = BouncingBalls3D.pde; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.java; };
+		E02F9B4D15C37B19003EDFDA /* BouncingBallsToAudio.pde */ = {isa = PBXFileReference; explicitFileType = sourcecode.java; path = BouncingBallsToAudio.pde; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.java; };
+		E02F9B4E15C37B19003EDFDA /* BZR.pde */ = {isa = PBXFileReference; explicitFileType = sourcecode.java; lineEnding = 0; path = BZR.pde; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.java; };
+		E02F9B4F15C37B19003EDFDA /* CircularArray.pde */ = {isa = PBXFileReference; explicitFileType = sourcecode.java; path = CircularArray.pde; sourceTree = "<group>"; };
+		E02F9B5015C37B19003EDFDA /* Console.pde */ = {isa = PBXFileReference; explicitFileType = sourcecode.java; path = Console.pde; sourceTree = "<group>"; };
+		E02F9B5115C37B19003EDFDA /* Drawer.pde */ = {isa = PBXFileReference; explicitFileType = sourcecode.java; lineEnding = 0; path = Drawer.pde; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.java; };
+		E02F9B5215C37B19003EDFDA /* Fire.pde */ = {isa = PBXFileReference; explicitFileType = sourcecode.java; lineEnding = 0; path = Fire.pde; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.java; };
+		E02F9B5315C37B19003EDFDA /* Paint.pde */ = {isa = PBXFileReference; explicitFileType = sourcecode.java; path = Paint.pde; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.java; };
+		E02F9B5415C37B19003EDFDA /* PaletteManager.pde */ = {isa = PBXFileReference; explicitFileType = sourcecode.java; path = PaletteManager.pde; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.java; };
+		E02F9B5515C37B19003EDFDA /* Pixels.pde */ = {isa = PBXFileReference; explicitFileType = sourcecode.java; lineEnding = 0; path = Pixels.pde; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.java; };
+		E02F9B5715C37B19003EDFDA /* TranceporterIIProcessing.pde */ = {isa = PBXFileReference; explicitFileType = sourcecode.java; path = TranceporterIIProcessing.pde; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.java; };
+		E03AFC1115CF02680088360C /* HardwareTest.pde */ = {isa = PBXFileReference; explicitFileType = sourcecode.java; path = HardwareTest.pde; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.java; };
 		E0406C3715C8C8DC00F6A29D /* BoundingBox.java */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.java; path = BoundingBox.java; sourceTree = "<group>"; };
 		E0406C3815C8C8DC00F6A29D /* Debug.java */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.java; path = Debug.java; sourceTree = "<group>"; };
 		E0406C3915C8C8DC00F6A29D /* Face.java */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.java; path = Face.java; sourceTree = "<group>"; };
@@ -31,13 +31,13 @@
 		E0406C3C15C8C8DC00F6A29D /* OBJModel.java */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.java; path = OBJModel.java; sourceTree = "<group>"; };
 		E0406C3D15C8C8DC00F6A29D /* Segment.java */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.java; path = Segment.java; sourceTree = "<group>"; };
 		E0467EEF15CE210D00F6C823 /* TotalControl.java */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.java; name = TotalControl.java; path = ../../common/p9813/processing/TotalControl.java; sourceTree = "<group>"; };
-		E05002FE15D2E93900DC28FF /* Settings.pde */ = {isa = PBXFileReference; lastKnownFileType = text; path = Settings.pde; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.java; };
+		E05002FE15D2E93900DC28FF /* Settings.pde */ = {isa = PBXFileReference; explicitFileType = sourcecode.java; path = Settings.pde; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.java; };
 		E058EA7715D494A400843748 /* ImportingSketches.md */ = {isa = PBXFileReference; lastKnownFileType = text; name = ImportingSketches.md; path = ../ImportingSketches.md; sourceTree = "<group>"; };
 		E058EA7815D494A400843748 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = text; name = README.md; path = ../README.md; sourceTree = "<group>"; };
-		E058EA8015D4A3CE00843748 /* Tunnel.pde */ = {isa = PBXFileReference; lastKnownFileType = text; path = Tunnel.pde; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.java; };
-		E078182B15D5EE55008D537F /* Heart.pde */ = {isa = PBXFileReference; lastKnownFileType = text; path = Heart.pde; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.java; };
-		E078182D15D6E00A008D537F /* Equalizer3d.pde */ = {isa = PBXFileReference; lastKnownFileType = text; path = Equalizer3d.pde; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.java; };
-		E078183215D868C3008D537F /* DroppingParticles.pde */ = {isa = PBXFileReference; lastKnownFileType = text; path = DroppingParticles.pde; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.java; };
+		E058EA8015D4A3CE00843748 /* Tunnel.pde */ = {isa = PBXFileReference; explicitFileType = sourcecode.java; path = Tunnel.pde; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.java; };
+		E078182B15D5EE55008D537F /* Heart.pde */ = {isa = PBXFileReference; explicitFileType = sourcecode.java; path = Heart.pde; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.java; };
+		E078182D15D6E00A008D537F /* Equalizer3d.pde */ = {isa = PBXFileReference; explicitFileType = sourcecode.java; path = Equalizer3d.pde; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.java; };
+		E078183215D868C3008D537F /* DroppingParticles.pde */ = {isa = PBXFileReference; explicitFileType = sourcecode.java; path = DroppingParticles.pde; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.java; };
 		E09481ED15DB3629009DA376 /* calibration.h */ = {isa = PBXFileReference; indentWidth = 4; lastKnownFileType = sourcecode.c.h; name = calibration.h; path = ../../common/p9813/calibration.h; sourceTree = "<group>"; tabWidth = 4; };
 		E09481EE15DB3629009DA376 /* p9813.h */ = {isa = PBXFileReference; indentWidth = 4; lastKnownFileType = sourcecode.c.h; name = p9813.h; path = ../../common/p9813/p9813.h; sourceTree = "<group>"; tabWidth = 4; };
 		E09481EF15DB3629009DA376 /* demo.c */ = {isa = PBXFileReference; indentWidth = 4; lastKnownFileType = sourcecode.c.c; name = demo.c; path = ../../common/p9813/demo.c; sourceTree = "<group>"; tabWidth = 4; };
@@ -46,10 +46,10 @@
 		E09481F215DB3629009DA376 /* random.c */ = {isa = PBXFileReference; indentWidth = 4; lastKnownFileType = sourcecode.c.c; name = random.c; path = ../../common/p9813/random.c; sourceTree = "<group>"; tabWidth = 4; };
 		E09481F315DB3629009DA376 /* rgb.c */ = {isa = PBXFileReference; indentWidth = 4; lastKnownFileType = sourcecode.c.c; name = rgb.c; path = ../../common/p9813/rgb.c; sourceTree = "<group>"; tabWidth = 4; };
 		E09481F415DB3629009DA376 /* TotalControl.c */ = {isa = PBXFileReference; indentWidth = 4; lastKnownFileType = sourcecode.c.c; name = TotalControl.c; path = ../../common/p9813/processing/TotalControl.c; sourceTree = "<group>"; tabWidth = 4; };
-		E09481F515DB497B009DA376 /* TotalControlConsumer.pde */ = {isa = PBXFileReference; lastKnownFileType = text; path = TotalControlConsumer.pde; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.java; };
-		E0A5030715E20BB00066A5E4 /* FastPlasma.pde */ = {isa = PBXFileReference; lastKnownFileType = text; path = FastPlasma.pde; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.java; };
-		E0BD413215D8CA7000FFE2E7 /* EyeMotion.pde */ = {isa = PBXFileReference; lastKnownFileType = text; path = EyeMotion.pde; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.java; };
-		E0F13A0C15DF215300F69CDA /* LedMap.pde */ = {isa = PBXFileReference; lastKnownFileType = text; lineEnding = 0; path = LedMap.pde; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.java; };
+		E09481F515DB497B009DA376 /* TotalControlConsumer.pde */ = {isa = PBXFileReference; explicitFileType = sourcecode.java; path = TotalControlConsumer.pde; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.java; };
+		E0A5030715E20BB00066A5E4 /* FastPlasma.pde */ = {isa = PBXFileReference; explicitFileType = sourcecode.java; path = FastPlasma.pde; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.java; };
+		E0BD413215D8CA7000FFE2E7 /* EyeMotion.pde */ = {isa = PBXFileReference; explicitFileType = sourcecode.java; path = EyeMotion.pde; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.java; };
+		E0F13A0C15DF215300F69CDA /* LedMap.pde */ = {isa = PBXFileReference; explicitFileType = sourcecode.java; lineEnding = 0; path = LedMap.pde; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.java; };
 /* End PBXFileReference section */
 
 /* Begin PBXGroup section */

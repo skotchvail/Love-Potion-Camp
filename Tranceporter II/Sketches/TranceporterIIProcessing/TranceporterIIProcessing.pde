@@ -18,7 +18,6 @@ int screenHeight = 400;
 
 int SAMPLE_RATE = 44100;
 int SAMPLE_SIZE = 1024;
-//int FRAME_RATE = SAMPLE_RATE/SAMPLE_SIZE;
 int FRAME_RATE = 24;
 
 
@@ -26,6 +25,8 @@ boolean draw2dGrid;
 boolean draw3dSimulation;
 boolean useTotalControlHardware;
 boolean needToFlushPrefs;
+float rotationSpeed = 1.0 / (FRAME_RATE * 30); // Once every 30 seconds
+
 MainClass main;
 Utility utility;
 Preferences prefs;
@@ -36,7 +37,7 @@ interface FunctionFloatFloat { void function(float x, float y); }
   
 void setup() {
   size(screenWidth, screenHeight, P2D);
-  
+
   println("target FRAME_RATE:" + FRAME_RATE);
   utility = new Utility();
   prefs = Preferences.userNodeForPackage(this.getClass());
@@ -223,11 +224,11 @@ class MainClass {
   ArrayList<String> getKeymapLines() {
 
     ArrayList<String> myStrings = new ArrayList();
-    myStrings.add(new String("space: freeze"));
-    myStrings.add(new String("n: next Sketch"));
-    myStrings.add(new String("t: use Hardware"));
-    myStrings.add(new String("2: show/hide 2d display"));
-    myStrings.add(new String("3: show/hide 3d display"));
+    myStrings.add(new String("space\tfreeze"));
+    myStrings.add(new String("n\tnext Sketch"));
+    myStrings.add(new String("t\tconnect to Hardware"));
+    myStrings.add(new String("2 3\tshow/hide 2d or 3d display"));
+    myStrings.add(new String("[ ]\t3D display rotation speed"));
 
     return myStrings;
   }
@@ -258,6 +259,19 @@ class MainClass {
       prefs.putBoolean("useTotalControlHardware", useTotalControlHardware);
       needToFlushPrefs = true;
       println("useTotalControlHardware: " + useTotalControlHardware);
+    }
+    
+    if (key == ']') {
+      rotationSpeed = max(rotationSpeed, 0.0004);
+      rotationSpeed = min(rotationSpeed * 1.1, 1.0 / (FRAME_RATE * 0.5)); // Fastest once every half second
+      //println("rotationSpeed = " + nf(rotationSpeed, 1, 4));
+    }
+    if (key == '[') {
+      rotationSpeed = rotationSpeed * 0.92;
+      if (rotationSpeed < 0.0005) {
+        rotationSpeed = 0;
+      }
+      //println("rotationSpeed = " + nf(rotationSpeed, 1, 4));
     }
     
     modes[modeCol][modeRow].keyPressed();

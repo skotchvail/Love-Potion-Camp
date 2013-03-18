@@ -52,7 +52,7 @@ class HardwareTest extends Drawer {
     }
     cursorStrand %= p.getNumStrands();
     
-    //which pixel on strand
+    //which LED on strand
     if (key == '+') {
       cursorOrdinal += 10;
     }
@@ -96,14 +96,14 @@ class HardwareTest extends Drawer {
         }
         int whichOrdinal = cursorOrdinal;
         Point a;
-
+        
         // this will throw an exception if we've received a keystroke that runs off the map - maybe we should just set a floor/ceiling
         do {
           assert(whichOrdinal > 0) : "bad whichOrdinal: " + whichOrdinal;
           a = p.ledGet(cursorStrand, whichOrdinal, false);
           whichOrdinal--;
         } while (a.x < 0);
-
+        
         // println("Setting " + cursorStrand + ", " + cursorOrdinal + ", " + (a.x + xChange) + ", " + (a.y + yChange) );
         p.ledRawSet(cursorStrand, cursorOrdinal, a.x + xChange, a.y + yChange);
         //p.ledInterpolate();
@@ -126,21 +126,21 @@ class HardwareTest extends Drawer {
       a.x >= 0?("x:" + a.x + " y:" + a.y):"missingLed",
     };
   }
-
+  
   ArrayList<String> getKeymapLines() {
     
     ArrayList<String> myStrings = main.getKeymapLines();
-
-    myStrings.add(new String("< >      select next/previous strand"));
-    myStrings.add(new String("_ +      select next/previous pixel * 10 "));
-    myStrings.add(new String("- =      select next/previous pixel"));
+    
+    myStrings.add(new String("← ↑ → ↓\tnavigate coordinates"));
+    myStrings.add(new String("< >\tnavigate strands"));
+    myStrings.add(new String("_ + - =\tnavigate LED's"));
     
     // TODO: this doesn't seem to work, so let's not display it for now
     // myStrings.add(new String("arrows   select pixel in indicated direction"));
-
+    
     return myStrings;
   }
-
+  
   final float kLevelGrid = 0.4;
   final float kLevelGreen = 0.2;
   
@@ -255,7 +255,7 @@ class HardwareTest extends Drawer {
     }
     
     if (true) {
- 
+      
       int cursorFinder = (int)(settings.getParam(settings.keyCustom2) * 20);
       
       //if (setting >= kLevelGreen && setting < kLevelGrid) {

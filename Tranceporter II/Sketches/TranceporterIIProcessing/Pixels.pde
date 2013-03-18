@@ -14,7 +14,7 @@ class Pixels {
 //  private color[] trainingPixelData;
   private OBJModel objModel;
   private PGraphics pg3D;
-
+  
   private Rectangle box2d, box3d;
   
   int maxPixelsPerStrand;
@@ -22,6 +22,7 @@ class Pixels {
   private int[] strandMap;
   private int[] trainingStrandMap;
   final boolean runConcurrent = true;
+  private float rotation;
   
   Pixels(PApplet p) {
     objModel = new OBJModel(p, "tranceporter.obj");
@@ -55,8 +56,8 @@ class Pixels {
     
     strandMap = new int[getNumStrands() * maxPixelsPerStrand];
     trainingStrandMap = new int[getNumStrands() * maxPixelsPerStrand];
-
-    initTotalControl();    
+    
+    initTotalControl();
   }
   
   void copyPixels(int[] pixels) {
@@ -99,7 +100,7 @@ class Pixels {
         }
       }
     }
-
+    
     PImage image = createImage(ledWidth, ledHeight, RGB);
     arrayCopy(pixelData, image.pixels, image.pixels.length);
     image.updatePixels();
@@ -122,15 +123,18 @@ class Pixels {
     image(result, box2d.x, box2d.y);
     return result;
   }
-
+  
   void drawModel(PImage texture) {
     try {
       PVector v = null, vt = null, vn = null;
-
+      
+      boolean calcLowest = false;
       PVector lowest = new PVector(10000000,10000000,10000000);
       PVector highest = new PVector(-10000000,-10000000,-10000000);
       Segment tmpModelSegment;
       Face tmpModelElement;
+      
+      pg3D.textureMode(NORMAL);
       
       // render all triangles
       for (int s = 0; s < objModel.getSegmentCount(); s++) {
@@ -138,41 +142,31 @@ class Pixels {
         for (int f = 0; f < tmpModelSegment.getFaceCount(); f++) {
           tmpModelElement = (tmpModelSegment.getFace(f));
           if (tmpModelElement.getVertIndexCount() > 0) {
-            pg3D.textureMode(NORMAL);
-            //println("face=" + f + " drawMode = " + objModel.getDrawMode());
             pg3D.beginShape(objModel.getDrawMode()); // specify render mode
-            boolean useTexture = false;
             pg3D.texture(texture);
             
             boolean mirrorImage = true;
             for (int fp = 0;  fp < tmpModelElement.getVertIndexCount(); fp++) {
               v = objModel.getVertex(tmpModelElement.getVertexIndex(fp));
-              // println("a"); //This is the line that gets execute
               if (v != null) {
-                  float textureX = map(v.x,-224,-24,0,1);
-                  float textureY;
-                  if (mirrorImage) {
-                    textureY = map(v.y,-1124,99,0,1);
-                  } else {
-                    textureY = map(v.y,-1124,99,0,0.5);
-                  }
-                    
-                  float textureZ = map(v.z,47,844,1,0);
+                float textureU;
+                if (mirrorImage) {
+                  textureU = map(v.y, -1124, 99, 0, 1);
+                } else {
+                  textureU = map(v.y, -1124, 99, 0, 0.5);
+                }
+                float textureV = map(v.z, 47, 844, 1, 0);
+                
+                pg3D.vertex(v.x, v.y, v.z, textureU, textureV);
+                if (calcLowest) {
+                  lowest.x = min(v.x, lowest.x);
+                  lowest.y = min(v.y, lowest.y);
+                  lowest.z = min(v.z, lowest.z);
                   
-                  pg3D.vertex(v.x, v.y, v.z, textureY, textureZ);
-                  if (v.x < lowest.x)
-                    lowest.x = v.x;
-                  if (v.y < lowest.y)
-                    lowest.y = v.y;
-                  if (v.z < lowest.z)
-                    lowest.z = v.z;
-                  
-                  if (v.x > highest.x)
-                    highest.x = v.x;
-                  if (v.y > highest.y)
-                    highest.y = v.y;
-                  if (v.z > highest.z)
-                    highest.z = v.z;
+                  highest.x = min(v.x, highest.x);
+                  highest.y = min(v.y, highest.y);
+                  highest.z = min(v.z, highest.z);
+                }
               }
             }
             pg3D.endShape();
@@ -185,64 +179,57 @@ class Pixels {
               v = objModel.getVertex(tmpModelElement.getVertexIndex(fp));
               // println("a"); //This is the line that gets execute
               if (v != null) {
-                float textureX = map(v.x,-224,-24,0,1);
-                float textureY;
+                float textureU;
                 if (mirrorImage) {
-                  textureY = map(v.y,-1124,99,0,1);
+                  textureU = map(v.y,-1124,99,0,1);
                 } else {
-                  textureY = map(v.y,-1124,99,0.5,1.0);
+                  textureU = map(v.y,-1124,99,0.5,1.0);
                 }
                 
-                float textureZ = map(v.z,47,844,1,0);
+                float textureV = map(v.z,47,844,1,0);
                 float x = v.x;
                 float y = v.y;
                 float z = v.z;
                 
                 x *= -1;
-                x -= 51; 
-
-                pg3D.vertex(x, y, z, textureY, textureZ);
+                x -= 51;
+                
+                pg3D.vertex(x, y, z, textureU, textureV);
               }
             }
             pg3D.endShape();
           }
         }
       }
-     // println("lowest=" + lowest + " highest=" + highest);
-
+      if (calcLowest) {
+        println("lowest=" + lowest + " highest=" + highest);
+      }
+      
     } catch (Exception e) {
       e.printStackTrace();
     }
   }
+  
+  void drawMappedOntoBottle(PGraphics flatImage) {
     
-  void drawMappedOntoBottle(PGraphics pg) {
-    
-    // create image version of the 2d map
-    PImage img = createImage(pg.width, pg.height, RGB);
-    img.loadPixels();
-    pg.loadPixels();
-    System.arraycopy(pg.pixels, 0, img.pixels, 0, img.pixels.length);
-    img.updatePixels();
-
     pg3D.beginDraw();
     pg3D.noStroke();
     colorMode(RGB,255);
     pg3D.background(color(6,25,41)); //dark blue color
     pg3D.lights();
-
+    
     float magicNum = 300; // Not sure how this affects the drawing, but it can be adjusted to make the field of view seem closer or further
     float maxZ = 10000;
     float fov = PI/3.9;
     float cameraZ = (box3d.height/2.0) / tan(fov/2.0);
     pg3D.perspective(fov, float(box3d.width)/float(box3d.height),
                      cameraZ/maxZ, cameraZ*maxZ);
-
+    
     pg3D.pushMatrix();
     
-    int fullRevolution = FRAME_RATE * 60; //X seconds
-    int rotation = (frameCount + fullRevolution / 7) % fullRevolution;
+    rotation = (rotation + rotationSpeed) % 1.0;
     float rX = PI/2;
-    float rY = map(rotation, 0, fullRevolution, -PI, PI);
+    float rY = map(rotation, 0, 1.0, -PI, PI);
     
     pg3D.translate(magicNum * 0.5, magicNum * 2.2, magicNum * -4.2);
     
@@ -251,17 +238,14 @@ class Pixels {
     
     pg3D.translate(magicNum * 0, magicNum * 1, magicNum * 0);
     
-    drawModel(img);
+    drawModel(flatImage);
     pg3D.popMatrix();
     pg3D.endDraw();
     
     // copy onto the display window
-    pg3D.loadPixels();
-    loadPixels();
-    copy(pg3D, 0, 0, pg3D.width, pg3D.height,  box3d.x, box2d.y, pg3D.width, pg3D.height);
-    updatePixels();
+    image(pg3D, box3d.x, box2d.y);
   }
-
+  
   boolean wasDrawing2D = true;
   boolean wasDrawing3D = true;
   
@@ -283,7 +267,7 @@ class Pixels {
     if (draw3dSimulation && pg3D != null) {
       drawMappedOntoBottle(pg);
     }
-
+    
     // print led coordinate state to screen
     int lineHeight = box2d.y * 2 + box2d.height + 10;
     String[] textLines = main.currentMode().getTextLines();
@@ -293,17 +277,22 @@ class Pixels {
         lineHeight += 20;
       }
     }
-
+    
     // print keymapping info to screen
     lineHeight = box2d.y * 2 + box2d.height + 10;
     ArrayList<String> keyMapLines = main.currentMode().getKeymapLines();
     if (keyMapLines != null) {
-      for(int i=0; i<keyMapLines.size();i++) {
-        text(keyMapLines.get(i), box2d.x + 200, lineHeight);
+      for(int i=0; i<keyMapLines.size(); i++) {
+        String[] parts = split(keyMapLines.get(i), '\t');
+        assert parts.length == 2 : "expected 2 parts, but got " + parts.length;
+        textAlign(RIGHT);
+        text(parts[0], box2d.x + 220, lineHeight);
+        textAlign(LEFT);
+        text(parts[1], box2d.x + 230, lineHeight);
         lineHeight += 20;
       }
     }
-
+    
     fill(255);
   }
   
@@ -333,7 +322,7 @@ class Pixels {
    3: 3, 12, shapeB
    
    */
-
+  
   
   /*
    ..    00      01      02      03      04      05      06      07      08      09      10
@@ -351,7 +340,7 @@ class Pixels {
    
    
    */
-
+  
   //convert coordinates into index into pixel array index
   private int c2i(int x, int y) {
     return (y*ledWidth) + x;
@@ -371,7 +360,7 @@ class Pixels {
     strandMap[index] = value;
     
   }
-
+  
   void ledRawSet(int whichStrand, int ordinal, int x, int y) {
     int value = c2i(x, y);
     ledSetRawValue(whichStrand, ordinal, value);
@@ -381,7 +370,7 @@ class Pixels {
     assert(whichStrand < getNumStrands()) : "not this many strands";
     assert(ordinal < getStrandSize(whichStrand)) : "" + ordinal + " exceeds number of leds per strand " + getStrandSize(whichStrand) + " on strand " + whichStrand;
     assert(ordinal < getStrandSize(whichStrand)) : "Cannot set LED " + ordinal + " on strand " + whichStrand +
-      " because it is of length " + getStrandSize(whichStrand);
+    " because it is of length " + getStrandSize(whichStrand);
     int index = (whichStrand * maxPixelsPerStrand) + ordinal;
     assert(strandMap[index] == TC_PIXEL_UNDEFINED) : "led " + ordinal + " on strand " + whichStrand + " is already defined: " + strandMap[index];
     strandMap[index] = value;
@@ -404,7 +393,7 @@ class Pixels {
     biggestY = max(y + yOffsetter, biggestY);
     ledSetValue(whichStrand, ordinal + ordinalOffsetter, c2i(x + xOffsetter, y + yOffsetter));
   }
-
+  
   
   int ledGetRawValue(int whichStrand, int ordinal, boolean useTrainingMode) {
     assert(whichStrand < getNumStrands()) : "not this many strands";
@@ -423,7 +412,7 @@ class Pixels {
     }
     return i2c(value);
   }
-
+  
   Point ledGet(int whichStrand, int ordinal) {
     return ledGet(whichStrand,ordinal,main.currentMode().isTrainingMode());
   }
@@ -470,7 +459,7 @@ class Pixels {
                   yChange = 1;
                 else if (b.y < a.y)
                   yChange = -1;
-
+                
                 int inc = 0;
                 for (int j = lastIndexWithCoord + 1; j < i; j++) {
                   int jVal = strandMap[j];
@@ -500,14 +489,14 @@ class Pixels {
     
     assert(minStrand < getNumStrands());
     assert(maxStrand <= getNumStrands());
-
+    
     for (int whichStrand = minStrand; whichStrand <= maxStrand; whichStrand++) {
       
       int minX = 10000;
       int minY = 10000;
       int maxX = -10000;
       int maxY = -10000;
-
+      
       println ("strand " + whichStrand);
       int strandSize = getStrandSize(whichStrand);
       StringBuilder s = new StringBuilder(200);
@@ -541,13 +530,13 @@ class Pixels {
       }
       s.append("\n");
       println(s);
-
+      
       
       println("min (" + minX + "," + minY + ") max ("  + maxX + "," + maxY + ")");
     }
     
   }
-
+  
   int getNumStrands() {
     return -1;
     //overridden by LedMap
@@ -562,11 +551,11 @@ class Pixels {
   void mapAllLeds() {
     //overridden by LedMap
   }
-
+  
   
   TotalControlConcurrent totalControlConcurrent;
   boolean hardwareAlreadySetup = false;
-
+  
   void initTotalControl()
   {
     int stealPixel = 0;
@@ -588,8 +577,7 @@ class Pixels {
         strandMap[j] = TC_PIXEL_UNDEFINED;
         trainingStrandMap[j] = stealPixel++;
         Point tester = i2c(trainingStrandMap[j]);
-        assert(tester.x < ledWidth && trainingStrandMap[j] < pixelData.length) : "Strands have more LEDs than we have pixels to assign them\n" + " x:" + tester.x + " y:" + tester.y + " strand: " + whichStrand + " ordinal:" + (j-start)
-            + " rawValue:" + trainingStrandMap[j];
+        assert(tester.x < ledWidth && trainingStrandMap[j] < pixelData.length) : "Strands have more LEDs than we have pixels to assign them\n" + " x:" + tester.x + " y:" + tester.y + " strand: " + whichStrand + " ordinal:" + (j-start) + " rawValue:" + trainingStrandMap[j];
         
       }
       if (true) {
@@ -602,7 +590,7 @@ class Pixels {
     }
     
     mapAllLeds();
-
+    
     ledInterpolate();
 //    ledMapDump(0,2); //set which strands you want to dump
     
@@ -614,7 +602,7 @@ class Pixels {
     }
     
     hardwareAlreadySetup = true;
-
+    
     if (runConcurrent) {
       totalControlConcurrent = new TotalControlConcurrent(getNumStrands(),maxPixelsPerStrand, kUseBitBang);
     }
@@ -633,7 +621,7 @@ class Pixels {
     if (!useTotalControlHardware) {
       return;
     }
- //   setPixel(ledWidth-1,ledHeight-1,color(255));
+//   setPixel(ledWidth-1,ledHeight-1,color(255));
     
     if (!hardwareAlreadySetup) {
       initTotalControl();
