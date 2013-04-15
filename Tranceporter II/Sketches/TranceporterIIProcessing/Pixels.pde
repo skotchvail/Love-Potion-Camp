@@ -129,75 +129,61 @@ class Pixels {
       PVector v = null, vt = null, vn = null;
       
       boolean calcLowest = false;
-      PVector lowest = new PVector(10000000,10000000,10000000);
-      PVector highest = new PVector(-10000000,-10000000,-10000000);
-      Segment tmpModelSegment;
-      Face tmpModelElement;
+      // Lowest and highest values discovered empircally using calcLowest
+      final float lowestY = -1123.7638, highestY = 98.722984;
+      final float lowestZ = 47.52061, highestZ = 843.26636;
+      final float neckY = -900;
       
+      PVector lowest = new PVector(Float.MAX_VALUE, Float.MAX_VALUE, Float.MAX_VALUE);
+      PVector highest = new PVector(-Float.MAX_VALUE, -Float.MAX_VALUE, -Float.MAX_VALUE);
+
       pg3D.textureMode(NORMAL);
       
       // render all triangles
       for (int s = 0; s < objModel.getSegmentCount(); s++) {
-        tmpModelSegment = objModel.getSegment(s);
+        Segment tmpModelSegment = objModel.getSegment(s);
         for (int f = 0; f < tmpModelSegment.getFaceCount(); f++) {
-          tmpModelElement = (tmpModelSegment.getFace(f));
+          Face tmpModelElement = (tmpModelSegment.getFace(f));
           if (tmpModelElement.getVertIndexCount() > 0) {
-            pg3D.beginShape(objModel.getDrawMode()); // specify render mode
-            pg3D.texture(texture);
             
-            boolean mirrorImage = true;
-            for (int fp = 0;  fp < tmpModelElement.getVertIndexCount(); fp++) {
-              v = objModel.getVertex(tmpModelElement.getVertexIndex(fp));
-              if (v != null) {
-                float textureU;
-                if (mirrorImage) {
-                  textureU = map(v.y, -1124, 99, 0, 1);
-                } else {
-                  textureU = map(v.y, -1124, 99, 0, 0.5);
-                }
-                float textureV = map(v.z, 47, 844, 1, 0);
-                
-                pg3D.vertex(v.x, v.y, v.z, textureU, textureV);
-                if (calcLowest) {
-                  lowest.x = min(v.x, lowest.x);
-                  lowest.y = min(v.y, lowest.y);
-                  lowest.z = min(v.z, lowest.z);
+            for (int side = 0; side < 2; side++) {
+              boolean portSide = (side == 0);
+              pg3D.beginShape(objModel.getDrawMode()); // specify render mode
+              pg3D.texture(texture);
+              
+              for (int fp = 0;  fp < tmpModelElement.getVertIndexCount(); fp++) {
+                v = objModel.getVertex(tmpModelElement.getVertexIndex(fp));
+                if (v != null) {
+                  float textureU = map(v.y, lowestY, highestY, 0.0, 1.0);
+                  float textureV = map(v.z, lowestZ, highestZ, 1.0, 0.0);
                   
-                  highest.x = min(v.x, highest.x);
-                  highest.y = min(v.y, highest.y);
-                  highest.z = min(v.z, highest.z);
+                  if (!portSide) {
+                    v.x *= -1;
+                    v.x -= 51;
+                  }
+                  pg3D.vertex(v.x, v.y, v.z, textureU, textureV);
+                  
+                  if (calcLowest) {
+                    if (portSide) {
+                      lowest.x = min(v.x, lowest.x);
+                      lowest.y = min(v.y, lowest.y);
+                      lowest.z = min(v.z, lowest.z);
+                      
+                      highest.x = max(v.x, highest.x);
+                      highest.y = max(v.y, highest.y);
+                      highest.z = max(v.z, highest.z);
+                    }
+                  }
+                  else {
+                    assert(v.y >= lowestY);
+                    assert(v.y <= highestY);
+                    assert(v.z >= lowestZ);
+                    assert(v.z <= highestZ);
+                  }
                 }
               }
+              pg3D.endShape();
             }
-            pg3D.endShape();
-            
-            //mirror image to have a 2 sided piece
-            pg3D.beginShape(objModel.getDrawMode()); // specify render mode
-            pg3D.texture(texture);
-            
-            for (int fp = 0;  fp < tmpModelElement.getVertIndexCount(); fp++) {
-              v = objModel.getVertex(tmpModelElement.getVertexIndex(fp));
-              // println("a"); //This is the line that gets execute
-              if (v != null) {
-                float textureU;
-                if (mirrorImage) {
-                  textureU = map(v.y,-1124,99,0,1);
-                } else {
-                  textureU = map(v.y,-1124,99,0.5,1.0);
-                }
-                
-                float textureV = map(v.z,47,844,1,0);
-                float x = v.x;
-                float y = v.y;
-                float z = v.z;
-                
-                x *= -1;
-                x -= 51;
-                
-                pg3D.vertex(x, y, z, textureU, textureV);
-              }
-            }
-            pg3D.endShape();
           }
         }
       }
