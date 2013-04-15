@@ -1151,23 +1151,7 @@ class LedMap extends Pixels {
     for (int i = 1154; i <= 1174; i++) {
       ledMissing(panel,i);
     }
-    
-
   }
-  
-  void allOnePixel(int panel) {
-    assert (panel < getNumStrands());
-    
-    //top of top driver side
-    xOffsetter = 0;
-    yOffsetter = 0;
-    ordinalOffsetter = 0;
-
-    for (int i = 0; i < getStrandSize(panel); i++) {
-      ledSet(panel,i,ledWidth-1,ledHeight-1);
-    }
-  }
-  
   
   int getStrandSize(int whichStrand) {
     return strandSizes[whichStrand];

@@ -46,11 +46,7 @@ class Pixels {
     int pixelDataSize = max(totalPixels, ledWidth * ledHeight);
     pixelData = new color[pixelDataSize];
     
-    int newHeight = (int)round(pixelData.length / (float)ledWidth);
-    newHeight = ledHeight;
-    assert(newHeight >= ledHeight);
-    
-    box2d = new Rectangle(10, 10, ledWidth * screenPixelSize, newHeight * screenPixelSize);
+    box2d = new Rectangle(10, 10, ledWidth * screenPixelSize, ledHeight * screenPixelSize);
     box3d = new Rectangle(box2d.x * 2 + box2d.width, box2d.y, 360, 180);
     pg3D = createGraphics(box3d.width, box3d.height, P3D);
     
@@ -61,33 +57,37 @@ class Pixels {
   }
   
   void copyPixels(int[] pixels) {
-    System.arraycopy(pixels, 0, pixelData, 0, pixels.length);
+    final int halfWidth = ledWidth / 2;
+    if (pixels.length == ledHeight * halfWidth) {
+      // Image is mirrored
+      for (int y = 0; y < ledHeight; y++) {
+        final int baseY = y * halfWidth;
+        final int baseYData = y * ledWidth;
+        for (int x = 0; x < halfWidth; x++) {
+          color pixel = pixels[baseY + x];
+          pixelData[baseYData + x] = pixel;
+          pixelData[baseYData + (ledWidth - x - 1)] = pixel;
+        }
+      }
+    }
+    else {
+      arrayCopy(pixels, 0, pixelData, 0, pixels.length);
+    }
   }
   
   void updateMaskPixels() {
     maskPixels = null;
   }
   
-//  void setPixel(int x, int y, color c) {
-//    pixelData[c2i(x,y)] = c;
-//  }
-//
-//  void setAll(color c) {
-//    for (int x=0; x<ledWidth; x++) {
-//      for (int y=0; y<ledHeight; y++) {
-//        setPixel(x, y, c);
-//      }
-//    }
-//  }
-  
   PGraphics drawFlat2DVersion() {
-    
     color white = color(255);
     
     if (maskPixels == null) {
       // Mask out any pixels that are not mapped
       maskPixels = new color[ledWidth * ledHeight];
+      
       for (int whichStrand = 0; whichStrand < getNumStrands(); whichStrand++) {
+        final boolean portSide = whichStrand < getNumStrands() / 2;
         int strandSize = getStrandSize(whichStrand);
         int start = whichStrand * maxPixelsPerStrand;
         for (int ordinal = 0; ordinal < strandSize; ordinal++) {
@@ -95,7 +95,12 @@ class Pixels {
           int value = strandMap[index];
           if (value >= 0) {
             Point p = i2c(value);
-            maskPixels[p.y * ledWidth + p.x] = white;
+            if (portSide) {
+              maskPixels[p.y * ledWidth + p.x] = white;
+            }
+            else {
+              maskPixels[p.y * ledWidth + (ledWidth - p.x - 1)] = white;
+            }
           }
         }
       }
@@ -129,10 +134,9 @@ class Pixels {
       PVector v = null, vt = null, vn = null;
       
       boolean calcLowest = false;
-      // Lowest and highest values discovered empircally using calcLowest
+      // Lowest and highest values were discovered empirically using calcLowest
       final float lowestY = -1123.7638, highestY = 98.722984;
       final float lowestZ = 47.52061, highestZ = 843.26636;
-      final float neckY = -900;
       
       PVector lowest = new PVector(Float.MAX_VALUE, Float.MAX_VALUE, Float.MAX_VALUE);
       PVector highest = new PVector(-Float.MAX_VALUE, -Float.MAX_VALUE, -Float.MAX_VALUE);
@@ -147,21 +151,29 @@ class Pixels {
           if (tmpModelElement.getVertIndexCount() > 0) {
             
             for (int side = 0; side < 2; side++) {
-              boolean portSide = (side == 0);
+              final boolean portSide = (side == 0);
               pg3D.beginShape(objModel.getDrawMode()); // specify render mode
               pg3D.texture(texture);
               
               for (int fp = 0;  fp < tmpModelElement.getVertIndexCount(); fp++) {
                 v = objModel.getVertex(tmpModelElement.getVertexIndex(fp));
                 if (v != null) {
-                  float textureU = map(v.y, lowestY, highestY, 0.0, 1.0);
+                  
+                  float textureU;
+                  if (true || portSide) {
+                    textureU = map(v.y, lowestY, highestY, 0.0, 0.5);
+                  }
+                  else {
+                    textureU = map(v.y, lowestY, highestY, 1.0, 0.5);
+                  }
                   float textureV = map(v.z, lowestZ, highestZ, 1.0, 0.0);
                   
+                  float x = v.x;
                   if (!portSide) {
-                    v.x *= -1;
-                    v.x -= 51;
+                    x *= -1;
+                    x -= 51;
                   }
-                  pg3D.vertex(v.x, v.y, v.z, textureU, textureV);
+                  pg3D.vertex(x, v.y, v.z, textureU, textureV);
                   
                   if (calcLowest) {
                     if (portSide) {
@@ -607,7 +619,6 @@ class Pixels {
     if (!useTotalControlHardware) {
       return;
     }
-//   setPixel(ledWidth-1,ledHeight-1,color(255));
     
     if (!hardwareAlreadySetup) {
       initTotalControl();

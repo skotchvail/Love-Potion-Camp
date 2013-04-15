@@ -10,10 +10,10 @@ import java.util.prefs.Preferences;
 
 //ADJUSTABLE PARAMS
 String iPadIP = "10.0.1.8";
-int ledWidth = 92;
+int ledWidth = 92 * 2; // Both sides
 int ledHeight = 58;
 int screenPixelSize = 3;
-int screenWidth = 700;
+int screenWidth = 950;
 int screenHeight = 400;
 
 int SAMPLE_RATE = 44100;

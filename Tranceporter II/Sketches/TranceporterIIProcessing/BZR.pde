@@ -12,8 +12,8 @@ class Bzr3 extends Drawer {
   
   Bzr3(Pixels p, Settings s) {
     super(p, s, JAVA2D);
-    w = ledWidth;
-    h = ledHeight;
+    w = width;
+    h = height;
     a = new float [ w ][ h ][2];  
     b = new float [ w ][ h ][2];  
     c = new float [ w ][ h ][2];

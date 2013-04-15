@@ -39,8 +39,8 @@ class AlienBlob extends Drawer {
     float d, h, s, b, n;
     float xx;
     float yy = 0;
-    int w2 = getWidth() / 2;
-    int h2 = getHeight() / 2;
+    int w2 = width / 2;
+    int h2 = height / 2;
     int offset = 0;
     
     int nd = ceil(10.0 * settings.getParam(settings.keyCustom1));
@@ -48,9 +48,9 @@ class AlienBlob extends Drawer {
     noiseDetail(nd);
     pg.loadPixels();
     
-    for (int y = 0; y < getHeight(); y++) {
+    for (int y = 0; y < height; y++) {
       xx = 0;
-      for (int x = 0; x < getWidth(); x++) {
+      for (int x = 0; x < width; x++) {
         d = dist(x, y, w2, h2) * 0.025;
         if (d * 20 <= dThresh) {
           n = noise(xx*multiplier, yy*multiplier, zoff); // noise only needs to be computed once per pixel

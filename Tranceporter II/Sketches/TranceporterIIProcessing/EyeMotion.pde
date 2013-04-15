@@ -42,8 +42,8 @@ class EyeMotion extends Drawer {
   String getCustom1Label() { return "Trippy";}
   
   void setup() {
-    touchX = (int)(0.585 * ledWidth);
-    touchY = (int)(0.366 * ledHeight);
+    touchX = (int)(0.585 * width);
+    touchY = (int)(0.366 * height);
     setMouseCoords(touchX*screenPixelSize,touchY*screenPixelSize);
     settings.setParam(settings.keyCustom1,0.1);
     settings.setParam(settings.keyFlash,0.0);
@@ -105,8 +105,8 @@ class EyeMotion extends Drawer {
     int timeSinceLastMove = millis() - lastLookChange;
     if ((timeSinceLastMove/1000 > timeBeforeMoveEyes) && (trippy > 0) && settings.isBeat(2)) {
       lastLookChange = millis();
-      touchX = (int)round(random(0,ledWidth));
-      touchY = (int)round(random(0,ledHeight));
+      touchX = (int)round(random(0, width));
+      touchY = (int)round(random(0, height));
       println("time before move:" + timeBeforeMoveEyes + " timeSinceLastMove:" + timeSinceLastMove);
     }
     
@@ -261,11 +261,9 @@ class EyeMotion extends Drawer {
     return time;
   }
   
-  void handleTouches(float touchX, float touchY)
-  {
-    
-    float targetX = map(touchX,0,ledWidth,(MINX+translateX)*SCALE,(MAXX+translateX)*SCALE);
-    float targetY = map(touchY,0,ledHeight,(MINY+translateY)*SCALE,(MAXY+translateY)*SCALE);
+  void handleTouches(float touchX, float touchY) {
+    float targetX = map(touchX, 0, width, (MINX+translateX)*SCALE, (MAXX+translateX)*SCALE);
+    float targetY = map(touchY, 0, height, (MINY+translateY)*SCALE, (MAXY+translateY)*SCALE);
 
     targetX = targetX/SCALE - translateX;
     targetY = targetY/SCALE - translateY;

@@ -167,8 +167,8 @@ class HardwareTest extends Drawer {
     float setting = settings.getParam(settings.keyCustom1);
     //    println("setting = " + setting);
     
-    int chunkX = 255 / ledWidth;
-    int chunkY = 255 / ledHeight;
+    int chunkX = 255 / width;
+    int chunkY = 255 / height;
     
     if (setting > kLevelGrid) {
       pg.background(color(0,0,0));

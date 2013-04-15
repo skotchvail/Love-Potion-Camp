@@ -8,6 +8,7 @@ class Drawer {
   int pressX, pressY;
   PGraphics pg; //flat 2D version
   boolean mousePressed;
+  boolean mirrored;
   int width, height;
   int mouseX, mouseY;
   int touchX, touchY;
@@ -25,7 +26,8 @@ class Drawer {
   Drawer(Pixels px, Settings s, String renderer) {
     p = px;
     pressed = false;
-    width = ledWidth;
+    mirrored = true;
+    width = mirrored ? ledWidth/2 : ledWidth;
     height = ledHeight;
     pg = createGraphics(width, height, renderer);
     xTouches = new float[MAX_TOUCHES];
@@ -86,14 +88,6 @@ class Drawer {
     return false;
   }
   
-  int getWidth() {
-    return ledWidth;
-  }
-  
-  int getHeight() {
-    return ledHeight;
-  }
-
   void setMousePressed(boolean mp) {
     mousePressed = mp; 
   }
