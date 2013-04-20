@@ -25,6 +25,7 @@ boolean draw2dGrid;
 boolean draw3dSimulation;
 boolean useTotalControlHardware;
 boolean needToFlushPrefs;
+boolean pauseAnimations;
 float rotationSpeed = 1.0 / (FRAME_RATE * 30); // Once every 30 seconds
 
 MainClass main;
@@ -182,7 +183,7 @@ class MainClass {
       }
     }
     
-    if (key == ' ')
+    if (pauseAnimations)
       return;
     
     settings.heartBeat();
@@ -234,6 +235,10 @@ class MainClass {
   }
 
   void keyPressed() {
+    
+    if (key == ' ') {
+      pauseAnimations = !pauseAnimations;
+    }
     
     if (key == 'n') {
       println("switching to new effect");
