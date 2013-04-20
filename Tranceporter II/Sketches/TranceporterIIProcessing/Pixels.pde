@@ -22,7 +22,7 @@ class Pixels {
   private int[] strandMap;
   private int[] trainingStrandMap;
   final boolean runConcurrent = true;
-  private float rotation;
+  private float rotation = 0.8;
   
   Pixels(PApplet p) {
     objModel = new OBJModel(p, "tranceporter.obj");

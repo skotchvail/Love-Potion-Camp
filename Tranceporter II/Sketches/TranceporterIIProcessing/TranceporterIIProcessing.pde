@@ -26,7 +26,7 @@ boolean draw3dSimulation;
 boolean useTotalControlHardware;
 boolean needToFlushPrefs;
 boolean pauseAnimations;
-float rotationSpeed = 1.0 / (FRAME_RATE * 30); // Once every 30 seconds
+float rotationSpeed; 
 
 MainClass main;
 Utility utility;
@@ -45,6 +45,7 @@ void setup() {
   draw2dGrid = prefs.getBoolean("draw2dGrid", true);
   useTotalControlHardware = prefs.getBoolean("useTotalControlHardware", true);
   draw3dSimulation = prefs.getBoolean("draw3dSimulation", true);
+  rotationSpeed = prefs.getFloat("rotationSpeed", 1.0 / (FRAME_RATE * 30)); // default once every 30 seconds
   main = new MainClass();
   main.setup(this);
 }
@@ -269,6 +270,8 @@ class MainClass {
     if (key == ']') {
       rotationSpeed = max(rotationSpeed, 0.0004);
       rotationSpeed = min(rotationSpeed * 1.1, 1.0 / (FRAME_RATE * 0.5)); // Fastest once every half second
+      prefs.putFloat("rotationSpeed", rotationSpeed);
+      needToFlushPrefs = true;
       //println("rotationSpeed = " + nf(rotationSpeed, 1, 4));
     }
     if (key == '[') {
@@ -276,6 +279,8 @@ class MainClass {
       if (rotationSpeed < 0.0005) {
         rotationSpeed = 0;
       }
+      prefs.putFloat("rotationSpeed", rotationSpeed);
+      needToFlushPrefs = true;
       //println("rotationSpeed = " + nf(rotationSpeed, 1, 4));
     }
     
