@@ -44,9 +44,9 @@ class EyeMotion extends Drawer {
   void setup() {
     touchX = (int)(0.585 * width);
     touchY = (int)(0.366 * height);
-    setMouseCoords(touchX*screenPixelSize,touchY*screenPixelSize);
-    settings.setParam(settings.keyCustom1,0.1);
-    settings.setParam(settings.keyFlash,0.0);
+    setMouseCoords(touchX*screenPixelSize, touchY*screenPixelSize);
+    settings.setParam(settings.keyCustom1, 0.1);
+    settings.setParam(settings.keyFlash, 0.0);
     setEyeLimits(0);
     mx = MINX;
     my = MINY;

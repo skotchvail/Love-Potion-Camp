@@ -13,8 +13,8 @@ class HardwareTest extends Drawer {
   }
   
   void setup(){
-    colorMode(RGB,255);
-    settings.setParam(settings.keyFlash,0.0);
+    colorMode(RGB, 255);
+    settings.setParam(settings.keyFlash, 0.0);
   }
   
   String getName() { return "Hardware Test"; }

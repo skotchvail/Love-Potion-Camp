@@ -189,25 +189,25 @@ class Settings {
     palette = null;
     paletteType = 0;
     
-    setParam(keySpeed,0.3);
-    setParam(keyColorCyclingSpeed,0.3);
-    setParam(keyCustom1,0.3);
-    setParam(keyCustom2,0.3);
-    setParam(keyBrightness,0.75);
-    setParam(keyAudioSpeedChange1,0.3);
-    setParam(keyAudioSpeedChange2,0.3);
-    setParam(keyAudioSpeedChange3,0.3);
-    setParam(keyAudioColorChange1,0.3);
-    setParam(keyAudioColorChange2,0.3);
-    setParam(keyAudioColorChange3,0.3);
-    setParam(keyAudioBrightnessChange1,0.0);
-    setParam(keyAudioBrightnessChange2,0.0);
-    setParam(keyAudioBrightnessChange3,0.0);
-    setParam(keyAudioSensitivity1,0.8);
-    setParam(keyAudioSensitivity2,0.3);
-    setParam(keyAudioSensitivity3,0.3);
-    setParam(keyBeatLength,0.5);
-    setParam(keyFlash,1.0);
+    setParam(keySpeed, 0.3);
+    setParam(keyColorCyclingSpeed, 0.3);
+    setParam(keyCustom1, 0.3);
+    setParam(keyCustom2, 0.3);
+    setParam(keyBrightness, 0.75);
+    setParam(keyAudioSpeedChange1, 0.3);
+    setParam(keyAudioSpeedChange2, 0.3);
+    setParam(keyAudioSpeedChange3, 0.3);
+    setParam(keyAudioColorChange1, 0.3);
+    setParam(keyAudioColorChange2, 0.3);
+    setParam(keyAudioColorChange3, 0.3);
+    setParam(keyAudioBrightnessChange1, 0.0);
+    setParam(keyAudioBrightnessChange2, 0.0);
+    setParam(keyAudioBrightnessChange3, 0.0);
+    setParam(keyAudioSensitivity1, 0.8);
+    setParam(keyAudioSensitivity2, 0.3);
+    setParam(keyAudioSensitivity3, 0.3);
+    setParam(keyBeatLength, 0.5);
+    setParam(keyFlash, 0.0);
 
   }
 
