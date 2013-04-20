@@ -24,7 +24,7 @@ class PaletteManager {
     colorMode(HSB);
     color[] hsbWheel = new color[256];
     for (int i=0; i<256; i++) {
-      hsbWheel[i] = color(i,255,255);
+      hsbWheel[i] = color(i, 255, 255);
     }
     kPs[0] = new Palette(pa, hsbWheel);
     
@@ -53,7 +53,7 @@ class PaletteManager {
             palettes = new Palette[count];
             for (int i = 0; i < count; i++) {
               int[] colors = (int[])in.readObject();
-              palettes[i] = new Palette(pa,colors);
+              palettes[i] = new Palette(pa, colors);
             }
             in.close();
           }
@@ -66,12 +66,12 @@ class PaletteManager {
           for (int i = 0; i < kt.length; i++) {
             int[] colors = kt[i].getColors();
             out.writeObject(colors);
-            palettes[i] = new Palette(pa,colors);
+            palettes[i] = new Palette(pa, colors);
           }
           out.close();
           // Get the bytes of the serialized object
           byte[] buf = bos.toByteArray();
-          prefs.putByteArray("Palettes",buf);
+          prefs.putByteArray("Palettes", buf);
           prefs.flush();
         }
         
@@ -136,7 +136,7 @@ class PaletteManager {
     if (paletteType == PT_KULER) {
       kPalInd = (kPalInd + 1) % kPs.length;
     }
-    setupPalette(numColors,colors);
+    setupPalette(numColors, colors);
   }
   
   int basePaletteColors() {

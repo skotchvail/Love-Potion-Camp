@@ -47,13 +47,13 @@ final int TC_CBUS_CLOCK = 8;   /* Use hardware for serial clock, not bitbang */
  if using fewer than 8 strands but the high-speed mode is still desired,
  add TC_CBUS_CLOCK to the number of strands, e.g.:
  
- status = TCopen(3 + TC_CBUS_CLOCK,100);
+ status = TCopen(3 + TC_CBUS_CLOCK, 100);
  
  Secondly, if using more than the default three strands (or if a different
  order or combination of pins is desired), TCsetStrandPin() should be used
  to assign FTDI pins to strand data lines, e.g.:
  
- TCsetStrandPin(3,TC_FTDI_CTS);
+ TCsetStrandPin(3, TC_FTDI_CTS);
  */
 
 //class foo {
@@ -69,14 +69,14 @@ final int TC_CBUS_CLOCK = 8;   /* Use hardware for serial clock, not bitbang */
     }
     
     if (useBitBang) {
-      TotalControl.setStrandPin(0,TC_FTDI_TX);
-      TotalControl.setStrandPin(1,TC_FTDI_RX);
-      TotalControl.setStrandPin(2,TC_FTDI_RTS);
-      TotalControl.setStrandPin(3,TC_FTDI_CTS);
-      TotalControl.setStrandPin(4,TC_FTDI_DTR);
-      TotalControl.setStrandPin(5,TC_FTDI_DSR);
-      TotalControl.setStrandPin(6,TC_FTDI_DCD);
-      TotalControl.setStrandPin(7,TC_FTDI_RI);
+      TotalControl.setStrandPin(0, TC_FTDI_TX);
+      TotalControl.setStrandPin(1, TC_FTDI_RX);
+      TotalControl.setStrandPin(2, TC_FTDI_RTS);
+      TotalControl.setStrandPin(3, TC_FTDI_CTS);
+      TotalControl.setStrandPin(4, TC_FTDI_DTR);
+      TotalControl.setStrandPin(5, TC_FTDI_DSR);
+      TotalControl.setStrandPin(6, TC_FTDI_DCD);
+      TotalControl.setStrandPin(7, TC_FTDI_RI);
     }
     
     int error = TotalControl.open(numStrands, pixelsPerStrand);

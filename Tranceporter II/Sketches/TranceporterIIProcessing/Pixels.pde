@@ -212,8 +212,8 @@ class Pixels {
     
     pg3D.beginDraw();
     pg3D.noStroke();
-    colorMode(RGB,255);
-    pg3D.background(color(6,25,41)); //dark blue color
+    colorMode(RGB, 255);
+    pg3D.background(color(6, 25, 41)); //dark blue color
     pg3D.lights();
     
     float magicNum = 300; // Not sure how this affects the drawing, but it can be adjusted to make the field of view seem closer or further
@@ -248,10 +248,10 @@ class Pixels {
   boolean wasDrawing3D = true;
   
   void drawToScreen() {
-    colorMode(RGB,255);
+    colorMode(RGB, 255);
     
     if (wasDrawing2D || wasDrawing3D || draw2dGrid || draw3dSimulation) {
-      background(color(12,49,81)); //dark blue color
+      background(color(12, 49, 81)); //dark blue color
     }
     
     wasDrawing2D = draw2dGrid;
@@ -271,7 +271,7 @@ class Pixels {
     String[] textLines = main.currentMode().getTextLines();
     if (textLines != null) {
       for (String line: textLines) {
-        text(line,box2d.x, lineHeight);
+        text(line, box2d.x, lineHeight);
         lineHeight += 20;
       }
     }
@@ -386,7 +386,7 @@ class Pixels {
   int biggestY = -1;
   
   void ledSet(int whichStrand, int ordinal, int x, int y) {
-    //    ledSetValue(whichStrand, ordinal, c2i(x,y+20));
+    //    ledSetValue(whichStrand, ordinal, c2i(x, y+20));
     biggestX = max(x + xOffsetter, biggestX);
     biggestY = max(y + yOffsetter, biggestY);
     ledSetValue(whichStrand, ordinal + ordinalOffsetter, c2i(x + xOffsetter, y + yOffsetter));
@@ -403,16 +403,16 @@ class Pixels {
   }
   
   Point ledGet(int whichStrand, int ordinal, boolean useTrainingMode) {
-    int value = ledGetRawValue(whichStrand, ordinal,useTrainingMode);
+    int value = ledGetRawValue(whichStrand, ordinal, useTrainingMode);
     
     if (value < 0) {
-      return new Point(-1,-1);
+      return new Point(-1, -1);
     }
     return i2c(value);
   }
   
   Point ledGet(int whichStrand, int ordinal) {
-    return ledGet(whichStrand,ordinal,main.currentMode().isTrainingMode());
+    return ledGet(whichStrand, ordinal, main.currentMode().isTrainingMode());
   }
   
   void ledInterpolate() {
@@ -442,7 +442,7 @@ class Pixels {
             
 //            for (int k = lastIndexWithCoord + 1; k < i; k++) {
 //              if (strandMap[k] == TC_PIXEL_UNDEFINED)
-//                strandMap[k] = c2i(11,writable);
+//                strandMap[k] = c2i(11, writable);
 //            }
             if (writable == available) {
               if (!(a.x != b.x && a.y != b.y)) {
@@ -465,7 +465,7 @@ class Pixels {
                     inc++;
                     int x = a.x + inc * xChange;
                     int y = a.y + inc * yChange;
-                    strandMap[j] = c2i(x,y);
+                    strandMap[j] = c2i(x, y);
                     
                   }
                 }
@@ -507,7 +507,7 @@ class Pixels {
           println(s);
           s = new StringBuilder(200);
         }
-        s.append(String.format(" %04d:",ordinal));
+        s.append(String.format(" %04d:", ordinal));
         int value = strandMap[index];
         if (value == TC_PIXEL_DISCONNECTED) {
           s.append(" DISC  ");
@@ -519,18 +519,18 @@ class Pixels {
         else {
           assert (value >= 0) : "can't print unrecognized value " + value;
           Point p = i2c(value);
-          s.append(String.format("(%02d,%02d) ",p.x,p.y));
-          minX = min(minX,p.x);
-          minY = min(minY,p.y);
-          maxX = max(maxX,p.x);
-          maxY = max(maxY,p.y);
+          s.append(String.format("(%02d,%02d) ", p.x, p.y));
+          minX = min(minX, p.x);
+          minY = min(minY, p.y);
+          maxX = max(maxX, p.x);
+          maxY = max(maxY, p.y);
         }
       }
       s.append("\n");
       println(s);
       
       
-      println("min (" + minX + "," + minY + ") max ("  + maxX + "," + maxY + ")");
+      println("min (" + minX + ", " + minY + ") max ("  + maxX + ", " + maxY + ")");
     }
     
   }
@@ -590,7 +590,7 @@ class Pixels {
     mapAllLeds();
     
     ledInterpolate();
-//    ledMapDump(0,2); //set which strands you want to dump
+//    ledMapDump(0, 2); //set which strands you want to dump
     
     println("biggestX:" + (biggestX + 1) + " biggestY:" + (biggestY + 1));
     
@@ -602,7 +602,7 @@ class Pixels {
     hardwareAlreadySetup = true;
     
     if (runConcurrent) {
-      totalControlConcurrent = new TotalControlConcurrent(getNumStrands(),maxPixelsPerStrand, kUseBitBang);
+      totalControlConcurrent = new TotalControlConcurrent(getNumStrands(), maxPixelsPerStrand, kUseBitBang);
     }
     else {
       int status = setupTotalControl(getNumStrands(), maxPixelsPerStrand, kUseBitBang);

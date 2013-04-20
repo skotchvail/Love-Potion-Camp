@@ -107,33 +107,33 @@ class MainClass {
     modes = new Drawer[][] {
       //column 0
       {
-        new Tunnel(display,settings),             //0,0
-        new Bzr3(display, settings),              //0,1
-        new Fire(display, settings),              //0,2
-        new Equalizer3d(display, settings),       //0,3
-        new FastPlasma(display, settings),        //0,4
+        new Tunnel(display, settings),             //0, 0
+        new Bzr3(display, settings),              //0, 1
+        new Fire(display, settings),              //0, 2
+        new Equalizer3d(display, settings),       //0, 3
+        new FastPlasma(display, settings),        //0, 4
       },
       //column 1
       {
-        new AlienBlob(display, settings),         //1,0
-        new BouncingBalls2D(display, settings),   //1,1
-        new Smoke(display, settings),             //1,2
-        new DroppingParticles(display, settings), //1,3
+        new AlienBlob(display, settings),         //1, 0
+        new BouncingBalls2D(display, settings),   //1, 1
+        new Smoke(display, settings),             //1, 2
+        new DroppingParticles(display, settings), //1, 3
       },
       //column 2
       {
-        new HardwareTest(display, settings),      //2,0
-        new Paint(display, settings),             //2,1
-        new EyeMotion(display, settings),         //2,2
-        new Heart(display, settings),             //2,3
+        new HardwareTest(display, settings),      //2, 0
+        new Paint(display, settings),             //2, 1
+        new EyeMotion(display, settings),         //2, 2
+        new Heart(display, settings),             //2, 3
 
       }
     };
     settings.initOSC();
     pm.init(applet);
 
-    modeCol = prefs.getInt("modeCol",2);
-    modeRow = prefs.getInt("modeRow",0);
+    modeCol = prefs.getInt("modeCol", 2);
+    modeRow = prefs.getInt("modeRow", 0);
     
 //    modeCol = 2;
 //    modeRow = 0;
@@ -193,7 +193,7 @@ class MainClass {
       float userSet = settings.getParam(settings.getKeyAudioSensitivity(i));
       float audioSensitivity = 1 - userSet;
       bd.setSensitivity(i, audioSensitivity * MAX_AUDIO_SENSITIVITY, (int)(settings.getParam(settings.keyBeatLength)*MAX_BEAT_LENGTH));
-      bd.analyzeBand(i,(userSet != 0));
+      bd.analyzeBand(i, (userSet != 0));
       
     }
     bd.update(audioIn.mix);
@@ -308,7 +308,7 @@ class MainClass {
     pm.setPaletteType(settings.paletteType, NUM_COLORS, settings.palette);
     Drawer mode = modes[modeCol][modeRow];
     mode.setup();
-    mouseX = mode.mouseX; //let the mode set the mouseX,Y in their setup and honor that.
+    mouseX = mode.mouseX; //let the mode set the mouseX, Y in their setup and honor that.
     mouseY = mode.mouseY;
     
     println("Initial mouseX:" + mouseX + " mouseY: " + mouseY);
@@ -324,9 +324,9 @@ class MainClass {
         if (col == oldModeCol && row <= oldModeRow)
           continue;
         
-        println("loop1 col" + col + " row" + row + " on:" + settings.isSketchOn(col,row));
+        println("loop1 col" + col + " row" + row + " on:" + settings.isSketchOn(col, row));
         
-        if (settings.isSketchOn(col,row)) {
+        if (settings.isSketchOn(col, row)) {
           modeCol = col;
           modeRow = row;
           return;
@@ -341,9 +341,9 @@ class MainClass {
           if (col == oldModeCol && row >= oldModeRow)
             break;
           
-          println("loop2 col" + col + " row" + row + " on:" + settings.isSketchOn(col,row));
+          println("loop2 col" + col + " row" + row + " on:" + settings.isSketchOn(col, row));
           
-          if (settings.isSketchOn(col,row)) {
+          if (settings.isSketchOn(col, row)) {
             modeCol = col;
             modeRow = row;
             return;
@@ -359,8 +359,8 @@ class MainClass {
     int oldModeCol = modeCol;
     int oldModeRow = modeRow;
     findNextMode();
-    prefs.putInt("modeCol",modeCol);
-    prefs.putInt("modeRow",modeRow);
+    prefs.putInt("modeCol", modeCol);
+    prefs.putInt("modeRow", modeRow);
     needToFlushPrefs = true;
     
     println("newEffect " + modes[oldModeCol][oldModeRow].getName() + " -> "+ modes[modeCol][modeRow].getName());
@@ -392,12 +392,12 @@ class MainClass {
   }
   
   void touchXY(int touchNum, float x, float y) {
-    if (frameCount % 10 == 0) println("Touch" + touchNum + " at " + nf(x,1,2) + " " + nf(y,1,2));
+    if (frameCount % 10 == 0) println("Touch" + touchNum + " at " + nf(x, 1, 2) + " " + nf(y, 1, 2));
     modes[modeCol][modeRow].setTouch(touchNum, x, y);
   }
   
   void mouseClicked() {
-    Point p = new Point(mouseX,mouseY);
+    Point p = new Point(mouseX, mouseY);
     if (display.getBox2D().contains(p)) {
       newEffect();
     }
@@ -425,7 +425,7 @@ class MainClass {
     for (int col = 0; col < modes.length; col++) {
       for (int row = 0; row < modes[col].length; row++) {
         name = modes[col][row].getName();
-        settings.sendMessageToPad(settings.sketchLabelName(col,row),name);
+        settings.sendMessageToPad(settings.sketchLabelName(col, row), name);
       }
     }
     

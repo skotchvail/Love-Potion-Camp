@@ -23,18 +23,18 @@ public class Console extends WindowAdapter implements WindowListener, ActionList
     // create all components and add them
     frame=new JFrame("Java Console");
     Dimension screenSize=Toolkit.getDefaultToolkit().getScreenSize();
-    Dimension frameSize=new Dimension((int)(screenSize.width/2),(int)(screenSize.height/2));
+    Dimension frameSize=new Dimension((int)(screenSize.width/2), (int)(screenSize.height/2));
     int x=(int)(frameSize.width/2);
     int y=(int)(frameSize.height/2);
-    frame.setBounds(x,y,frameSize.width,frameSize.height);
+    frame.setBounds(x, y, frameSize.width, frameSize.height);
 
     textArea=new JTextArea();
     textArea.setEditable(false);
     JButton button=new JButton("clear");
 
     frame.getContentPane().setLayout(new BorderLayout());
-    frame.getContentPane().add(new JScrollPane(textArea),BorderLayout.CENTER);
-    frame.getContentPane().add(button,BorderLayout.SOUTH);
+    frame.getContentPane().add(new JScrollPane(textArea), BorderLayout.CENTER);
+    frame.getContentPane().add(button, BorderLayout.SOUTH);
     frame.setVisible(true);		
 
     frame.addWindowListener(this);		
@@ -43,7 +43,7 @@ public class Console extends WindowAdapter implements WindowListener, ActionList
     try
     {
       PipedOutputStream pout=new PipedOutputStream(this.pin);
-      System.setOut(new PrintStream(pout,true)); 
+      System.setOut(new PrintStream(pout, true));
     } 
     catch (java.io.IOException io)
     {
@@ -57,7 +57,7 @@ public class Console extends WindowAdapter implements WindowListener, ActionList
     try 
     {
       PipedOutputStream pout2=new PipedOutputStream(this.pin2);
-      System.setErr(new PrintStream(pout2,true));
+      System.setErr(new PrintStream(pout2, true));
     } 
     catch (java.io.IOException io)
     {
@@ -180,7 +180,7 @@ public class Console extends WindowAdapter implements WindowListener, ActionList
       if (available==0) break;
       byte b[]=new byte[available];
       in.read(b);
-      input=input+new String(b,0,b.length);														
+      input=input+new String(b, 0, b.length);
     }
     while( !input.endsWith("\n") &&  !input.endsWith("\r\n") && !quit);
     return input;

@@ -23,16 +23,16 @@ class Equalizer3d extends Drawer
 
 
   void setup() {
-    settings.setParam(settings.keyAudioSensitivity1,0.5);
-    settings.setParam(settings.keyAudioSensitivity2,0.5);
-    settings.setParam(settings.keyAudioSensitivity3,0.7);
-    settings.setParam(settings.keyBeatLength,0.25);
+    settings.setParam(settings.keyAudioSensitivity1, 0.5);
+    settings.setParam(settings.keyAudioSensitivity2, 0.5);
+    settings.setParam(settings.keyAudioSensitivity3, 0.7);
+    settings.setParam(settings.keyBeatLength, 0.25);
   }
   
   float factor = 0.18;
 
   void draw() {
-    colorMode(RGB,255);
+    colorMode(RGB, 255);
     
     if (randoms == null) {
       randoms = new int[numCols][numRows];
@@ -45,9 +45,9 @@ class Equalizer3d extends Drawer
       }
     }
     
-    pg.fill(0,10);
-    pg.rect(0,0,width,height);
-    pg.translate(25,0);
+    pg.fill(0, 10);
+    pg.rect(0, 0, width, height);
+    pg.translate(25, 0);
     pg.rotateY(rad);
     pg.rotateX(rad);
 
@@ -95,14 +95,14 @@ class Equalizer3d extends Drawer
         // Translate to the location, set fill, and draw the box
         if(brightness(c)>30){
           pg.pushMatrix();
-          pg.translate(x,y,-100*factor);
-          pg.fill(c,100);
+          pg.translate(x, y, -100*factor);
+          pg.fill(c, 100);
           pg.noStroke();
-          pg.box(60*factor,60*factor,z);
+          pg.box(60*factor, 60*factor, z);
           pg.popMatrix();
           pg.pushMatrix();
-          pg.translate(x,(160 * factor),y-(320 * factor));
-          pg.box(60*factor,z,60*factor);
+          pg.translate(x, (160 * factor), y - (320 * factor));
+          pg.box(60*factor, z, 60*factor);
           pg.popMatrix();
         }
       }

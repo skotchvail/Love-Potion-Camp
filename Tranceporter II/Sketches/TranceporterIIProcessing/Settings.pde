@@ -120,7 +120,7 @@ class Settings {
             public void function() {
               main.reset();
             }});
-    actions.put("/pageAudio/instaFlash",new VoidFunction() {
+    actions.put("/pageAudio/instaFlash",    new VoidFunction() {
       public void function() {
         main.currentMode().manualFlash = true;
       }});
@@ -213,10 +213,10 @@ class Settings {
 
   public Object switchSettings(Object newSettings) {
     HashMap saver = new HashMap();
-    saver.put("1",paramMap);
-    saver.put("2",utility.toIntegerList(palette));
-    saver.put("3",utility.toBooleanList(isBeat));
-    saver.put("4",paletteType);
+    saver.put("1", paramMap);
+    saver.put("2", utility.toIntegerList(palette));
+    saver.put("3", utility.toBooleanList(isBeat));
+    saver.put("4", paletteType);
     
     if (newSettings == null) {
       println("newSettings are null");
@@ -298,12 +298,12 @@ class Settings {
 ////////////////////////////////////////////////////////////////////
 //OSC 5 stuff
   void initOSC() {
-    oscP5 = new OscP5(this,8000);
-    oscReceiver = new NetAddress(iPadIP,9000);
+    oscP5 = new OscP5(this, 8000);
+    oscReceiver = new NetAddress(iPadIP, 9000);
 }
 
   private void enableControl(String controlKey, boolean enabled) {
-    sendMessageToPad(controlKey + "/visible",enabled?"1":"0");
+    sendMessageToPad(controlKey + "/visible", enabled?"1":"0");
   }
   
   /* this comes in on a different thread than 
@@ -395,7 +395,7 @@ class Settings {
   {
     println("detected new iPad address: " + iPadIP + " -> " + ipAddress);
     iPadIP = ipAddress; //once the iPad contacts us, we can contact them, if the hardcoded IP address is wrong
-    oscReceiver = new NetAddress(iPadIP,9000);
+    oscReceiver = new NetAddress(iPadIP, 9000);
     sendAllSettingsToPad();
     main.updateIPadGUI();  }
   
@@ -445,7 +445,7 @@ class Settings {
     boolean on = whichModes[column][0];
     
     for (int row = 0; row < numRows; row++) {
-      setSketchOn(column,row,!on);
+      setSketchOn(column, row, !on);
     }
     sendSketchesToPad();
   }
@@ -456,8 +456,8 @@ class Settings {
     
     for (int col = 0; col < numCols; col++) {
       for (int row = 0; row < numRows; row++) {
-        sendMessageToPad(sketchName(col,row) + "/toggle",whichModes[col][row]?"1":"0");
-        println("sendSketchesToPad " + sketchName(col,row) + "/toggle");
+        sendMessageToPad(sketchName(col, row) + "/toggle", whichModes[col][row]?"1":"0");
+        println("sendSketchesToPad " + sketchName(col, row) + "/toggle");
       }
     }
   }
@@ -468,7 +468,7 @@ class Settings {
 
   void setSketchOn(int col, int row, boolean state) {
     whichModes[col][row] = state;
-    prefs.putBoolean(sketchName(col,row), state);
+    prefs.putBoolean(sketchName(col, row), state);
     needToFlushPrefs = true;
   }
   
@@ -478,7 +478,7 @@ class Settings {
     
     for (int col = 0; col < numCols; col++) {
       for (int row = 0; row < numRows; row++) {
-        whichModes[col][row] = prefs.getBoolean(sketchName(col,row), false);
+        whichModes[col][row] = prefs.getBoolean(sketchName(col, row), false);
       }
     }
   }

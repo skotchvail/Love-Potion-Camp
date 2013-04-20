@@ -8,7 +8,7 @@ class Fire extends Drawer {
   // Flame colors
   color[] palette;
   float angle;
-  int[] calc1,calc2,calc3,calc4,calc5;
+  int[] calc1, calc2, calc3, calc4, calc5;
   int height2;
 
   String getName() { return "Fire"; }
@@ -63,7 +63,7 @@ class Fire extends Drawer {
     // Randomize the bottom row of the fire buffer
     int clusterSize = round(settings.getParam(settings.keyCustom2)*10) + 1;
     for(int x = 0; x < width; x+=clusterSize) {
-      int i = int(random(0,190));
+      int i = int(random(0, 190));
       for (int x2=x; x2<min(x+clusterSize, width); x2++) { 
         fire[x2][height2-1] = i;
       }

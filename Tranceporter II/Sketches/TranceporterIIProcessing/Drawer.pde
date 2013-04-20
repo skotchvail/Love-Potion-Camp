@@ -207,7 +207,7 @@ class Drawer {
   }
   
   // adapted from https://github.com/adafruit/Adavision/blob/master/Processing/WS2801/src/WS2801.java
-  // Fancy gamma correction; separate R,G,B ranges and exponents:
+  // Fancy gamma correction; separate RGB ranges and exponents:
   double lastGamma = 0;
   private void setGamma(double gamma) {
     if (gamma != lastGamma) {
@@ -226,9 +226,9 @@ class Drawer {
 
     for(short i=0; i<256; i++) {
       d = (double)i / 255.0;
-      rgbGamma[i][0] = (short)(rMin + (int)Math.floor(rRange * Math.pow(d,rGamma) + 0.5));
-      rgbGamma[i][1] = (short)(gMin + (int)Math.floor(gRange * Math.pow(d,gGamma) + 0.5));
-      rgbGamma[i][2] = (short)(bMin + (int)Math.floor(bRange * Math.pow(d,bGamma) + 0.5));
+      rgbGamma[i][0] = (short)(rMin + (int)Math.floor(rRange * Math.pow(d, rGamma) + 0.5));
+      rgbGamma[i][1] = (short)(gMin + (int)Math.floor(gRange * Math.pow(d, gGamma) + 0.5));
+      rgbGamma[i][2] = (short)(bMin + (int)Math.floor(bRange * Math.pow(d, bGamma) + 0.5));
     }
   }
   

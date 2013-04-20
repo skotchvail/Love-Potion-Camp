@@ -31,11 +31,11 @@ class FastPlasma extends Drawer {
 //    float piSplit1 = settings.getParam(settings.keyCustom1) * 25;
 //    float piSplit2 = settings.getParam(settings.keyCustom1) * 50;
    
-    float s1,s2;
+    float s1, s2;
     for (int i=0;i<128;i++) {
       s1=sin(i*PI/25);
       s2=sin(i*PI/50+PI/4);
-      pal[i]=color(128+s1*128,128+s2*128,s1*128);
+      pal[i]=color(128+s1*128, 128+s2*128, s1*128);
       //getColor( x % getNumColors());
     }
     

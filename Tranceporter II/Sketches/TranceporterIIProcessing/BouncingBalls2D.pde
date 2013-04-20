@@ -43,7 +43,7 @@ class BouncingBalls2D extends Drawer {
     color col = color(mass/maxMass, 0.5, 1.0);
     
     assert(bbox != null);
-    Vec2D pos = new Vec2D(random(0,bbox.getDims().x), random(0, bbox.getDims().y/2));
+    Vec2D pos = new Vec2D(random(0, bbox.getDims().x), random(0, bbox.getDims().y/2));
     Vec2D dpos = new Vec2D(random(-1, 1), random(-1, 1));
     dpos = dpos.normalizeTo(startMomentum/mass);
     balls.add(new ball(bbox, pos, dpos, radius, col, mass));

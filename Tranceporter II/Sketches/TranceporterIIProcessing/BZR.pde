@@ -20,13 +20,13 @@ class Bzr3 extends Drawer {
   }
   
   void setup () {
-    randomDots(0,0,w,h);
+    randomDots(0, 0, w, h);
     settings.setParam(settings.keyBrightness, 0.5); // set brightness to 50%    
     settings.setParam(settings.keyCustom1, 0.3);
   }
   
   void reset() {
-    randomDots(0,0,w,h);
+    randomDots(0, 0, w, h);
   }
   
   String getName() { return "Belousov-Zhabotinsky Reaction"; }
@@ -62,7 +62,7 @@ class Bzr3 extends Drawer {
           b[x ][ y ][ q] = constrain ( c_b + c_b * ( c_c - c_a ), 0, 1);    
           c[x ][ y ][ q] = constrain ( c_c + c_c * ( c_a - c_b ), 0, 1);
           
-          //set(x,y, color(0.5 ,0.7 , a[x][y][q]));      
+          //set(x, y, color(0.5, 0.7, a[x][y][q]));
         }  
       }
         

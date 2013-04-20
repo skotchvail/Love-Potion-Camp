@@ -53,17 +53,17 @@ display name for your class. This will display on the pad  GUI.
 
   String getName() { return "MyNewClass"; }
 
-5) In your setup() method, delete the line the has the size(100,100) in it. 
+5) In your setup() method, delete the line the has the size(100, 100) in it.
 That is normally the first line. You are stuck using the size of the 
 LED's that we have installed on the art car. 
 
 6) Any graphic calls need to be prefixed with pg.  For example,       
 	
-	background(color(0,0,0));
+	background(color(0, 0, 0));
 
 should be changed to: 
 
-	pg.background(color(0,0,0));
+	pg.background(color(0, 0, 0));
 
 Anything that draws to the screen must draw to pg instead. This is
 very important, things won't work unless you find all of these places

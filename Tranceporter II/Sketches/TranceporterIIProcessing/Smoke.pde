@@ -69,26 +69,26 @@ class Smoke extends Drawer {
     }
     for(int i = 0; i <= lwidth; i++) {
       for(int u = 0; u <= lheight; u++) {
-        v[i][u] = new vsquare((int)(i*res),(int)(u*res));
-        vbuf[i][u] = new vbuffer((int)(i*res),(int)(u*res));
+        v[i][u] = new vsquare((int)(i*res), (int)(u*res));
+        vbuf[i][u] = new vbuffer((int)(i*res), (int)(u*res));
       }
     }
     
-    settings.setParam(settings.keyBeatLength,0.05);
-    settings.setParam(settings.keyAudioSensitivity1,0.5);
-    settings.setParam(settings.keyAudioSensitivity2,0.5);
-    settings.setParam(settings.keyAudioSensitivity3,0.5);
-    settings.setParam(settings.keyFlash,0.0);
+    settings.setParam(settings.keyBeatLength, 0.05);
+    settings.setParam(settings.keyAudioSensitivity1, 0.5);
+    settings.setParam(settings.keyAudioSensitivity2, 0.5);
+    settings.setParam(settings.keyAudioSensitivity3, 0.5);
+    settings.setParam(settings.keyFlash, 0.0);
   }
 
   float newParticleX()
   {
-    return random(startPosition-startBlockWidth,startPosition+startBlockWidth);
+    return random(startPosition-startBlockWidth, startPosition+startBlockWidth);
   }
 
   float newParticleY()
   {
-    return random(scaledHeight-startBlockWidth/2,scaledHeight) - startBlockWidth * 0.25;
+    return random(scaledHeight-startBlockWidth/2, scaledHeight) - startBlockWidth * 0.25;
   }
 
   
@@ -98,8 +98,8 @@ class Smoke extends Drawer {
     speedFactor *= speedFactor;
     speedFactor += 0.1;
     
-    colorMode(RGB,255);
-    pg.colorMode(RGB,255);
+    colorMode(RGB, 255);
+    pg.colorMode(RGB, 255);
     pg.scale(SCALE);
     pg.background(0);
     int axvel = mouseX-pmouseX;
@@ -115,12 +115,12 @@ class Smoke extends Drawer {
       boolean beat2 = settings.isBeat(2) && settings.beatPosSimple(2) == 0;
       
       if(beat0 || beat1 || beat2) {
-        randomGustMax = (int)random(5,12);
+        randomGustMax = (int)random(5, 12);
         randomGust = randomGustMax;
         
         color theColor;
-        randomGustX = random(0,scaledWidth);
-        randomGustY = randomYForBottle(randomGustX,SCALE);
+        randomGustX = random(0, scaledWidth);
+        randomGustY = randomYForBottle(randomGustX, SCALE);
         if (beat0) {
           theColor = getColor(1);
         }
@@ -130,7 +130,7 @@ class Smoke extends Drawer {
         else {
           theColor = getColor((int)(getNumColors() * 0.9));
         }
-        Gust g = new Gust(new PVector(randomGustX,randomGustY), theColor);
+        Gust g = new Gust(new PVector(randomGustX, randomGustY), theColor);
         gusts.add(g);
         
         randomGustSize = 25;
@@ -143,7 +143,7 @@ class Smoke extends Drawer {
     
     for(int i = 0; i < lwidth; i++) {
       for(int u = 0; u < lheight; u++) {
-        vbuf[i][u].updatebuf(i,u);
+        vbuf[i][u].updatebuf(i, u);
         v[i][u].col = 0;
       }
     }
@@ -197,7 +197,7 @@ class Gust
     intensity *= intensity;
     intensity = 255 * (1 - intensity);
     intensity *= drawsLeft * 1.5 / MAX_FRAMES;
-    intensity = min(intensity,255);
+    intensity = min(intensity, 255);
     c = replaceAlpha(c, intensity);
     pg.fill(c);
     pg.ellipse(location.x, location.y, 20, 20);
@@ -220,8 +220,8 @@ class particle
     x = newParticleX();
     y = newParticleY();
 
-    xvel = random(-1,1);
-    yvel = random(-1,1);
+    xvel = random(-1, 1);
+    yvel = random(-1, 1);
   }
 
   void updatepos() {
@@ -261,7 +261,7 @@ class particle
     else {
       reposition();
     }
-    if(random(0,400) < 1) {
+    if(random(0, 400) < 1) {
       reposition();
     }
     xvel *= 0.6;
@@ -279,7 +279,7 @@ class vbuffer
   float pressurey = 0;
   float pressure = 0;
 
-  vbuffer(int xIn,int yIn) {
+  vbuffer(int xIn, int yIn) {
     x = xIn;
     y = yIn;
     pressurex = 0;
@@ -302,7 +302,7 @@ class vsquare {
   float yvel;
   float col;
 
-  vsquare(int xIn,int yIn) {
+  vsquare(int xIn, int yIn) {
     x = xIn;
     y = yIn;
   }
@@ -392,8 +392,8 @@ class vsquare {
 //    float aGreen = green(c1) + (green(c2) - green(c1)) * a1 * a2;
 //    float aBlue = blue(c1) + (blue(c2) - blue(c1)) * (1-a1) * (1-a4);
 //    
-//    color c4 = color(aRed,aGreen,aBlue);
-//    color c5 = blendColor(c4,c3,OVERLAY);
+//    color c4 = color(aRed, aGreen, aBlue);
+//    color c5 = blendColor(c4, c3, OVERLAY);
 //    pg.fill(c5);
     
 //    float percent = (255 - tcol)/255.0;
@@ -409,12 +409,12 @@ class vsquare {
       c = color(0);
     }
     else {
-      c = replaceAlpha(#40FF40,tcol * 1.9);
+      c = replaceAlpha(#40FF40, tcol * 1.9);
     }
 
     pg.fill(c);
     
-    pg.rect(x,y,res,res);
+    pg.rect(x, y, res, res);
     col = 0;
   }
 }

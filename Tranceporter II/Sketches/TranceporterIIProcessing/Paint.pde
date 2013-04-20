@@ -68,7 +68,7 @@ class Paint extends Drawer {
           int x = tailX[ind][i];
           int y = tailY[ind][i];
           if (x != -1 && y != -1) {
-            pg.set(x,y, getColor((frameCount + i * getNumColors() / MAX_TOUCHES) % (getNumColors() - 1) + 1));
+            pg.set(x, y, getColor((frameCount + i * getNumColors() / MAX_TOUCHES) % (getNumColors() - 1) + 1));
           }
         }
       }
@@ -85,8 +85,10 @@ class Paint extends Drawer {
   }
   
   color getColor(int index) {
-    if (index == 0) return color(0,0,0);
-    else return super.getColor(index);
+    if (index == 0)
+      return color(0, 0, 0);
+    else
+      return super.getColor(index);
   }
 
 }

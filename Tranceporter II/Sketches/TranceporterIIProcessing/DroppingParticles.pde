@@ -23,10 +23,10 @@ class DroppingParticles extends Drawer {
     pg.colorMode(RGB, 255, 255, 255, 100);
 
     psystems = new ArrayList();
-    settings.setParam(settings.keyBeatLength,0.05);
-    settings.setParam(settings.keyAudioSensitivity1,0.03);
-    settings.setParam(settings.keyAudioSensitivity2,0.03);
-    settings.setParam(settings.keyAudioSensitivity3,0.03);
+    settings.setParam(settings.keyBeatLength, 0.05);
+    settings.setParam(settings.keyAudioSensitivity1, 0.03);
+    settings.setParam(settings.keyAudioSensitivity2, 0.03);
+    settings.setParam(settings.keyAudioSensitivity3, 0.03);
   }
   
   void draw() {
@@ -48,13 +48,13 @@ class DroppingParticles extends Drawer {
     upper +=2;
     
     if (settings.isBeat(0)) {
-      psystems.add(new ParticleSystem(int(random((int)lower,(int)upper)),new PVector(30,10)));
+      psystems.add(new ParticleSystem(int(random((int)lower, (int)upper)), new PVector(30, 10)));
     }
     if (settings.isBeat(1)) {
-      psystems.add(new ParticleSystem(int(random((int)lower,(int)upper)),new PVector(45,20)));
+      psystems.add(new ParticleSystem(int(random((int)lower, (int)upper)), new PVector(45, 20)));
     }
     if (settings.isBeat(2)) {
-      psystems.add(new ParticleSystem(int(random((int)lower,(int)upper)),new PVector(90,40)));
+      psystems.add(new ParticleSystem(int(random((int)lower, (int)upper)), new PVector(90, 40)));
     }
   
     // Cycle through all particle systems, run them and delete old ones
@@ -99,8 +99,8 @@ class DroppingParticles extends Drawer {
     
     // Another constructor (the one we are using here)
     Particle(PVector l) {
-      acc = new PVector(0,0.05,0);
-      vel = new PVector(random(-1,1),random(-2,0),0);
+      acc = new PVector(0, 0.05, 0);
+      vel = new PVector(random(-1, 1), random(-2, 0), 0);
       loc = l.get();
       r = 10.0;
       timer = 100.0;
@@ -120,7 +120,7 @@ class DroppingParticles extends Drawer {
       speed += 0.2;
       speed *= 2.5;
       speed *= speed;
-      vel.add(PVector.mult(acc,speed));
+      vel.add(PVector.mult(acc, speed));
       loc.add(vel);
       timer -= 1.0;
     }
@@ -128,9 +128,9 @@ class DroppingParticles extends Drawer {
     // Method to display
     void render() {
       pg.ellipseMode(CENTER);
-      pg.stroke(replaceAlpha(strokeColor,timer));
-      pg.fill(100,timer);
-      pg.ellipse(loc.x,loc.y,r,r);
+      pg.stroke(replaceAlpha(strokeColor, timer));
+      pg.fill(100, timer);
+      pg.ellipse(loc.x, loc.y, r, r);
     }
     
     // Is the particle still useful?
@@ -148,7 +148,7 @@ class DroppingParticles extends Drawer {
         return color(255);
       }
       
-      float location = map(loc.x,0,width/scale,0,1);
+      float location = map(loc.x, 0, width/scale, 0, 1);
       float colorRange = colorSetting * getNumColors();
       
       return getColor((int)round(location * colorRange));
@@ -197,10 +197,10 @@ class DroppingParticles extends Drawer {
       
       // Then add a rotating line
       pg.pushMatrix();
-      pg.translate(loc.x,loc.y);
+      pg.translate(loc.x, loc.y);
       pg.rotate(theta);
-      pg.stroke(replaceAlpha(strokeColor,timer));
-      pg.line(0,0,25,0);
+      pg.stroke(replaceAlpha(strokeColor, timer));
+      pg.line(0, 0, 25, 0);
       pg.popMatrix();
     }
   }

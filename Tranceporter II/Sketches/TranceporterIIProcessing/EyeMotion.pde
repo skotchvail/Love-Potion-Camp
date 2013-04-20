@@ -81,17 +81,17 @@ class EyeMotion extends Drawer {
 
     float MAX_SECONDS_TO_FOCUS = 3.0;
     float MIN_SECONDS_TO_FOCUS = 0.05;
-    float totalSecondsForMovement = secondsForSpeed(MIN_SECONDS_TO_FOCUS, MAX_SECONDS_TO_FOCUS,1.0-speed);
+    float totalSecondsForMovement = secondsForSpeed(MIN_SECONDS_TO_FOCUS, MAX_SECONDS_TO_FOCUS, 1.0-speed);
     easing = 1.0/(totalSecondsForMovement * FRAME_RATE);
     
  //   println("touchX: " + touchX + " touchY: " + touchY);
     pg.scale(SCALE);
     pg.noStroke();
     pg.smooth();
-    pg.translate(translateX,translateY);
+    pg.translate(translateX, translateY);
     pg.background(backgroundColor);
     
-    handleTouches(touchX,touchY);
+    handleTouches(touchX, touchY);
     if (mx != lastmx || my != lastmy) {
       lastLookChange = millis();
       lastmx = mx;
@@ -100,7 +100,7 @@ class EyeMotion extends Drawer {
 
     float MAX_SECONDS_BETWEEN_MOVES = 10.0;
     float MIN_SECONDS_BETWEEN_MOVES = 0.01;
-    float timeBeforeMoveEyes = secondsForSpeed(MIN_SECONDS_BETWEEN_MOVES,MAX_SECONDS_BETWEEN_MOVES,1.0 - (trippy * speed));
+    float timeBeforeMoveEyes = secondsForSpeed(MIN_SECONDS_BETWEEN_MOVES, MAX_SECONDS_BETWEEN_MOVES, 1.0 - (trippy * speed));
     
     int timeSinceLastMove = millis() - lastLookChange;
     if ((timeSinceLastMove/1000 > timeBeforeMoveEyes) && (trippy > 0) && settings.isBeat(2)) {
@@ -116,14 +116,14 @@ class EyeMotion extends Drawer {
     
     //iris
     color targetColor = getColor(getNumColors()/2);
-    irisColor = fadeColor(irisColor,targetColor,0.2,0.8);
+    irisColor = fadeColor(irisColor, targetColor, 0.2, 0.8);
     pg.fill(irisColor);
     
     pg.ellipse(mx, my - 10, 192, 179);
     
     //pupil
     targetColor = getColor(0);
-    pupilColor = fadeColor(pupilColor,targetColor,0.6,0.95);
+    pupilColor = fadeColor(pupilColor, targetColor, 0.6, 0.95);
     pg.fill(pupilColor);
     pg.ellipse(mx, my - 10, 130, 130);
     
@@ -174,15 +174,15 @@ class EyeMotion extends Drawer {
     pg.fill(lidColor);
     pg.beginShape();
     pg.vertex(166, 226);
-    pg.bezierVertex(185, 276,248, 323, 318, 323);
+    pg.bezierVertex(185, 276, 248, 323, 318, 323);
     pg.bezierVertex(388, 323, 464, 263, 464, 216);
     pg.bezierVertex(464, 287, 402, 346, 318, 346);
-    pg.bezierVertex(234, 346, 169 ,300, 166, 226);
+    pg.bezierVertex(234, 346, 169, 300, 166, 226);
     pg.endShape();
     
     float secondsBetweenBlinks = 15.0;
     if (!readyToBlink) {
-      readyToBlink = (random(0.0,1.0) < (1.0/(FRAME_RATE * secondsBetweenBlinks)));
+      readyToBlink = (random(0.0, 1.0) < (1.0/(FRAME_RATE * secondsBetweenBlinks)));
     }
     if (settings.isBeat(1) && readyToBlink){
       readyToBlink = false;
@@ -233,7 +233,7 @@ class EyeMotion extends Drawer {
     
     //glare 1
     pg.fill(glare1); //color
-    pg.ellipse(266, 175,33, 30);
+    pg.ellipse(266, 175, 33, 30);
     
     //glare 2
     pg.fill(glare1); //color
@@ -242,14 +242,14 @@ class EyeMotion extends Drawer {
     pg.fill(glare2); //color
     pg.ellipse(253, 205, 13, 21);
     
-//    pg.stroke(0,255,0,255);
+//    pg.stroke(0, 255, 0, 255);
 //    pg.noFill();
-//    pg.rect(MINX,MINY,MAXX - MINX, MAXY-MINY);
+//    pg.rect(MINX, MINY, MAXX - MINX, MAXY-MINY);
 //    
-//    pg.rect(dX,dY,10,10);
+//    pg.rect(dX, dY, 10, 10);
   
-//    pg.fill(255,0,255,255);
-//    pg.rect(mx,my,50,50);
+//    pg.fill(255, 0, 255, 255);
+//    pg.rect(mx, my, 50, 50);
 //  
 //    println("dX:" + dX + " dY:" + dY);
   }
@@ -289,9 +289,9 @@ class EyeMotion extends Drawer {
       return targetColor;
     }
     
-    float alpha = map(trippy,baseTrippy,fullTrippy,255,0);
-    color theColor = replaceAlpha(baseColor,alpha);
-    theColor = blendColor(targetColor,theColor, BLEND);
+    float alpha = map(trippy, baseTrippy, fullTrippy, 255, 0);
+    color theColor = replaceAlpha(baseColor, alpha);
+    theColor = blendColor(targetColor, theColor, BLEND);
     return theColor;
   }
 

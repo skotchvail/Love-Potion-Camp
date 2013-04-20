@@ -154,7 +154,7 @@ class HardwareTest extends Drawer {
   
   
   void draw() {
-    colorMode(RGB,255);
+    colorMode(RGB, 255);
     
     if (millis() - lastTimeSwitched  >= 100) {
       //do something once a second
@@ -171,7 +171,7 @@ class HardwareTest extends Drawer {
     int chunkY = 255 / height;
     
     if (setting > kLevelGrid) {
-      pg.background(color(0,0,0));
+      pg.background(color(0, 0, 0));
       
       int unit = 10;
       if (setting > 0.95)
@@ -200,29 +200,29 @@ class HardwareTest extends Drawer {
             
             pg.noStroke();
             
-            int color1 = color(0,0,100);
-            int color2 = color(100,50,0);
+            int color1 = color(0, 0, 100);
+            int color2 = color(100, 50, 0);
             
             int c = ((tensDigitX + tensDigitY) % 2 == 0) ? color1: color2;
             
             pg.fill(c);
             
             //            pg.fill(color(10 + (tensDigitX * chunkX * unit), ((tensDigitX + tensDigitY) % 2 == 0) ? 100: 200, 255 - (tensDigitY * chunkY * unit)));
-            pg.rect(x,y,unit,unit);
+            pg.rect(x, y, unit, unit);
           }
         }
         int whichPixel = movementPixelSlow % 10;
         if ((x % 10) == whichPixel) {
-          pg.stroke(color(0,0,0));
-          pg.line(x,0,x,ledHeight);
+          pg.stroke(color(0, 0, 0));
+          pg.line(x, 0, x, ledHeight);
         }
       }
     }
     else if (setting >= kLevelGreen) {
-      pg.background(0,30,0);
+      pg.background(0, 30, 0);
     }
     else {
-      pg.background(color(220,238,191));
+      pg.background(color(220, 238, 191));
       
       for (int whichStrand = 0; whichStrand < p.getNumStrands(); whichStrand++) {
         int strandSize = p.getStrandSize(whichStrand);
@@ -236,20 +236,20 @@ class HardwareTest extends Drawer {
           int c = strandColor[whichStrand] ;
           
           if (lastDigit != 0) {
-            //            int color1 = color(108,158,190);
-            //            int color2 = color(69,69,190);
+            //            int color1 = color(108, 158, 190);
+            //            int color2 = color(69, 69, 190);
             
-            int color1 = color(140,140,140);
-            int color2 = color(25,25,25);
-            //color2 = color(255,255,255);
+            int color1 = color(140, 140, 140);
+            int color2 = color(25, 25, 25);
+            //color2 = color(255, 255, 255);
             c = ((secondDigit % 2) == 1)?color1:color2;
           }
           
           int whichPixel = (movementPixelFast + 1) % 10;
           if (lastDigit == whichPixel) {
-            c = color(red(c)/2,green(c)/2,blue(c)/2);
+            c = color(red(c)/2, green(c)/2, blue(c)/2);
           }
-          pg.set(a.x,a.y,c);
+          pg.set(a.x, a.y, c);
         }
       }
     }
@@ -268,10 +268,10 @@ class HardwareTest extends Drawer {
             continue;
           }
           Point a = p.ledGet(cursorStrand, i);
-          color c = color(255,255,0);
+          color c = color(255, 255, 0);
           
           if (a.x >= 0 && a.y >= 0) {
-            pg.set(a.x,a.y,c);
+            pg.set(a.x, a.y, c);
           }
           
         }
@@ -288,7 +288,7 @@ class HardwareTest extends Drawer {
       color c = color(0 * factor, 0 * factor, 255 * factor);
       
       if (a.x >= 0 && a.y >= 0) {
-        pg.set(a.x,a.y,c);
+        pg.set(a.x, a.y, c);
       }
       
       

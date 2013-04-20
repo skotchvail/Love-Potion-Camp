@@ -30,7 +30,7 @@ class BouncingBalls3D extends Drawer {
       float mass = 4 / 3 * radius*radius*radius;
       color col = color(mass/maxMass, 0.5, 1.0);
       
-      Vec3D pos = new Vec3D(random(0,bbox.getDims().x), random(0,bbox.getDims().y), 2.0/3*bbox.getDims().z);
+      Vec3D pos = new Vec3D(random(0, bbox.getDims().x), random(0, bbox.getDims().y), 2.0/3*bbox.getDims().z);
       Vec3D dpos = new Vec3D(random(-1, 1), random(-1, 1), random(-1, 1));
       dpos = dpos.normalizeTo(startMomentum/mass);
       balls[i] = new ball3D(bbox, pos, dpos, radius, col, mass);
@@ -178,14 +178,56 @@ class Bbox3D {
     //pg.box(dims.x, dims.y, dims.z);
     //pg.translate(-dims.x/2, -dims.y/2, -dims.z/2);
     
-    pg.fill(wallColors[0][0]); pg.beginShape(); pg.vertex(0,0,0); pg.vertex(0,0,dims.z); pg.vertex(0,dims.y,dims.z); pg.vertex(0,dims.y,0); pg.endShape(CLOSE);
-    pg.fill(wallColors[0][1]); pg.beginShape(); pg.vertex(dims.x,0,0); pg.vertex(dims.x,0,dims.z); pg.vertex(dims.x,dims.y,dims.z); pg.vertex(dims.x,dims.y,0); pg.endShape(CLOSE);
+    pg.fill(wallColors[0][0]);
+    pg.beginShape();
+    {
+      pg.vertex(0, 0, 0);
+      pg.vertex(0, 0, dims.z);
+      pg.vertex(0, dims.y, dims.z);
+      pg.vertex(0, dims.y, 0);
+      pg.endShape(CLOSE);
+    }
+    pg.fill(wallColors[0][1]);
+    pg.beginShape();
+    {
+      pg.vertex(dims.x, 0, 0);
+      pg.vertex(dims.x, 0, dims.z);
+      pg.vertex(dims.x, dims.y, dims.z);
+      pg.vertex(dims.x, dims.y, 0);
+    }
+    pg.endShape(CLOSE);
 
-    pg.fill(wallColors[1][0]); pg.beginShape(); pg.vertex(0,0,0); pg.vertex(0,0,dims.z); pg.vertex(dims.x,0,dims.z); pg.vertex(dims.x,0,0); pg.endShape(CLOSE);
-    pg.fill(wallColors[1][0]); pg.beginShape(); pg.vertex(0,dims.y,0); pg.vertex(0,dims.y,dims.z); pg.vertex(dims.x,dims.y,dims.z); pg.vertex(dims.x,dims.y,0); pg.endShape(CLOSE);
+    pg.fill(wallColors[1][0]);
+    pg.beginShape();
+    {
+      pg.vertex(0, 0, 0);
+      pg.vertex(0, 0, dims.z);
+      pg.vertex(dims.x, 0, dims.z);
+      pg.vertex(dims.x, 0, 0);
+    }
+    pg.endShape(CLOSE);
+    pg.fill(wallColors[1][0]);
+    pg.beginShape();
+    {
+      pg.vertex(0, dims.y, 0);
+      pg.vertex(0, dims.y, dims.z);
+      pg.vertex(dims.x, dims.y, dims.z);
+      pg.vertex(dims.x, dims.y, 0);
+    }
+    pg.endShape(CLOSE);
 
-    pg.fill(wallColors[2][0]); pg.beginShape(); pg.vertex(0,0,0); pg.vertex(0,dims.y,0); pg.vertex(dims.x,dims.y,0); pg.vertex(dims.x,0,0); pg.endShape(CLOSE);
+    pg.fill(wallColors[2][0]);
+    pg.beginShape();
+    {
+      pg.vertex(0, 0, 0);
+      pg.vertex(0, dims.y, 0);
+      pg.vertex(dims.x, dims.y, 0);
+      pg.vertex(dims.x, 0, 0);
+    }
+    pg.endShape(CLOSE);
   }
   
-  Vec3D getDims() { return dims; }
+  Vec3D getDims() {
+    return dims;
+  }
 }

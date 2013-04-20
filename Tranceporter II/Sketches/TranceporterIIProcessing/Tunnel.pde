@@ -56,8 +56,8 @@ class Tunnel extends Drawer {
       pg.colorMode(HSB, NUMBER_OF_LAYERS, 1, 1, NUMBER_OF_LAYERS);
     }
     else {
-      colorMode(RGB,255);
-      pg.colorMode(RGB,255);
+      colorMode(RGB, 255);
+      pg.colorMode(RGB, 255);
     }
 
     lCol.nextStep();
@@ -168,10 +168,10 @@ class Tunnel extends Drawer {
       
       this.dev = new PVector();
       this.maxSpeed = cmaxSpeed;
-      this.speed = (int)random(1,maxSpeed);
+      this.speed = (int)random(1, maxSpeed);
       
-      dev.x = random(-rad,rad);
-      dev.y = random(-rad,rad) * sin(map(dev.x, -(float) rad, (float) rad, -PI, 0));
+      dev.x = random(-rad, rad);
+      dev.y = random(-rad, rad) * sin(map(dev.x, -(float) rad, (float) rad, -PI, 0));
     }
     
     public void update(LayerCollection col) {
@@ -184,7 +184,7 @@ class Tunnel extends Drawer {
       }
       if (curLayerNum > col.list.size() - 1) {
         curLayerNum = 0;
-        this.speed = (int)random(1,maxSpeed);
+        this.speed = (int)random(1, maxSpeed);
       }
     }
     
@@ -287,7 +287,7 @@ class Tunnel extends Drawer {
     public CircleShape() {
       center = new PVector(0, 0, 0);
       offset = new PVector(0, 0);
-      increment = new PVector(random(0.15,0.25),random(0.15,0.25));
+      increment = new PVector(random(0.15, 0.25), random(0.15, 0.25));
     }
     
     public void generateCenter(float w, float h) {

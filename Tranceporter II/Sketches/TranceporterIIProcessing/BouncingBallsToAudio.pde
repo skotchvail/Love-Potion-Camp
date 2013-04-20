@@ -16,7 +16,7 @@ class BouncingBallsToAudio extends BouncingBalls2D {
       color col = color(0, 1.0, 1.0);
       
       Vec2D pos = new Vec2D((i+1)*bbox.getDims().x/4.0, 1.0/3*bbox.getDims().y);
-      Vec2D dpos = new Vec2D(0,0);
+      Vec2D dpos = new Vec2D(0, 0);
       balls.add(new ball(bbox, pos, dpos, radius, col, mass));
     }      
   }
