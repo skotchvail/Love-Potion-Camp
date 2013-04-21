@@ -137,11 +137,14 @@ class Pixels {
       // Lowest and highest values were discovered empirically using calcLowest
       final float lowestY = -1123.7638, highestY = 98.722984;
       final float lowestZ = 47.52061, highestZ = 843.26636;
+      final float diffY = highestY - lowestY;
+      final float diffZ = highestZ - lowestZ;
       
       PVector lowest = new PVector(Float.MAX_VALUE, Float.MAX_VALUE, Float.MAX_VALUE);
       PVector highest = new PVector(-Float.MAX_VALUE, -Float.MAX_VALUE, -Float.MAX_VALUE);
-
+      
       pg3D.textureMode(NORMAL);
+      pg3D.fillColor = color(100, 0, 0);
       
       // render all triangles
       for (int s = 0; s < objModel.getSegmentCount(); s++) {
@@ -153,7 +156,7 @@ class Pixels {
             for (int side = 0; side < 2; side++) {
               final boolean portSide = (side == 0);
               pg3D.beginShape(objModel.getDrawMode()); // specify render mode
-              pg3D.texture(texture);
+              boolean hasTexture = false;
               
               for (int fp = 0;  fp < tmpModelElement.getVertIndexCount(); fp++) {
                 v = objModel.getVertex(tmpModelElement.getVertexIndex(fp));
@@ -161,19 +164,28 @@ class Pixels {
                   
                   float textureU;
                   if (true || portSide) {
-                    textureU = map(v.y, lowestY, highestY, 0.0, 0.5);
+                    textureU = map(v.y, lowestY + diffY * factorLowU, highestY - diffY * factorHighU, 0.0, 0.5);
                   }
                   else {
-                    textureU = map(v.y, lowestY, highestY, 1.0, 0.5);
+                    textureU = map(v.y, lowestY + diffY * factorLowU, highestY - diffY * factorHighU, 1.0, 0.5);
                   }
-                  float textureV = map(v.z, lowestZ, highestZ, 1.0, 0.0);
+                  float textureV = map(v.z, lowestZ + diffZ * factorLowV, highestZ - diffZ * factorHighV, 1.0, 0.0);
                   
+                  if ((fp == 0 && textureU >= 0.0 && textureU <= 1.0)) {
+                    pg3D.texture(texture);
+                    hasTexture = true;
+                  }
                   float x = v.x;
                   if (!portSide) {
                     x *= -1;
                     x -= 51;
                   }
-                  pg3D.vertex(x, v.y, v.z, textureU, textureV);
+                  if (hasTexture) {
+                    pg3D.vertex(x, v.y, v.z, textureU, textureV);
+                  }
+                  else {
+                    pg3D.vertex(x, v.y, v.z);
+                  }
                   
                   if (calcLowest) {
                     if (portSide) {

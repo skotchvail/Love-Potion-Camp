@@ -26,7 +26,8 @@ boolean draw3dSimulation;
 boolean useTotalControlHardware;
 boolean needToFlushPrefs;
 boolean pauseAnimations;
-float rotationSpeed; 
+float rotationSpeed;
+float  factorLowU = 0.2, factorHighU = 0.02, factorLowV = 0.02, factorHighV = 0.13;
 
 MainClass main;
 Utility utility;
@@ -59,9 +60,8 @@ void mouseClicked() {
 }
 
 void keyPressed() {
-    main.keyPressed();
+  main.keyPressed();
 }
-
 
 class MainClass {
   
@@ -240,41 +240,36 @@ class MainClass {
     if (key == ' ') {
       pauseAnimations = !pauseAnimations;
     }
-    
-    if (key == 'n') {
+    else if (key == 'n') {
       println("switching to new effect");
       newEffect();
     }
-    
-    if (key == '2') {
+    else if (key == '2') {
       draw2dGrid = !draw2dGrid;
       prefs.putBoolean("draw2dGrid", draw2dGrid);
       needToFlushPrefs = true;
       println("2D grid: " + draw2dGrid);
     }
-    
-    if (key == '3') {
+    else if (key == '3') {
       draw3dSimulation = !draw3dSimulation;
       prefs.putBoolean("draw3dSimulation", draw3dSimulation);
       needToFlushPrefs = true;
       println("3D grid: " + draw3dSimulation);
     }
-    
-    if (key == 't') {
+    else if (key == 't') {
       useTotalControlHardware = !useTotalControlHardware;
       prefs.putBoolean("useTotalControlHardware", useTotalControlHardware);
       needToFlushPrefs = true;
       println("useTotalControlHardware: " + useTotalControlHardware);
     }
-    
-    if (key == ']') {
+    else if (key == ']') {
       rotationSpeed = max(rotationSpeed, 0.0004);
       rotationSpeed = min(rotationSpeed * 1.1, 1.0 / (FRAME_RATE * 0.5)); // Fastest once every half second
       prefs.putFloat("rotationSpeed", rotationSpeed);
       needToFlushPrefs = true;
       //println("rotationSpeed = " + nf(rotationSpeed, 1, 4));
     }
-    if (key == '[') {
+    else if (key == '[') {
       rotationSpeed = rotationSpeed * 0.92;
       if (rotationSpeed < 0.0005) {
         rotationSpeed = 0;
@@ -283,9 +278,45 @@ class MainClass {
       needToFlushPrefs = true;
       //println("rotationSpeed = " + nf(rotationSpeed, 1, 4));
     }
+    else if (key == 'F') {
+      factorHighU = min(factorHighU + 0.01, 1.0);
+      println("U = (" + factorLowU + " -> " + factorHighU + ") V = (" + factorLowV + " -> " + factorHighV + ")");
+    }
+    else if (key == 'S') {
+      factorHighU = max(factorHighU - 0.01, 0.0);
+      println("U = (" + factorLowU + " -> " + factorHighU + ") V = (" + factorLowV + " -> " + factorHighV + ")");
+    }
+    else if (key == 'E') {
+      factorHighV = min(factorHighV + 0.01, 1.0);
+      println("U = (" + factorLowU + " -> " + factorHighU + ") V = (" + factorLowV + " -> " + factorHighV + ")");
+    }
+    else if (key == 'D') {
+      factorHighV = max(factorHighV - 0.01, 0.0);
+      println("U = (" + factorLowU + " -> " + factorHighU + ") V = (" + factorLowV + " -> " + factorHighV + ")");
+    }
+    else if (key == 'f') {
+      factorLowU = min(factorLowU + 0.01, 1.0);
+      println("U = (" + factorLowU + " -> " + factorHighU + ") V = (" + factorLowV + " -> " + factorHighV + ")");
+    }
+    else if (key == 's') {
+      factorLowU = max(factorLowU - 0.01, 0.0);
+      println("U = (" + factorLowU + " -> " + factorHighU + ") V = (" + factorLowV + " -> " + factorHighV + ")");
+    }
+    else if (key == 'e') {
+      factorLowV = min(factorLowV + 0.01, 1.0);
+      println("U = (" + factorLowU + " -> " + factorHighU + ") V = (" + factorLowV + " -> " + factorHighV + ")");
+    }
+    else if (key == 'd') {
+      factorLowV = max(factorLowV - 0.01, 0.0);
+      println("U = (" + factorLowU + " -> " + factorHighU + ") V = (" + factorLowV + " -> " + factorHighV + ")");
+    }
+    else {
+      println("pressed " + int(key) + " " + keyCode);
+    }
     
     modes[modeCol][modeRow].keyPressed();
   }
+  
   
   Drawer currentMode() {
     return modes[modeCol][modeRow];
