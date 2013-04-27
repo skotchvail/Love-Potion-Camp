@@ -8,7 +8,7 @@ class Paint extends Drawer {
   int tailInd;
   
   Paint(Pixels p, Settings s) {
-    super(p, s, JAVA2D);
+    super(p, s, JAVA2D, DrawType.RepeatingSides);
     canvas = new int[width][height];
     tailX = new int[MAX_TAIL_LENGTH][MAX_TOUCHES];
     tailY = new int[MAX_TAIL_LENGTH][MAX_TOUCHES];

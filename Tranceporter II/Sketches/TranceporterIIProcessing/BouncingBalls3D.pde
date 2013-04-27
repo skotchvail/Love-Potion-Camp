@@ -12,7 +12,7 @@ class BouncingBalls3D extends Drawer {
   Vec3D gravity = new Vec3D(0, 0.006, 0);
   
   BouncingBalls3D(Pixels p, Settings s) {
-    super(p, s, P3D);
+    super(p, s, P3D, DrawType.MirrorSides);
     
     assert false;
   }

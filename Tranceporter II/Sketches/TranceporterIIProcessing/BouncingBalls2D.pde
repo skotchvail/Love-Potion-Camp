@@ -14,7 +14,7 @@ class BouncingBalls2D extends Drawer {
   int beatAssign;
   
   BouncingBalls2D(Pixels p, Settings s) {
-    super(p, s, JAVA2D);
+    super(p, s, JAVA2D, DrawType.MirrorSides);
   }
   
   String getName() { return "BouncingBalls2D"; }

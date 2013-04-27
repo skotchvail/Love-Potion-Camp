@@ -45,7 +45,7 @@ class Smoke extends Drawer {
 
   
   Smoke(Pixels p, Settings s) {
-    super(p, s, JAVA2D);
+    super(p, s, JAVA2D, DrawType.MirrorSides);
   }
 
   void setup()

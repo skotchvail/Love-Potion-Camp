@@ -9,7 +9,7 @@ class DroppingParticles extends Drawer {
   float scale = 0.5;
   
   DroppingParticles(Pixels p, Settings s) {
-    super(p, s, JAVA2D);
+    super(p, s, JAVA2D, DrawType.MirrorSides);
   }
   
   

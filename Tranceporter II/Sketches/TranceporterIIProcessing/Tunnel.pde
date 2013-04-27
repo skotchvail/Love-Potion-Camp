@@ -20,7 +20,7 @@ class Tunnel extends Drawer {
   int DEPTH;
 
   Tunnel(Pixels p, Settings s) {
-    super(p, s, P3D);
+    super(p, s, P3D, DrawType.MirrorSides);
   }
 
   String getName() { return "Tunnel"; }

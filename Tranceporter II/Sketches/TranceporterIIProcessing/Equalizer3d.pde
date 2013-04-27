@@ -11,7 +11,7 @@ class Equalizer3d extends Drawer
   int numRows = 4;
   
   Equalizer3d(Pixels p, Settings s) {
-    super(p, s, P3D);
+    super(p, s, P3D, DrawType.MirrorSides);
   }
  
   String getName()

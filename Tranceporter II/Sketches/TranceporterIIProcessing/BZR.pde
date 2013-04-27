@@ -11,7 +11,7 @@ class Bzr3 extends Drawer {
   int w, h;
   
   Bzr3(Pixels p, Settings s) {
-    super(p, s, JAVA2D);
+    super(p, s, JAVA2D, DrawType.MirrorSides);
     w = width;
     h = height;
     a = new float [ w ][ h ][2];  

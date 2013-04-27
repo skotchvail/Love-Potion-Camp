@@ -8,6 +8,7 @@
 
 /* Begin PBXFileReference section */
 		E00ECDCE15D0D8290099F4BF /* Smoke.pde */ = {isa = PBXFileReference; explicitFileType = sourcecode.java; path = Smoke.pde; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.java; };
+		E02C5673172C6B9C00FB5A13 /* DrawType.java */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.java; path = DrawType.java; sourceTree = "<group>"; };
 		E02F9B2815C37B19003EDFDA /* AlienBlob.pde */ = {isa = PBXFileReference; explicitFileType = sourcecode.java; lineEnding = 0; path = AlienBlob.pde; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.java; };
 		E02F9B4A15C37B19003EDFDA /* BeatDetect.pde */ = {isa = PBXFileReference; explicitFileType = sourcecode.java; path = BeatDetect.pde; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.java; };
 		E02F9B4B15C37B19003EDFDA /* BouncingBalls2D.pde */ = {isa = PBXFileReference; explicitFileType = sourcecode.java; path = BouncingBalls2D.pde; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.java; };
@@ -79,6 +80,7 @@
 				E02F9B4F15C37B19003EDFDA /* CircularArray.pde */,
 				E02F9B5015C37B19003EDFDA /* Console.pde */,
 				E02F9B5115C37B19003EDFDA /* Drawer.pde */,
+				E02C5673172C6B9C00FB5A13 /* DrawType.java */,
 				E078183215D868C3008D537F /* DroppingParticles.pde */,
 				E078182D15D6E00A008D537F /* Equalizer3d.pde */,
 				E0BD413215D8CA7000FFE2E7 /* EyeMotion.pde */,

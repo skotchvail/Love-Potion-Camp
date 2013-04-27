@@ -56,9 +56,10 @@ class Pixels {
     initTotalControl();
   }
   
-  void copyPixels(int[] pixels) {
+  void copyPixels(int[] pixels, DrawType drawType) {
     final int halfWidth = ledWidth / 2;
-    if (pixels.length == ledHeight * halfWidth) {
+
+    if (drawType == DrawType.MirrorSides) {
       // Image is mirrored
       for (int y = 0; y < ledHeight; y++) {
         final int baseY = y * halfWidth;
@@ -70,8 +71,23 @@ class Pixels {
         }
       }
     }
-    else {
+    else if (drawType == DrawType.RepeatingSides) {
+      // Image is repeated
+      for (int y = 0; y < ledHeight; y++) {
+        final int baseY = y * halfWidth;
+        final int baseYData = y * ledWidth;
+        for (int x = 0; x < halfWidth; x++) {
+          color pixel = pixels[baseY + x];
+          pixelData[baseYData + x] = pixel;
+          pixelData[baseYData + x + halfWidth] = pixel;
+        }
+      }
+    }
+    else if (drawType == DrawType.TwoSides) {
       arrayCopy(pixels, 0, pixelData, 0, pixels.length);
+    }
+    else {
+      assert false : "unknown drawType = " + drawType;
     }
   }
   

@@ -35,7 +35,7 @@ class EyeMotion extends Drawer {
   color glare2 = color(144, 187, 204, 50);
   
   EyeMotion(Pixels p, Settings s) {
-    super(p, s, JAVA2D);
+    super(p, s, JAVA2D, DrawType.MirrorSides);
   }
 
   String getName() { return "Eye Motion"; }

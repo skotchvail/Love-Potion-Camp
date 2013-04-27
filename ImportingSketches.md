@@ -45,7 +45,7 @@ break another sketch.
     class MyNewClass extends Drawer {
 
     MyNewClass(Pixels p, Settings s) {
-      super(p, s, JAVA2D);
+      super(p, s, JAVA2D, DrawType.MirrorSides);
     }
 
 4) Under the constructor and before setup(), add this method with the 

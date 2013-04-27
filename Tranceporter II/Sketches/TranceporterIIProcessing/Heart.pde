@@ -3,7 +3,7 @@ class Heart extends Drawer
 {
   
   Heart(Pixels p, Settings s) {
-    super(p, s, JAVA2D);
+    super(p, s, JAVA2D, DrawType.MirrorSides);
   }
 
   int numFrames = 18;  // The number of frames in the animation

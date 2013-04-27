@@ -3,12 +3,13 @@
 // configured for the LEDwall dimensions and can use any PGraphics method like loadPixels, set, beginShape etc.
 
 class Drawer {
+  
   Pixels p; //flat 2D version
+  DrawType drawType;
   boolean pressed;
   int pressX, pressY;
   PGraphics pg; //flat 2D version
   boolean mousePressed;
-  boolean mirrored;
   int width, height;
   int mouseX, mouseY;
   int touchX, touchY;
@@ -23,11 +24,11 @@ class Drawer {
   int MIN_SATURATION = 245;
   int MAX_AUDIO_COLOR_OFFSET = 300;
   
-  Drawer(Pixels px, Settings s, String renderer) {
+  Drawer(Pixels px, Settings s, String renderer, DrawType pixelDrawType) {
     p = px;
     pressed = false;
-    mirrored = true;
-    width = mirrored ? ledWidth/2 : ledWidth;
+    drawType = pixelDrawType;
+    width = (drawType == DrawType.TwoSides) ? ledWidth : ledWidth/2;
     height = ledHeight;
     pg = createGraphics(width, height, renderer);
     xTouches = new float[MAX_TOUCHES];
@@ -81,7 +82,7 @@ class Drawer {
     onsetOn4 = flash4;
     
     pg.loadPixels();
-    p.copyPixels(pg.pixels);
+    p.copyPixels(pg.pixels, drawType);
   }
   
   boolean isTrainingMode() {

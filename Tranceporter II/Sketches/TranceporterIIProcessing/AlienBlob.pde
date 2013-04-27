@@ -8,7 +8,7 @@ class AlienBlob extends Drawer {
   float dThresh, incr, xoffIncr, yoffIncr, zoffIncr, noiseMult;
   
   AlienBlob(Pixels p, Settings s) {
-    super(p, s, JAVA2D);
+    super(p, s, JAVA2D, DrawType.MirrorSides);
     
     // precalculate 1 period of the sine wave (360 degrees)
     sineTable = new float[360];
