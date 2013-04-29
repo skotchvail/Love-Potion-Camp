@@ -9,9 +9,7 @@ int LOC_BYTES = 1; // how many bytes to use to store the index at the beginning 
 int MAX_RGB = 255;
 
 class Pixels {
-  private color[] pixelData;
-  private color[] maskPixels;
-//  private color[] trainingPixelData;
+  private color[] pixelData, maskPixels;
   private OBJModel objModel;
   private PGraphics pg3D;
   
@@ -32,7 +30,6 @@ class Pixels {
   }
   
   void setup() {
-    
     int totalPixels = 0;
     maxPixelsPerStrand = 0;
     for (int i = 0; i < getNumStrands(); i++) {
@@ -91,41 +88,40 @@ class Pixels {
     }
   }
   
-  void updateMaskPixels() {
+  void forceUpdateMaskPixels() {
     maskPixels = null;
   }
-  
-  PGraphics drawFlat2DVersion() {
+
+  void updateMaskPixels() {
     color white = color(255);
-    
     if (maskPixels == null) {
       // Mask out any pixels that are not mapped
       maskPixels = new color[ledWidth * ledHeight];
       
       for (int whichStrand = 0; whichStrand < getNumStrands(); whichStrand++) {
-        final boolean portSide = whichStrand < getNumStrands() / 2;
-        int strandSize = getStrandSize(whichStrand);
-        int start = whichStrand * maxPixelsPerStrand;
-        for (int ordinal = 0; ordinal < strandSize; ordinal++) {
-          int index = ordinal + start;
-          int value = strandMap[index];
-          if (value >= 0) {
-            Point p = i2c(value);
-            if (portSide) {
-              maskPixels[p.y * ledWidth + p.x] = white;
-            }
-            else {
-              maskPixels[p.y * ledWidth + (ledWidth - p.x - 1)] = white;
-            }
+        final boolean portSide = isStrandPortSide(whichStrand);
+        for (Point point: pointsForStrand(whichStrand)) {
+          if (portSide) {
+            maskPixels[point.y * ledWidth + point.x] = white;
+          }
+          else {
+            maskPixels[point.y * ledWidth + (ledWidth - point.x - 1)] = white;
           }
         }
       }
     }
+  }
+    
+  PGraphics drawFlat2DVersion() {
+    boolean trainingMode = main.currentMode().isTrainingMode();
+    updateMaskPixels();
     
     PImage image = createImage(ledWidth, ledHeight, RGB);
     arrayCopy(pixelData, image.pixels, image.pixels.length);
     image.updatePixels();
-    image.mask(maskPixels);
+    if (!trainingMode) {
+      image.mask(maskPixels);
+    }
     
     // Render into offscreen buffer so that we can blur it, and then copy it
     // onto the display window
@@ -133,7 +129,9 @@ class Pixels {
     result.beginDraw();
     {
       result.image(image, 0, 0, result.width, result.height);
-      result.filter(BLUR, 2.5);
+      if (!trainingMode) {
+        result.filter(BLUR, 2.5);
+      }
     }
     result.endDraw();
     
@@ -148,7 +146,6 @@ class Pixels {
   void drawModel(PImage texture) {
     try {
       PVector v = null, vt = null, vn = null;
-      
       boolean calcLowest = false;
       // Lowest and highest values were discovered empirically using calcLowest
       final float lowestY = -1123.7638, highestY = 98.722984;
@@ -179,7 +176,7 @@ class Pixels {
                 if (v != null) {
                   
                   float textureU;
-                  if (true || portSide) {
+                  if (portSide) {
                     textureU = map(v.y, lowestY + diffY * factorLowU, highestY - diffY * factorHighU, 0.0, 0.5);
                   }
                   else {
@@ -237,7 +234,6 @@ class Pixels {
   }
   
   void drawMappedOntoBottle(PGraphics flatImage) {
-    
     pg3D.beginDraw();
     pg3D.noStroke();
     colorMode(RGB, 255);
@@ -410,29 +406,35 @@ class Pixels {
   int yOffsetter;
   int ordinalOffsetter;
   
-  int biggestX = -1;
-  int biggestY = -1;
+  int lowestX = Integer.MAX_VALUE;
+  int lowestY = Integer.MAX_VALUE;
+  int biggestX = Integer.MIN_VALUE;
+  int biggestY = Integer.MIN_VALUE;
   
   void ledSet(int whichStrand, int ordinal, int x, int y) {
     //    ledSetValue(whichStrand, ordinal, c2i(x, y+20));
-    biggestX = max(x + xOffsetter, biggestX);
-    biggestY = max(y + yOffsetter, biggestY);
-    ledSetValue(whichStrand, ordinal + ordinalOffsetter, c2i(x + xOffsetter, y + yOffsetter));
+    int newX = x + xOffsetter;
+    int newY = y + yOffsetter;
+    
+    lowestX = min(newX, lowestX);
+    lowestY = min(newY, lowestY);
+    biggestX = max(newX, biggestX);
+    biggestY = max(newY, biggestY);
+    ledSetValue(whichStrand, ordinal + ordinalOffsetter, c2i(newX, newY));
   }
   
-  
   int ledGetRawValue(int whichStrand, int ordinal, boolean useTrainingMode) {
-    assert(whichStrand < getNumStrands()) : "not this many strands";
-    assert(ordinal < getStrandSize(whichStrand)) : "whichStrand exceeds number of leds per strand";
+    assert whichStrand < getNumStrands() : "not this many strands";
+    assert ordinal < getStrandSize(whichStrand) : "ordinal exceeds number of leds per strand";
     int[] map = useTrainingMode?trainingStrandMap:strandMap;
     int index = (whichStrand * maxPixelsPerStrand) + ordinal;
+    assert index < map.length : "strand: " + whichStrand + " ordinal: " + ordinal + " goes beyond end of map (" + index + " >= " + map.length + ")";
     int value = map[index];
     return value;
   }
   
   Point ledGet(int whichStrand, int ordinal, boolean useTrainingMode) {
     int value = ledGetRawValue(whichStrand, ordinal, useTrainingMode);
-    
     if (value < 0) {
       return new Point(-1, -1);
     }
@@ -444,7 +446,6 @@ class Pixels {
   }
   
   void ledInterpolate() {
-    
     int available = 0;
     
     for (int strand = 0; strand < getNumStrands(); strand++) {
@@ -468,10 +469,6 @@ class Pixels {
             int writable = abs(b.y - a.y) + abs(b.x - a.x) - 1;
             //println ("writable(" + writable + ") = abs(" + b.y + " - " + a.y + ") + abs(" + b.x + " - " + a.x + ")");
             
-//            for (int k = lastIndexWithCoord + 1; k < i; k++) {
-//              if (strandMap[k] == TC_PIXEL_UNDEFINED)
-//                strandMap[k] = c2i(11, writable);
-//            }
             if (writable == available) {
               if (!(a.x != b.x && a.y != b.y)) {
                 
@@ -511,13 +508,11 @@ class Pixels {
     if (maxStrand < minStrand) {
       return;
     }
-    
-    
+
     assert(minStrand < getNumStrands());
     assert(maxStrand <= getNumStrands());
     
     for (int whichStrand = minStrand; whichStrand <= maxStrand; whichStrand++) {
-      
       int minX = 10000;
       int minY = 10000;
       int maxX = -10000;
@@ -556,11 +551,8 @@ class Pixels {
       }
       s.append("\n");
       println(s);
-      
-      
       println("min (" + minX + ", " + minY + ") max ("  + maxX + ", " + maxY + ")");
     }
-    
   }
   
   int getNumStrands() {
@@ -568,22 +560,39 @@ class Pixels {
     //overridden by LedMap
   }
   
-  
   int getStrandSize(int whichStrand) {
     return 0;
     //overridden by LedMap
+  }
+  
+  boolean isStrandPortSide(int whichStrand) {
+    return whichStrand < getNumStrands() / 2;
   }
   
   void mapAllLeds() {
     //overridden by LedMap
   }
   
-  
+  Point[] pointsForStrand(int whichStrand) {
+    assert whichStrand < getNumStrands();
+    int strandSize = getStrandSize(whichStrand);
+    ArrayList<Point> points = new ArrayList<Point>();
+    int start = whichStrand * maxPixelsPerStrand;
+    for (int ordinal = 0; ordinal < strandSize; ordinal++) {
+      int index = ordinal + start;
+      int value = strandMap[index];
+      if (value >= 0) {
+        Point p = i2c(value);
+        points.add(p);
+      }
+    }
+    return (Point[]) points.toArray(new Point[0]);
+  }
+
   TotalControlConcurrent totalControlConcurrent;
   boolean hardwareAlreadySetup = false;
   
-  void initTotalControl()
-  {
+  void initTotalControl() {
     int stealPixel = 0;
     int boundary = 0;
     //create the trainingStrandMap
@@ -619,9 +628,12 @@ class Pixels {
     
     ledInterpolate();
 //    ledMapDump(0, 2); //set which strands you want to dump
-    
-    println("biggestX:" + (biggestX + 1) + " biggestY:" + (biggestY + 1));
-    
+
+    println("" + lowestX + " <= x <= " + biggestX + ", " + lowestY + " <= y <= " + biggestY);
+    assert(lowestX == 0): "lowest LED should be X == 0";
+    assert(lowestY == 0): "lowest LED should be Y == 0";
+    assert((biggestX + 1) * 2 == ledWidth): "biggest LED should be X == " + ledWidth;
+    assert(biggestY + 1 == ledHeight): "biggest LED should be Y == " + ledHeight;
     
     if (!useTotalControlHardware) {
       return;
@@ -638,7 +650,6 @@ class Pixels {
         //useTotalControlHardware = false;
         //println("turning off Total Control because of error during initialization");
       }
-      
     }
   }
   
@@ -653,7 +664,6 @@ class Pixels {
     }
     
     int[] theStrandMap = main.currentMode().isTrainingMode()?trainingStrandMap:strandMap;
-    //color[] thePixelData = main.currentMode().isTrainingMode()?trainingPixelData:pixelData;
     color[] thePixelData = pixelData;
     //println("sending pixelData: " + pixelData.length + " strandMap: " + theStrandMap.length);
     if (runConcurrent) {
@@ -663,5 +673,6 @@ class Pixels {
       int status = writeOneFrame(thePixelData, theStrandMap);
     }
   }
+  
 }
 
