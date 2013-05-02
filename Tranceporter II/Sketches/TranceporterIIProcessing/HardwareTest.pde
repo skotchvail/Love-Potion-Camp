@@ -222,13 +222,18 @@ class HardwareTest extends Drawer {
     }
   }
   
-  void drawVerticalLineSweep() {
+  void drawLineSweep() {
     pg.noStroke();
     pg.fill(0, 100 * settings.getParam(settings.keySpeed));
     pg.rect(0, 0, width, height);
-    int counter = (frameCount) % width;
+    int counter = (frameCount) % (width + height);
     pg.fill(255, 128, 0);
-    pg.rect(counter, 0, 2, height + 1);
+    if (counter < width) {
+      pg.rect(counter, 0, 2, height + 1);
+    }
+    else {
+      pg.rect(0, counter - width, width + 1, 2);
+    }
   }
   
   void drawTrainingMode() {
@@ -286,7 +291,7 @@ class HardwareTest extends Drawer {
     }
     else if (mode == kModeVerticalLineSweep) {
       useCursorFinder = true;
-      drawVerticalLineSweep();
+      drawLineSweep();
     }
     else {
       assert mode == kModeLedTraining;
