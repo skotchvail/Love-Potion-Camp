@@ -84,8 +84,7 @@ class MainClass {
   int MAX_BEAT_LENGTH = 750, MAX_AUDIO_SENSITIVITY = 12;
   
   Drawer[][] modes;
-  int modeCol;
-  int modeRow;
+  ColumnRow whichEffect = new ColumnRow();
   float lastModeChangeTimeStamp;
   Point screenLocation = new Point();
   
@@ -107,7 +106,7 @@ class MainClass {
     modes = new Drawer[][] {
       //column 0
       {
-        new Tunnel(display, settings),             //0, 0
+        new Tunnel(display, settings),            //0, 0
         new Bzr3(display, settings),              //0, 1
         new Fire(display, settings),              //0, 2
         new Equalizer3d(display, settings),       //0, 3
@@ -122,22 +121,22 @@ class MainClass {
       },
       //column 2
       {
-        new HardwareTest(display, settings),      //2, 0
-        new Paint(display, settings),             //2, 1
-        new EyeMotion(display, settings),         //2, 2
-        new Heart(display, settings),             //2, 3
+        new Paint(display, settings),             //2, 0
+        new EyeMotion(display, settings),         //2, 1
+        new Heart(display, settings),             //2, 2
 
-      }
+      },
+      //column 3 (Hidden from GUI)
+      {
+        new HardwareTest(display, settings),      //3, 0
+      },
+      
     };
     settings.initOSC();
     pm.init(applet);
 
-    modeCol = prefs.getInt("modeCol", 2);
-    modeRow = prefs.getInt("modeRow", 0);
-    
-//    modeCol = 2;
-//    modeRow = 0;
-    
+    whichEffect.column = prefs.getInt("whichEffect.column", 2);
+    whichEffect.row = prefs.getInt("whichEffect.row", 0);
     
     // Audio features
     minim = new Minim(applet);
@@ -199,7 +198,7 @@ class MainClass {
     bd.update(audioIn.mix);
     for (int i=0; i<NUM_BANDS; i++)
       settings.setIsBeat(i, bd.isBeat("spectralFlux", i));
-    Drawer d = modes[modeCol][modeRow];
+    Drawer d = currentMode();
     
     if (settings.palette == null) {
       assert(settings.palette != null);
@@ -314,12 +313,16 @@ class MainClass {
       println("pressed " + int(key) + " " + keyCode);
     }
     
-    modes[modeCol][modeRow].keyPressed();
+    currentMode().keyPressed();
   }
   
   
+  Drawer getMode(ColumnRow coord) {
+    return modes[coord.column][coord.row];
+  }
+  
   Drawer currentMode() {
-    return modes[modeCol][modeRow];
+    return getMode(whichEffect);
   }
 
   void newPalette() {
@@ -337,7 +340,7 @@ class MainClass {
   void newEffectFirstTime() {
     settings.palette = new color[NUM_COLORS];
     pm.setPaletteType(settings.paletteType, NUM_COLORS, settings.palette);
-    Drawer mode = modes[modeCol][modeRow];
+    Drawer mode = currentMode();
     mode.setup();
     mouseX = mode.mouseX; //let the mode set the mouseX, Y in their setup and honor that.
     mouseY = mode.mouseY;
@@ -345,65 +348,59 @@ class MainClass {
     println("Initial mouseX:" + mouseX + " mouseY: " + mouseY);
   }
   
-  void findNextMode() {
+  ColumnRow findNextMode() {
     
-    int oldModeCol = modeCol;
-    int oldModeRow = modeRow;
-
-    for (int col = oldModeCol; col < modes.length; col++) {
+    // Scan from the current position to the end of the table
+    for (int col = whichEffect.column; col < modes.length - 1; col++) {
       for (int row = 0; row < modes[col].length; row++) {
-        if (col == oldModeCol && row <= oldModeRow)
+        if (col == whichEffect.column && row <= whichEffect.row)
           continue;
         
-        println("loop1 col" + col + " row" + row + " on:" + settings.isSketchOn(col, row));
+        if (settings.isSketchOn(col, row)) {
+          return new ColumnRow(col, row);
+        }
+      }
+    }
+    
+    // Scan from the start of the table to the current position
+    for (int col = 0; col <= whichEffect.column && col < modes.length - 1; col++) {
+      for (int row = 0; row < modes[col].length; row++) {
+        if (col == whichEffect.column && row >= whichEffect.row)
+          break;
         
         if (settings.isSketchOn(col, row)) {
-          modeCol = col;
-          modeRow = row;
-          return;
+          return new ColumnRow(col, row);
         }
       }
     }
     
-    if (modeCol == oldModeCol && modeRow == oldModeRow) {
-      
-      for (int col = 0; col <= oldModeCol; col++) {
-        for (int row = 0; row < modes[col].length; row++) {
-          if (col == oldModeCol && row >= oldModeRow)
-            break;
-          
-          println("loop2 col" + col + " row" + row + " on:" + settings.isSketchOn(col, row));
-          
-          if (settings.isSketchOn(col, row)) {
-            modeCol = col;
-            modeRow = row;
-            return;
-          }
-        }
-      }
-    }
+    return whichEffect.clone();
+  }
+
+  void newEffect() {
+    lastModeChangeTimeStamp = millis();    
+    ColumnRow coord = findNextMode();
+    switchToNewEffect(coord);
   }
   
-  void newEffect() {
-    lastModeChangeTimeStamp = millis();
-    
-    int oldModeCol = modeCol;
-    int oldModeRow = modeRow;
-    findNextMode();
-    prefs.putInt("modeCol", modeCol);
-    prefs.putInt("modeRow", modeRow);
+  void switchToNewEffect(ColumnRow newEffect) {
+    prefs.putInt("whichEffect.column", newEffect.column);
+    prefs.putInt("whichEffect.row", newEffect.row);
     needToFlushPrefs = true;
     
-    println("newEffect " + modes[oldModeCol][oldModeRow].getName() + " -> "+ modes[modeCol][modeRow].getName());
+    println("newEffect " + currentMode().getName() + " -> "+ getMode(newEffect).getName());
     
-    if (modeCol == oldModeCol && modeRow == oldModeRow) {
+    if (newEffect.column == whichEffect.column && newEffect.row == whichEffect.row) {
       return;
     }
     
+    ColumnRow oldEffect = whichEffect;
+    whichEffect = newEffect;
+    
     // Each mode tracks its own settings
-    Object newSettings = modes[modeCol][modeRow].getSettingsBackup();
+    Object newSettings = currentMode().getSettingsBackup();
     Object oldSettings = settings.switchSettings(newSettings);
-    modes[oldModeCol][oldModeRow].setSettingsBackup(oldSettings);
+    getMode(oldEffect).setSettingsBackup(oldSettings);
     
     if (newSettings == null) {
       newEffectFirstTime();
@@ -417,14 +414,20 @@ class MainClass {
     updateIPadGUI();
   }
   
+  void gotoHardwareTest()
+  {
+    ColumnRow hardwareTest = new ColumnRow(3, 0);
+    switchToNewEffect(hardwareTest);
+  }
+  
   void reset() {
-    modes[modeCol][modeRow].reset();
+    currentMode().reset();
     updateIPadGUI();
   }
   
   void touchXY(int touchNum, float x, float y) {
     if (frameCount % 10 == 0) println("Touch" + touchNum + " at " + nf(x, 1, 2) + " " + nf(y, 1, 2));
-    modes[modeCol][modeRow].setTouch(touchNum, x, y);
+    currentMode().setTouch(touchNum, x, y);
   }
   
   void mouseClicked() {
@@ -442,13 +445,13 @@ class MainClass {
   {
     settings.updateLabelForAutoChanger();
     
-    String name = modes[modeCol][modeRow].getName();
+    String name = currentMode().getName();
     settings.sendMessageToPad(settings.keyModeName, name);
     
-    name = modes[modeCol][modeRow].getCustom1Label();
+    name = currentMode().getCustom1Label();
     settings.sendMessageToPad(settings.keyCustom1Label, name);
     
-    name = modes[modeCol][modeRow].getCustom2Label();
+    name = currentMode().getCustom2Label();
     settings.sendMessageToPad(settings.keyCustom2Label, name);
     
     settings.sendMessageToPad(settings.keyPaletteName, pm.getPaletteDisplayName());
@@ -461,6 +464,25 @@ class MainClass {
     }
     
     settings.sendSketchesToPad();
+  }
+}
+
+class ColumnRow implements Cloneable {
+  int column;
+  int row;
+  
+  ColumnRow() {
+    column = 0;
+    row = 0;
+  }
+  
+  ColumnRow(int theColumn, int theRow) {
+    column = theColumn;
+    row = theRow;
+  }
+  
+  ColumnRow clone() {
+    return new ColumnRow(column, row);
   }
 }
 

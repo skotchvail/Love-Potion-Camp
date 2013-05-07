@@ -84,45 +84,50 @@ class Settings {
     setDefaultSettings();
     
     actions = new HashMap();
-    actions.put("/pageControl/multixy1/1",  new FunctionFloatFloat() {
-              public void function(float x, float y) {
-                main.touchXY(1, x, y);
-              }});
-    actions.put("/pageControl/multixy1/2",  new FunctionFloatFloat() {
-              public void function(float x, float y) {
-                main.touchXY(2, x, y);
-              }});
-    actions.put("/pageControl/multixy1/3",  new FunctionFloatFloat() {
-            public void function(float x, float y) {
-              main.touchXY(3, x, y);
-            }});
-    actions.put("/pageControl/multixy1/4",  new FunctionFloatFloat() {
-            public void function(float x, float y) {
-              main.touchXY(4, x, y);
-            }});
-    actions.put("/pageControl/multixy1/5",  new FunctionFloatFloat() {
-            public void function(float x, float y) {
-              main.touchXY(5, x, y);
-            }});
-    actions.put("/pageControl/newEffect",   new VoidFunction() {
-            public void function() {
-              main.newEffect();
-            }});
-    actions.put("/pageControl/paletteType", new VoidFunction() {
-            public void function() {
-              main.newPaletteType();
-            }});
-    actions.put("/pageControl/newPalette",  new VoidFunction() {
-            public void function() {
-              main.newPalette();
-            }});
-    actions.put("/pageControl/reset",       new VoidFunction() {
-            public void function() {
-              main.reset();
-            }});
-    actions.put("/pageAudio/instaFlash",    new VoidFunction() {
+    actions.put("/pageControl/multixy1/1",    new FunctionFloatFloat() {
+        public void function(float x, float y) {
+          main.touchXY(1, x, y);
+        }});
+    actions.put("/pageControl/multixy1/2",    new FunctionFloatFloat() {
+        public void function(float x, float y) {
+          main.touchXY(2, x, y);
+        }});
+    actions.put("/pageControl/multixy1/3",    new FunctionFloatFloat() {
+        public void function(float x, float y) {
+          main.touchXY(3, x, y);
+        }});
+    actions.put("/pageControl/multixy1/4",    new FunctionFloatFloat() {
+        public void function(float x, float y) {
+          main.touchXY(4, x, y);
+        }});
+    actions.put("/pageControl/multixy1/5",    new FunctionFloatFloat() {
+        public void function(float x, float y) {
+          main.touchXY(5, x, y);
+        }});
+    
+    actions.put("/pageControl/newEffect",     new VoidFunction() {
+        public void function() {
+          main.newEffect();
+        }});
+    actions.put("/pageControl/paletteType",   new VoidFunction() {
+        public void function() {
+          main.newPaletteType();
+        }});
+    actions.put("/pageControl/newPalette",    new VoidFunction() {
+        public void function() {
+          main.newPalette();
+        }});
+    actions.put("/pageControl/reset",         new VoidFunction() {
+        public void function() {
+          main.reset();
+        }});
+    actions.put("/pageAudio/instaFlash",      new VoidFunction() {
+        public void function() {
+          main.currentMode().manualFlash = true;
+        }});
+    actions.put("/progLed/gotoHardwareTest",  new VoidFunction() {
       public void function() {
-        main.currentMode().manualFlash = true;
+        main.gotoHardwareTest();
       }});
     
     
@@ -373,7 +378,7 @@ class Settings {
       else if (addr.startsWith("/sketches/col")) {
         handleSketchToggles(addr, msg.get(0).floatValue());
       }
-      else if (addr.equals("/pageControl") || addr.equals("/pageAudio") || addr.equals("/sketches") || addr.equals("/writer")) {
+      else if (addr.equals("/pageControl") || addr.equals("/pageAudio") || addr.equals("/sketches") || addr.equals("/writer") || addr.equals("/progLed")) {
         //just a page change, ignore
       }
       else {
