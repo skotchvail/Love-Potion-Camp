@@ -418,6 +418,8 @@ class MainClass {
   {
     ColumnRow hardwareTest = new ColumnRow(3, 0);
     switchToNewEffect(hardwareTest);
+    HardwareTest effect = (HardwareTest)currentMode();
+    effect.enteredByUserAction();
   }
   
   void reset() {

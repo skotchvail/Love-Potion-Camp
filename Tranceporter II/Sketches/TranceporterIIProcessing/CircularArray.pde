@@ -91,7 +91,8 @@ int getIndex(int ind, int length) { return (ind + length) % length; }
 double calcMean(double[] data, int startInd, int endInd) {
   double sum = 0;
   int diff = endInd - startInd + 1;
-  if (endInd < startInd ) diff = endInd+data.length - startInd + 1;
+  if (endInd < startInd)
+    diff = endInd+data.length - startInd + 1;
 
   for (int i=startInd; i<startInd+diff; i++) sum += data[getIndex(i, data.length)];
   return sum / diff;
@@ -100,8 +101,10 @@ double calcMean(double[] data, int startInd, int endInd) {
 double calcSD(double[] data, int startInd, int endInd, double mean) {
   float sum = 0;
   int diff = endInd - startInd + 1;
-  if (endInd < startInd ) diff = endInd+data.length - startInd + 1;
-  for (int i=startInd; i<startInd+diff; i++) sum += sq((float)(data[getIndex(i, data.length)] - mean));
+  if (endInd < startInd)
+    diff = endInd+data.length - startInd + 1;
+  for (int i=startInd; i<startInd+diff; i++)
+    sum += sq((float)(data[getIndex(i, data.length)] - mean));
   return sqrt(sum / diff);
 }
 

@@ -275,7 +275,7 @@ class Pixels {
     colorMode(RGB, 255);
     
     if (wasDrawing2D || wasDrawing3D || draw2dGrid || draw3dSimulation) {
-      background(color(12, 49, 81)); //dark blue color
+      background(color(12, 49, 81)); // Dark blue color
     }
     
     wasDrawing2D = draw2dGrid;
@@ -290,7 +290,7 @@ class Pixels {
       drawMappedOntoBottle(pg);
     }
     
-    // print led coordinate state to screen
+    // Print led coordinate state to screen
     int lineHeight = box2d.y * 2 + box2d.height + 10;
     String[] textLines = main.currentMode().getTextLines();
     if (textLines != null) {
@@ -300,7 +300,7 @@ class Pixels {
       }
     }
     
-    // print keymapping info to screen
+    // Print keymapping info to screen
     lineHeight = box2d.y * 2 + box2d.height + 10;
     ArrayList<String> keyMapLines = main.currentMode().getKeymapLines();
     if (keyMapLines != null) {

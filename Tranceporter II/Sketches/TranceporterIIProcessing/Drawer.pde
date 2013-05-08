@@ -100,6 +100,9 @@ class Drawer {
     lastMouseY = my;
   }
   
+  void handleOscEvent(OscMessage msg) {
+  }
+  
   void keyPressed() {
   }
   

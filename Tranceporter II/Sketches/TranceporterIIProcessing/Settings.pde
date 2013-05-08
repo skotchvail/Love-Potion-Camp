@@ -381,6 +381,9 @@ class Settings {
       else if (addr.equals("/pageControl") || addr.equals("/pageAudio") || addr.equals("/sketches") || addr.equals("/writer") || addr.equals("/progLed")) {
         //just a page change, ignore
       }
+      else if (addr.startsWith("/progLed/")) {
+        main.currentMode().handleOscEvent(msg);
+      }
       else {
         print("### Received an unhandled osc message: " + msg.addrPattern() + " " + msg.typetag() + " ");
         Object[] args = msg.arguments();
@@ -430,14 +433,14 @@ class Settings {
     println("value = " + value + " substring = " + substring);
     if (substring.indexOf("row") >= 0) {
       String[] temp = substring.split("row");
-      int col = Integer.parseInt( temp[0] );
-      int row = Integer.parseInt( temp[1] );
+      int col = Integer.parseInt(temp[0]);
+      int row = Integer.parseInt(temp[1]);
       
       setSketchOn(col, row, value > 0?true:false);
     }
     else {
       if (value == 1.0) {
-        int col = Integer.parseInt( substring );
+        int col = Integer.parseInt(substring);
         println("toggle col = " + col);
         toggleColumn(col);
         

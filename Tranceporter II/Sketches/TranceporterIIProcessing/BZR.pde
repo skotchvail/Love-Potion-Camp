@@ -58,9 +58,9 @@ class Bzr3 extends Drawer {
           c_b /= 9.0;    
           c_c /= 9.0;
           
-          a[x ][ y ][ q] = constrain ( c_a + c_a * ( c_b - c_c ), 0, 1);    
-          b[x ][ y ][ q] = constrain ( c_b + c_b * ( c_c - c_a ), 0, 1);    
-          c[x ][ y ][ q] = constrain ( c_c + c_c * ( c_a - c_b ), 0, 1);
+          a[x][y][q] = constrain (c_a + c_a * (c_b - c_c), 0, 1);
+          b[x][y][q] = constrain (c_b + c_b * (c_c - c_a), 0, 1);
+          c[x][y][q] = constrain (c_c + c_c * (c_a - c_b), 0, 1);
           
           //set(x, y, color(0.5, 0.7, a[x][y][q]));
         }  

@@ -23,14 +23,14 @@ class HardwareTest extends Drawer {
   float lastTimeSwitched;
   int movementPixelFast;
   int[] strandColor = {
-  color(255,  176,    33),    // strand 0
-  color(0,    0,    200),     // strand 1
-  color(0,    220,  0),       // strand 2
-  color(0,    200,  200),     // strand 3
-  color(200,  0,    0),       // strand 4
-  color(200,  0,    150),     // strand 5
-  color(200,  100,  0),       // strand 6
-  color(200,  55,   100),     // strand 7
+    color(255,  176,    33),    // strand 0
+    color(0,    0,    200),     // strand 1
+    color(0,    220,  0),       // strand 2
+    color(0,    200,  200),     // strand 3
+    color(200,  0,    0),       // strand 4
+    color(200,  0,    150),     // strand 5
+    color(200,  100,  0),       // strand 6
+    color(200,  55,   100),     // strand 7
   };
 
   int cursorStrand;
@@ -49,16 +49,123 @@ class HardwareTest extends Drawer {
   String getCustom1Label() { return "Strand/Checks";}
   String getCustom2Label() { return "Cursor Finder";}
   
+  void enteredByUserAction() {
+    settings.setParam(settings.keyCustom1, 0.0);
+  }
+  
+  final int programStrandHigher = 1;
+  final int programStrandLower = 2;
+  final int programOrdinalLower = 3;
+  final int programOrdinalHigher = 4;
+  final int programOrdinalMuchLower = 5;
+  final int programOrdinalMuchHigher = 6;
+  final int programCoordYHigher = 7;
+  final int programCoordYLower = 8;
+  final int programCoordXLower = 9;
+  final int programCoordXHigher = 10;
+  final int programLedOff = 11;
+  
+  void handleOscEvent(OscMessage msg) {
+    String addr = msg.addrPattern();
+    if (!addr.startsWith("/progLed/"))
+        return;
+    String[] list = split(addr, '/');
+    String action = list[2];
+    println("action = " + action);
+    
+    boolean pressed = (msg.get(0).floatValue() != 1.0);
+    if (pressed) {
+      int command = 0;
+      if (action.equals("strandHigher")) {
+        command = programStrandHigher;
+      }
+      else if (action.equals("strandLower")) {
+        command = programStrandLower;
+      }
+      else if (action.equals("ordinalLower")) {
+        command = programOrdinalLower;
+      }
+      else if (action.equals("ordinalMuchLower")) {
+        command = programOrdinalMuchLower;
+      }
+      else if (action.equals("ordinalHigher")) {
+        command = programOrdinalHigher;
+      }
+      else if (action.equals("ordinalMuchHigher")) {
+        command = programOrdinalMuchHigher;
+      }
+      else if (action.equals("coordYHigher")) {
+        command = programCoordYHigher;
+      }
+      else if (action.equals("coordYLower")) {
+        command = programCoordYLower;
+      }
+      else if (action.equals("coordXHigher")) {
+        command = programCoordXHigher;
+      }
+      else if (action.equals("coordXLower")) {
+        command = programCoordXLower;
+      }
+      
+      if (command != 0) {
+        doProgramAction(command);
+      }
+    }
+  }
+
   void keyPressed() {
+    int command = 0;
+    if (key == '>') {
+      command = programStrandHigher;
+    }
+    else if (key == '<') {
+      command = programStrandLower;
+    }
+    else if (key == '+') {
+      command = programOrdinalMuchHigher;
+    }
+    else if (key == '_') {
+      command = programOrdinalMuchLower;
+    }
+    else if (key == '=') {
+      command = programOrdinalHigher;
+    }
+    else if (key == '-') {
+      command = programOrdinalLower;
+    }
+    else if (key == 'x') {
+      command = programLedOff;
+    }
+    else if (key == CODED) {
+        if (keyCode == UP) {
+          command = programCoordYHigher;
+        }
+        else if (keyCode == DOWN) {
+          command = programCoordYLower;
+        }
+        else if (keyCode == LEFT) {
+          command = programCoordXLower;
+        }
+        else if (keyCode == RIGHT) {
+          command = programCoordXHigher;
+        }
+    }
+
+    if (command != 0) {
+      doProgramAction(command);
+    }
+  }
+    
+  void doProgramAction(int command) {
     
     int oldCursorOrdinal = cursorOrdinal;
     int oldCursorStrand = cursorStrand;
     
     // Which strand
-    if (key == '>') {
+    if (command == programStrandHigher) {
       cursorStrand++;
     }
-    else if (key == '<') {
+    else if (command == programStrandLower) {
       cursorStrand--;
     }
     if (cursorStrand < 0) {
@@ -67,61 +174,59 @@ class HardwareTest extends Drawer {
     cursorStrand %= p.getNumStrands();
     
     // Which LED on strand
-    if (key == '+') {
+    if (command == programOrdinalMuchHigher) {
       cursorOrdinal += 10;
     }
-    else if (key == '_') {
+    else if (command == programOrdinalMuchLower) {
       cursorOrdinal -= 10;
     }
-    else if (key == '=') {
+    else if (command == programOrdinalHigher) {
       cursorOrdinal++;
     }
-    else if (key == '-') {
+    else if (command == programOrdinalLower) {
       cursorOrdinal--;
     }
     
     int strandSize = p.getStrandSize(cursorStrand);
     
-    if (cursorOrdinal < strandSize ) {
+    if (cursorOrdinal < strandSize) {
       cursorOrdinal += strandSize;
     }
     assert cursorOrdinal >= 0;
     cursorOrdinal %= strandSize;
     
-    if (key == 'x') {
-      //p.ledRawSet(cursorStrand, cursorOrdinal, -999999, -999999);
+    if (command == programLedOff) {
+      p.ledRawSet(cursorStrand, cursorOrdinal, -999999, -999999);
     }
     
-    if (key == CODED) {
-      if (keyCode == UP || keyCode == DOWN || keyCode == LEFT || keyCode == RIGHT) {
-        int xChange = 0;
-        int yChange = 0;
-        if (keyCode == UP) {
-          yChange = -1;
+    int xChange = 0;
+    int yChange = 0;
+    if (command == programCoordYHigher) {
+      yChange = -1;
+    }
+    if (command == programCoordYLower) {
+      yChange = 1;
+    }
+    if (command == programCoordXLower) {
+      xChange = 1;
+    }
+    if (command == programCoordXHigher) {
+      xChange = -1;
+    }
+    
+    if (xChange != 0 || yChange != 0) {
+      // Find the x, y for the cursorOrdinal, and modify it
+      Point a = new Point(-1, -1);
+      int whichOrdinal = cursorOrdinal;
+      while (whichOrdinal >= 0) {
+        a = p.ledGet(cursorStrand, whichOrdinal, false);
+        if (a.x >= 0) {
+          break;
         }
-        if (keyCode == DOWN) {
-          yChange = 1;
-        }
-        if (keyCode == LEFT) {
-          xChange = 1;
-        }
-        if (keyCode == RIGHT) {
-          xChange = -1;
-        }
-
-        // Find the x, y for the cursorOrdinal, and modify it
-        Point a = new Point(-1, -1);
-        int whichOrdinal = cursorOrdinal;
-        while (whichOrdinal >= 0) {
-          a = p.ledGet(cursorStrand, whichOrdinal, false);
-          if (a.x >= 0) {
-            break;
-          }
-          whichOrdinal--;
-        };
-        
-        p.ledRawSet(cursorStrand, cursorOrdinal, a.x + xChange, a.y + yChange);
-      }
+        whichOrdinal--;
+      };
+      
+      p.ledRawSet(cursorStrand, cursorOrdinal, a.x + xChange, a.y + yChange);
     }
   }
   
