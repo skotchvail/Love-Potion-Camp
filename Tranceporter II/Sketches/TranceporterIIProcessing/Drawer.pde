@@ -43,9 +43,14 @@ class Drawer {
   String getCustom1Label() { return "Disabled";}
   String getCustom2Label() { return "Disabled";}
     
-  void setup() {}
-  void draw() {}
-  void reset() {}
+  void setup() {
+  }
+  
+  void draw() {
+  }
+  
+  void reset() {
+  }
   
   boolean onsetOn1 = false;
   boolean onsetOn2 = false;

@@ -153,8 +153,7 @@ class MainClass {
     //frameRate(SAMPLE_RATE/SAMPLE_SIZE);
     frameRate(FRAME_RATE);
     
-    settings.sendAllSettingsToPad();
-    updateIPadGUI();
+    settings.sendEntireGUIToIPad();
     
     println("Done setup");
   }
@@ -334,7 +333,7 @@ class MainClass {
   void newPaletteType() {
     pm.nextPaletteType();
     newPalette();
-    updateIPadGUI();
+    settings.sendMessageToPad(settings.keyPaletteName, pm.getPaletteDisplayName());
   }
   
   void newEffectFirstTime() {
@@ -410,21 +409,14 @@ class MainClass {
     }
 
     assert(settings.palette != null);
-    settings.sendAllSettingsToPad();
-    updateIPadGUI();
+    settings.sendControlValuesForThisSketchToIPad();
   }
   
-  void gotoHardwareTest()
-  {
+  void gotoHardwareTest() {
     ColumnRow hardwareTest = new ColumnRow(3, 0);
     switchToNewEffect(hardwareTest);
     HardwareTest effect = (HardwareTest)currentMode();
     effect.enteredByUserAction();
-  }
-  
-  void reset() {
-    currentMode().reset();
-    updateIPadGUI();
   }
   
   void touchXY(int touchNum, float x, float y) {
@@ -441,31 +433,6 @@ class MainClass {
   
   void debugPaletteType(String extra) {
     println(extra + " paletteType = " + settings.paletteType + " " + pm.getPaletteDisplayName() + (settings.palette == null?" (null)":" (not null)"));
-  }
-  
-  void updateIPadGUI()
-  {
-    settings.updateLabelForAutoChanger();
-    
-    String name = currentMode().getName();
-    settings.sendMessageToPad(settings.keyModeName, name);
-    
-    name = currentMode().getCustom1Label();
-    settings.sendMessageToPad(settings.keyCustom1Label, name);
-    
-    name = currentMode().getCustom2Label();
-    settings.sendMessageToPad(settings.keyCustom2Label, name);
-    
-    settings.sendMessageToPad(settings.keyPaletteName, pm.getPaletteDisplayName());
-    
-    for (int col = 0; col < modes.length; col++) {
-      for (int row = 0; row < modes[col].length; row++) {
-        name = modes[col][row].getName();
-        settings.sendMessageToPad(settings.sketchLabelName(col, row), name);
-      }
-    }
-    
-    settings.sendSketchesToPad();
   }
 }
 

@@ -6,8 +6,8 @@ class Settings {
   private boolean[][] whichModes = new boolean[3][5];
   private color[] palette;
   private boolean[] isBeat;
-  private HashMap paramMap;
-  private HashMap paramGlobalMap;
+  private HashMap paramMap; // Values of controls specific to any Sketch
+  private HashMap paramGlobalMap; // Values of controls that control all Sketches
   private HashMap actions;
   private int numBands;
   private OscP5 oscP5;
@@ -16,10 +16,10 @@ class Settings {
   List<String> keyNames;
   List<String> keyGlobalNames;
   
-  final String keySpeed="/pageControl/speed";
-  final String keyColorCyclingSpeed="/pageControl/cycling";
-  final String keyCustom1="/pageControl/custom1";
-  final String keyCustom2="/pageControl/custom2";
+  final String keySpeed = "/pageControl/speed";
+  final String keyColorCyclingSpeed = "/pageControl/cycling";
+  final String keyCustom1 = "/pageControl/custom1";
+  final String keyCustom2 = "/pageControl/custom2";
   final String keyBrightness="/pageControl/brightness";
   final String keyAudioSpeedChange1 = "/pageAudio/speedChange/1";
   final String keyAudioSpeedChange2 = "/pageAudio/speedChange/2";
@@ -119,7 +119,8 @@ class Settings {
         }});
     actions.put("/pageControl/reset",         new VoidFunction() {
         public void function() {
-          main.reset();
+          main.currentMode().reset();
+          sendControlValuesForThisSketchToIPad();
         }});
     actions.put("/pageAudio/instaFlash",      new VoidFunction() {
         public void function() {
@@ -379,7 +380,7 @@ class Settings {
         handleSketchToggles(addr, msg.get(0).floatValue());
       }
       else if (addr.equals("/pageControl") || addr.equals("/pageAudio") || addr.equals("/sketches") || addr.equals("/writer") || addr.equals("/progLed")) {
-        //just a page change, ignore
+        // Just a page change, ignore
       }
       else if (addr.startsWith("/progLed/")) {
         main.currentMode().handleOscEvent(msg);
@@ -399,13 +400,12 @@ class Settings {
     }
   }
 
-  private void detectedNewIPadAddress(String ipAddress)
-  {
+  private void detectedNewIPadAddress(String ipAddress) {
     println("detected new iPad address: " + iPadIP + " -> " + ipAddress);
-    iPadIP = ipAddress; //once the iPad contacts us, we can contact them, if the hardcoded IP address is wrong
+    iPadIP = ipAddress; // Once the iPad contacts us, we can contact them, if the hardcoded IP address is wrong
     oscReceiver = new NetAddress(iPadIP, 9000);
-    sendAllSettingsToPad();
-    main.updateIPadGUI();  }
+    sendEntireGUIToIPad();
+  }
   
   void sendMessageToPad(String key, String value) {
     OscMessage myMessage = new OscMessage(key);
@@ -418,15 +418,54 @@ class Settings {
     myMessage.add(value);
     oscP5.send(myMessage, oscReceiver);
   }
-
   
-  //TODO: these methods may need to go on another thread to speed things up
-  void sendAllSettingsToPad() {
+  /*
+   Send Sketch specific control values to the iPad.
+   Normally these need to be updated when we switch to a new Sketch, 
+   since each Sketch tracks its own set of values.
+   */
+  void sendControlValuesForThisSketchToIPad() {
+    // TODO: these methods may need to go on another thread to speed things up
     for (Object controlName : paramMap.keySet()) {
       float value = (Float)paramMap.get(controlName);
       sendMessageToPad((String)controlName, value);
     }
+
+    Drawer currentMode = main.currentMode();
+    
+    String name = currentMode.getName();
+    sendMessageToPad(keyModeName, name);
+
+    name = currentMode.getCustom1Label();
+    sendMessageToPad(keyCustom1Label, name);
+    
+    name = currentMode.getCustom2Label();
+    sendMessageToPad(keyCustom2Label, name);
+    
+    sendMessageToPad(keyPaletteName, main.pm.getPaletteDisplayName());
   }
+  
+  /*
+   When we first talk to iPad, initialize it with all
+   of the control labels and values. 
+   */
+  void sendEntireGUIToIPad() {
+    // TODO: these methods may need to go on another thread to speed things up
+    
+    Drawer[][] modes = main.modes;
+
+    for (int col = 0; col < modes.length; col++) {
+      for (int row = 0; row < modes[col].length; row++) {
+        String name = modes[col][row].getName();
+        sendMessageToPad(sketchLabelName(col, row), name);
+      }
+    }
+    
+    updateLabelForAutoChanger();
+    sendSketchGridTogglesToIPad();
+    sendControlValuesForThisSketchToIPad();
+  }
+  
   
   void handleSketchToggles(String addr, float value) {
     String substring = addr.substring("/sketches/col".length());
@@ -455,17 +494,17 @@ class Settings {
     for (int row = 0; row < numRows; row++) {
       setSketchOn(column, row, !on);
     }
-    sendSketchesToPad();
+    sendSketchGridTogglesToIPad();
   }
   
-  void sendSketchesToPad() {
+  void sendSketchGridTogglesToIPad() {
     int numCols = whichModes.length;
     int numRows = whichModes[0].length;
     
     for (int col = 0; col < numCols; col++) {
       for (int row = 0; row < numRows; row++) {
         sendMessageToPad(sketchName(col, row) + "/toggle", whichModes[col][row]?"1":"0");
-        println("sendSketchesToPad " + sketchName(col, row) + "/toggle");
+        println("sendSketchGridTogglesToIPad " + sketchName(col, row) + "/toggle");
       }
     }
   }
