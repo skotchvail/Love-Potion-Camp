@@ -51,6 +51,14 @@ class HardwareTest extends Drawer {
   
   void enteredByUserAction() {
     settings.setParam(settings.keyCustom1, 0.0);
+    sendToIPad();
+  }
+  
+  void sendToIPad() {
+    Point a = p.ledGet(cursorStrand, cursorOrdinal, false);
+    settings.sendMessageToIPad("/progLed/labelCoordinates", "" + a.x + ", " + a.y);
+    settings.sendMessageToIPad("/progLed/labelStrand", "Strand " + (cursorStrand + 1));
+    settings.sendMessageToIPad("/progLed/labelOrdinal", "LED " + cursorOrdinal);
   }
   
   final int programStrandHigher = 1;
@@ -228,6 +236,8 @@ class HardwareTest extends Drawer {
       
       p.ledRawSet(cursorStrand, cursorOrdinal, a.x + xChange, a.y + yChange);
     }
+    
+    sendToIPad();
   }
   
   String[] getTextLines() {

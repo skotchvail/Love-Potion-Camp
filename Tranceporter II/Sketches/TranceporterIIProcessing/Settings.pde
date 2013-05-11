@@ -309,7 +309,7 @@ class Settings {
 }
 
   private void enableControl(String controlKey, boolean enabled) {
-    sendMessageToPad(controlKey + "/visible", enabled?"1":"0");
+    sendMessageToIPad(controlKey + "/visible", enabled?"1":"0");
   }
   
   /* this comes in on a different thread than 
@@ -407,13 +407,13 @@ class Settings {
     sendEntireGUIToIPad();
   }
   
-  void sendMessageToPad(String key, String value) {
+  void sendMessageToIPad(String key, String value) {
     OscMessage myMessage = new OscMessage(key);
     myMessage.add(value);
     oscP5.send(myMessage, oscReceiver);
   }
 
-  void sendMessageToPad(String key, float value) {
+  void sendMessageToIPad(String key, float value) {
     OscMessage myMessage = new OscMessage(key);
     myMessage.add(value);
     oscP5.send(myMessage, oscReceiver);
@@ -428,21 +428,21 @@ class Settings {
     // TODO: these methods may need to go on another thread to speed things up
     for (Object controlName : paramMap.keySet()) {
       float value = (Float)paramMap.get(controlName);
-      sendMessageToPad((String)controlName, value);
+      sendMessageToIPad((String)controlName, value);
     }
 
     Drawer currentMode = main.currentMode();
     
     String name = currentMode.getName();
-    sendMessageToPad(keyModeName, name);
+    sendMessageToIPad(keyModeName, name);
 
     name = currentMode.getCustom1Label();
-    sendMessageToPad(keyCustom1Label, name);
+    sendMessageToIPad(keyCustom1Label, name);
     
     name = currentMode.getCustom2Label();
-    sendMessageToPad(keyCustom2Label, name);
+    sendMessageToIPad(keyCustom2Label, name);
     
-    sendMessageToPad(keyPaletteName, main.pm.getPaletteDisplayName());
+    sendMessageToIPad(keyPaletteName, main.pm.getPaletteDisplayName());
   }
   
   /*
@@ -457,7 +457,7 @@ class Settings {
     for (int col = 0; col < modes.length; col++) {
       for (int row = 0; row < modes[col].length; row++) {
         String name = modes[col][row].getName();
-        sendMessageToPad(sketchLabelName(col, row), name);
+        sendMessageToIPad(sketchLabelName(col, row), name);
       }
     }
     
@@ -503,7 +503,7 @@ class Settings {
     
     for (int col = 0; col < numCols; col++) {
       for (int row = 0; row < numRows; row++) {
-        sendMessageToPad(sketchName(col, row) + "/toggle", whichModes[col][row]?"1":"0");
+        sendMessageToIPad(sketchName(col, row) + "/toggle", whichModes[col][row]?"1":"0");
         println("sendSketchGridTogglesToIPad " + sketchName(col, row) + "/toggle");
       }
     }
@@ -588,8 +588,8 @@ class Settings {
     else if (seconds >= 60) {
       label = "AutoChange " + (seconds/60) + "m " + (seconds % 60) +  "s";
     }
-    sendMessageToPad(keyGlobalAutoChangeSpeedLabel, label);
-    sendMessageToPad(keyGlobalAutoChangeSpeed, getParam(keyGlobalAutoChangeSpeed));
+    sendMessageToIPad(keyGlobalAutoChangeSpeedLabel, label);
+    sendMessageToIPad(keyGlobalAutoChangeSpeed, getParam(keyGlobalAutoChangeSpeed));
   }
 
 }

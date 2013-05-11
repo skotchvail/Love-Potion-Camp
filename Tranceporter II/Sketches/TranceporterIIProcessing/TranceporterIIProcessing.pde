@@ -333,7 +333,7 @@ class MainClass {
   void newPaletteType() {
     pm.nextPaletteType();
     newPalette();
-    settings.sendMessageToPad(settings.keyPaletteName, pm.getPaletteDisplayName());
+    settings.sendMessageToIPad(settings.keyPaletteName, pm.getPaletteDisplayName());
   }
   
   void newEffectFirstTime() {
