@@ -13,7 +13,7 @@ class Pixels {
   private OBJModel objModel;
   private PGraphics pg3D;
   
-  private Rectangle box2d, box3d;
+  private Rectangle box2d, box3d, boxLEDs;
   
   int maxPixelsPerStrand;
   final boolean kUseBitBang = true;
@@ -21,6 +21,23 @@ class Pixels {
   private int[] trainingStrandMap;
   final boolean runConcurrent = true;
   private float rotation = 0.8;
+  final int ledSide = 15;
+  final int ledBetween = 2;
+  
+  final int[][] ledStrand = {
+  {-1, -1,  0,  1,  2,  3,  4},
+  {10,  9,  8,  7, -1,  6,  5},
+  {11, 12, 13, 14, 15, 16, 17},
+  {24, 23, 22, 21, 20, 19, 18},
+  {25, 26, 27, 28, 29, 30, 31},
+  {32, 33, 34, 35, 36, 37, 38},
+  {45, 44, 43, 42, 41, 40, 39},
+  {46, 47, 48, -1, 49, 50, 51},
+  };
+  
+  final int ledRows = ledStrand.length;
+  final int ledCols = ledStrand[0].length;
+  
   
   Pixels(PApplet p) {
     objModel = new OBJModel(p, "tranceporter.obj");
@@ -45,6 +62,10 @@ class Pixels {
     
     box2d = new Rectangle(10, 10, ledWidth * screenPixelSize, ledHeight * screenPixelSize);
     box3d = new Rectangle(box2d.x * 2 + box2d.width, box2d.y, 360, 180);
+    boxLEDs = new Rectangle(box3d.x,
+                            box3d.y * 2 + box3d.height,
+                            ledCols * ledSide + (ledCols + 1) * ledBetween,
+                            ledRows * ledSide + (ledRows + 1) * ledBetween);
     pg3D = createGraphics(box3d.width, box3d.height, P3D);
     
     strandMap = new int[getNumStrands() * maxPixelsPerStrand];
@@ -276,7 +297,32 @@ class Pixels {
     
     if (wasDrawing2D || wasDrawing3D || draw2dGrid || draw3dSimulation) {
       background(color(12, 49, 81)); // Dark blue color
+      drawInstructions();
     }
+    
+    if (true) {
+      noStroke();
+      fill(27, 114, 188);
+      rect(boxLEDs.x, boxLEDs.y, boxLEDs.width, boxLEDs.height);
+      
+      fill(255);
+      int whichStrand = 0;
+      final int ledInterval = ledSide + ledBetween;
+      for (int x = 0; x < ledCols; x++) {
+        for (int y = 0; y < ledRows; y++) {
+          int whichOridinal = ledStrand[y][x];
+          int ledColor = color(0);
+          if (whichOridinal > 0) {
+            Point coordinate = ledGet(whichStrand, whichOridinal);
+            ledColor = pixelData[coordinate.y * ledWidth + coordinate.x];
+          }
+          fill(ledColor);
+          rect(boxLEDs.x + (x * ledInterval) + ledBetween, boxLEDs.y + (y * ledInterval) + ledBetween, ledSide, ledSide);
+        }
+      }
+      fill(255);
+    }
+    
     
     wasDrawing2D = draw2dGrid;
     wasDrawing3D = draw3dSimulation;
@@ -289,7 +335,12 @@ class Pixels {
     if (draw3dSimulation && pg3D != null) {
       drawMappedOntoBottle(pg);
     }
+    drawInstructions();
     
+    fill(255);
+  }
+  
+  void drawInstructions() {
     // Print led coordinate state to screen
     int lineHeight = box2d.y * 2 + box2d.height + 10;
     String[] textLines = main.currentMode().getTextLines();
@@ -314,8 +365,6 @@ class Pixels {
         lineHeight += 20;
       }
     }
-    
-    fill(255);
   }
   
   Rectangle getBox2D() {return box2d;}

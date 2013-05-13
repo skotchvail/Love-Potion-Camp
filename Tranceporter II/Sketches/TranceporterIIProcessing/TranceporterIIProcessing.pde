@@ -211,7 +211,6 @@ class MainClass {
       d.setMouseCoords(mouseX, mouseY);
     }
     
-    //  sendParamsOSC();
     d.update();
     display.drawToScreen();
     display.drawToLeds();
