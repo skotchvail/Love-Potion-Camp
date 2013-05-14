@@ -10,15 +10,15 @@ import java.util.prefs.Preferences;
 
 //ADJUSTABLE PARAMS
 String iPadIP = "10.0.1.8";
-int ledWidth = 92 * 2; // Both sides
-int ledHeight = 58;
-int screenPixelSize = 3;
-int screenWidth = 950;
-int screenHeight = 400;
+final int ledWidth = 92 * 2; // Both sides
+final int ledHeight = 58;
+final int screenPixelSize = 3;
+final int screenWidth = 950;
+final int screenHeight = 400;
 
-int SAMPLE_RATE = 44100;
-int SAMPLE_SIZE = 1024;
-int FRAME_RATE = 24;
+final int SAMPLE_RATE = 44100;
+final int SAMPLE_SIZE = 1024;
+final int FRAME_RATE = 24;
 
 
 boolean draw2dGrid;

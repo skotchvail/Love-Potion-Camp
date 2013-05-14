@@ -5,23 +5,16 @@
 class HardwareTest extends Drawer {
   
   // Processing doesn't allow enums yet (sigh)
-  final int kModeCheckerboard = 4;
-  final float kModeCheckerboardLevel = 0.4;
+  final int kModeLowPower = 0;
+  final int kModeLedTraining = 1;
+  final int kModeCheckerboard = 2;
+  final int kModeEachLedPanel = 3;
+  final int kModeVerticalLineSweep = 4;
   
-  final int kModeLowPower = 3;
-  final float kModeLowPowerLevel = 0.3;
-  
-  final int kModeEachLedPanel = 2;
-  final float kModeEachLedPanelLevel = 0.2;
-  
-  final int kModeVerticalLineSweep = 1;
-  final float kModeVerticalLineSweepLevel = 0.1;
-
-  final int kModeLedTraining = 0;
-  final float kModeLedTrainingLevel = 0.0;
-  
+  int drawMode = kModeLowPower;
   float lastTimeSwitched;
   int movementPixelFast;
+  
   int[] strandColor = {
     color(255,  176,    33),    // strand 0
     color(0,    0,    200),     // strand 1
@@ -50,7 +43,7 @@ class HardwareTest extends Drawer {
   String getCustom2Label() { return "Cursor Finder";}
   
   void enteredByUserAction() {
-    settings.setParam(settings.keyCustom1, 0.0);
+    drawMode = kModeVerticalLineSweep;
     sendToIPad();
   }
   
@@ -59,6 +52,10 @@ class HardwareTest extends Drawer {
     settings.sendMessageToIPad("/progLed/labelCoordinates", "" + a.x + ", " + a.y);
     settings.sendMessageToIPad("/progLed/labelStrand", "Strand " + (cursorStrand + 1));
     settings.sendMessageToIPad("/progLed/labelOrdinal", "LED " + cursorOrdinal);
+    for (int i = 0; i < 5; i++) {
+      settings.sendMessageToIPad("/progLed/drawModeToggle/1/" + (i+1), (drawMode == i)?1:0);
+    }
+    
   }
   
   final int programStrandHigher = 1;
@@ -81,42 +78,50 @@ class HardwareTest extends Drawer {
     String action = list[2];
     println("action = " + action);
     
-    boolean pressed = (msg.get(0).floatValue() != 1.0);
-    if (pressed) {
-      int command = 0;
-      if (action.equals("strandHigher")) {
-        command = programStrandHigher;
+    if (action.equals("drawModeToggle")) {
+      boolean pressed = (msg.get(0).floatValue() == 1.0);
+      if (pressed) {
+        drawMode = Integer.parseInt(list[4]) - 1;
+        sendToIPad();
       }
-      else if (action.equals("strandLower")) {
-        command = programStrandLower;
-      }
-      else if (action.equals("ordinalLower")) {
-        command = programOrdinalLower;
-      }
-      else if (action.equals("ordinalMuchLower")) {
-        command = programOrdinalMuchLower;
-      }
-      else if (action.equals("ordinalHigher")) {
-        command = programOrdinalHigher;
-      }
-      else if (action.equals("ordinalMuchHigher")) {
-        command = programOrdinalMuchHigher;
-      }
-      else if (action.equals("coordYHigher")) {
-        command = programCoordYHigher;
-      }
-      else if (action.equals("coordYLower")) {
-        command = programCoordYLower;
-      }
-      else if (action.equals("coordXHigher")) {
-        command = programCoordXHigher;
-      }
-      else if (action.equals("coordXLower")) {
-        command = programCoordXLower;
-      }
-      
-      if (command != 0) {
-        doProgramAction(command);
+    }
+    else {
+      boolean pressed = (msg.get(0).floatValue() != 1.0);
+      if (pressed) {
+        int command = 0;
+        if (action.equals("strandHigher")) {
+          command = programStrandHigher;
+        }
+        else if (action.equals("strandLower")) {
+          command = programStrandLower;
+        }
+        else if (action.equals("ordinalLower")) {
+          command = programOrdinalLower;
+        }
+        else if (action.equals("ordinalMuchLower")) {
+          command = programOrdinalMuchLower;
+        }
+        else if (action.equals("ordinalHigher")) {
+          command = programOrdinalHigher;
+        }
+        else if (action.equals("ordinalMuchHigher")) {
+          command = programOrdinalMuchHigher;
+        }
+        else if (action.equals("coordYHigher")) {
+          command = programCoordYHigher;
+        }
+        else if (action.equals("coordYLower")) {
+          command = programCoordYLower;
+        }
+        else if (action.equals("coordXHigher")) {
+          command = programCoordXHigher;
+        }
+        else if (action.equals("coordXLower")) {
+          command = programCoordXLower;
+        }
+        if (command != 0) {
+          doProgramAction(command);
+        }
       }
     }
   }
@@ -261,21 +266,8 @@ class HardwareTest extends Drawer {
     return myStrings;
   }
   
-  int modeFromSlider() {
-    float slider = settings.getParam(settings.keyCustom1);
-    if (slider >= kModeCheckerboardLevel)
-      return kModeCheckerboard;
-    if (slider >= kModeLowPowerLevel)
-      return kModeLowPower;
-    if (slider >= kModeEachLedPanelLevel)
-      return kModeEachLedPanel;
-    if (slider >= kModeVerticalLineSweepLevel)
-      return kModeVerticalLineSweep;
-    return kModeLedTraining;
-  }
-  
   boolean isTrainingMode() {
-    return (modeFromSlider() == kModeLedTraining);
+    return (drawMode == kModeLedTraining);
   }
 
   void drawCheckerboard() {
@@ -283,7 +275,7 @@ class HardwareTest extends Drawer {
     pg.background(color(0, 0, 0));
 
     float slider = settings.getParam(settings.keyCustom1);
-    int unit = (int)map(slider, kModeCheckerboardLevel, 1.0, 10, 2);
+    int unit = (int)map(slider, 0.0, 1.0, 10, 2);
     int movementPixelSlow = movementPixelFast / 10;
     
     for (int x = 0; x < pg.width; x++) {
@@ -391,7 +383,7 @@ class HardwareTest extends Drawer {
     }
     
     boolean useCursorFinder = false;
-    int mode = modeFromSlider();
+    int mode = drawMode;
     if (mode == kModeCheckerboard) {
       useCursorFinder = true;
       drawCheckerboard();
@@ -409,7 +401,7 @@ class HardwareTest extends Drawer {
       drawLineSweep();
     }
     else {
-      assert mode == kModeLedTraining;
+      assert mode == kModeLedTraining : "unknown training mode " + mode;
       useCursorFinder = true;
       drawTrainingMode();
     }
