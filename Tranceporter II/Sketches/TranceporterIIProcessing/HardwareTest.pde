@@ -218,13 +218,13 @@ class HardwareTest extends Drawer {
       yChange = -1;
     }
     if (command == programCoordYLower) {
-      yChange = 1;
+      yChange = +1;
     }
     if (command == programCoordXLower) {
-      xChange = 1;
+      xChange = -1;
     }
     if (command == programCoordXHigher) {
-      xChange = -1;
+      xChange = +1;
     }
     
     if (xChange != 0 || yChange != 0) {
@@ -238,8 +238,12 @@ class HardwareTest extends Drawer {
         }
         whichOrdinal--;
       };
-      
-      p.ledRawSet(cursorStrand, cursorOrdinal, a.x + xChange, a.y + yChange);
+      if (a.x < 0) {
+        p.ledRawSet(cursorStrand, cursorOrdinal, 0, 0);
+      }
+      else {
+        p.ledRawSet(cursorStrand, cursorOrdinal, a.x + xChange, a.y + yChange);
+      }
     }
     
     sendToIPad();

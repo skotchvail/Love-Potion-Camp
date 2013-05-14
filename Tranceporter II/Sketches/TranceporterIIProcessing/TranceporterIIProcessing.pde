@@ -82,6 +82,7 @@ class MainClass {
   FFT fft;
   Minim minim;
   int MAX_BEAT_LENGTH = 750, MAX_AUDIO_SENSITIVITY = 12;
+  HardwareTest hardwareTestEffect;
   
   Drawer[][] modes;
   ColumnRow whichEffect = new ColumnRow();
@@ -102,6 +103,8 @@ class MainClass {
     
     display = new LedMap(applet);
     display.setup();
+    
+    hardwareTestEffect =  new HardwareTest(display, settings);
     
     modes = new Drawer[][] {
       //column 0
@@ -128,7 +131,7 @@ class MainClass {
       },
       //column 3 (Hidden from GUI)
       {
-        new HardwareTest(display, settings),      //3, 0
+        hardwareTestEffect,      //3, 0
       },
       
     };
@@ -414,8 +417,8 @@ class MainClass {
   void gotoHardwareTest() {
     ColumnRow hardwareTest = new ColumnRow(3, 0);
     switchToNewEffect(hardwareTest);
-    HardwareTest effect = (HardwareTest)currentMode();
-    effect.enteredByUserAction();
+    assert(currentMode() == hardwareTestEffect);
+    hardwareTestEffect.enteredByUserAction();
   }
   
   void touchXY(int touchNum, float x, float y) {

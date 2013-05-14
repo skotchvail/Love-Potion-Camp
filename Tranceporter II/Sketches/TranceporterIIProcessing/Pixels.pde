@@ -306,15 +306,17 @@ class Pixels {
       rect(boxLEDs.x, boxLEDs.y, boxLEDs.width, boxLEDs.height);
       
       fill(255);
-      int whichStrand = 0;
+      int whichStrand = main.hardwareTestEffect.cursorStrand;
       final int ledInterval = ledSide + ledBetween;
       for (int x = 0; x < ledCols; x++) {
         for (int y = 0; y < ledRows; y++) {
           int whichOridinal = ledStrand[y][x];
           int ledColor = color(0);
-          if (whichOridinal > 0) {
+          if (whichOridinal >= 0) {
             Point coordinate = ledGet(whichStrand, whichOridinal);
-            ledColor = pixelData[coordinate.y * ledWidth + coordinate.x];
+            if (coordinate.x >= 0) {
+              ledColor = pixelData[coordinate.y * ledWidth + coordinate.x];
+            }
           }
           fill(ledColor);
           rect(boxLEDs.x + (x * ledInterval) + ledBetween, boxLEDs.y + (y * ledInterval) + ledBetween, ledSide, ledSide);
