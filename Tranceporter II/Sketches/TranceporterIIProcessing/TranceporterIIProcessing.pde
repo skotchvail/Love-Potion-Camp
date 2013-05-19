@@ -66,6 +66,7 @@ void keyPressed() {
 class MainClass {
   
   Pixels display;
+  LedMap ledMap;
   Console console;
 
   int NUM_COLORS = 512;
@@ -101,7 +102,8 @@ class MainClass {
       println("Error redirecting stdout/stderr: " + e);
     }
     
-    display = new LedMap(applet);
+    ledMap = new LedMap();
+    display = new Pixels(applet);
     display.setup();
     
     hardwareTestEffect =  new HardwareTest(display, settings);
@@ -216,7 +218,7 @@ class MainClass {
     
     d.update();
     display.drawToScreen();
-    display.drawToLeds();
+    ledMap.drawToLeds();
     
     if (settings.millisBetweenAutoChanges() < millis() - lastModeChangeTimeStamp) {
       newEffect();

@@ -87,7 +87,7 @@ class Drawer {
     onsetOn4 = flash4;
     
     pg.loadPixels();
-    p.copyPixels(pg.pixels, drawType);
+    main.ledMap.copyPixels(pg.pixels, drawType);
   }
   
   boolean isTrainingMode() {

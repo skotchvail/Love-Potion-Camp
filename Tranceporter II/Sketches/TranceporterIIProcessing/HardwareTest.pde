@@ -48,7 +48,7 @@ class HardwareTest extends Drawer {
   }
   
   void sendToIPad() {
-    Point a = p.ledGet(cursorStrand, cursorOrdinal, false);
+    Point a = main.ledMap.ledGet(cursorStrand, cursorOrdinal, false);
     settings.sendMessageToIPad("/progLed/labelCoordinates", "" + a.x + ", " + a.y);
     settings.sendMessageToIPad("/progLed/labelStrand", "Strand " + (cursorStrand + 1));
     settings.sendMessageToIPad("/progLed/labelOrdinal", "LED " + cursorOrdinal);
@@ -182,9 +182,9 @@ class HardwareTest extends Drawer {
       cursorStrand--;
     }
     if (cursorStrand < 0) {
-      cursorStrand += p.getNumStrands();
+      cursorStrand += main.ledMap.getNumStrands();
     }
-    cursorStrand %= p.getNumStrands();
+    cursorStrand %= main.ledMap.getNumStrands();
     
     // Which LED on strand
     if (command == programOrdinalMuchHigher) {
@@ -200,7 +200,7 @@ class HardwareTest extends Drawer {
       cursorOrdinal--;
     }
     
-    int strandSize = p.getStrandSize(cursorStrand);
+    int strandSize = main.ledMap.getStrandSize(cursorStrand);
     
     if (cursorOrdinal < strandSize) {
       cursorOrdinal += strandSize;
@@ -209,7 +209,7 @@ class HardwareTest extends Drawer {
     cursorOrdinal %= strandSize;
     
     if (command == programLedOff) {
-      p.ledRawSet(cursorStrand, cursorOrdinal, -999999, -999999);
+      main.ledMap.ledRawSet(cursorStrand, cursorOrdinal, -999999, -999999);
     }
     
     int xChange = 0;
@@ -232,17 +232,17 @@ class HardwareTest extends Drawer {
       Point a = new Point(-1, -1);
       int whichOrdinal = cursorOrdinal;
       while (whichOrdinal >= 0) {
-        a = p.ledGet(cursorStrand, whichOrdinal, false);
+        a = main.ledMap.ledGet(cursorStrand, whichOrdinal, false);
         if (a.x >= 0) {
           break;
         }
         whichOrdinal--;
       };
       if (a.x < 0) {
-        p.ledRawSet(cursorStrand, cursorOrdinal, 0, 0);
+        main.ledMap.ledRawSet(cursorStrand, cursorOrdinal, 0, 0);
       }
       else {
-        p.ledRawSet(cursorStrand, cursorOrdinal, a.x + xChange, a.y + yChange);
+        main.ledMap.ledRawSet(cursorStrand, cursorOrdinal, a.x + xChange, a.y + yChange);
       }
     }
     
@@ -251,7 +251,7 @@ class HardwareTest extends Drawer {
   
   String[] getTextLines() {
     
-    Point a = p.ledGet(cursorStrand, cursorOrdinal, false);
+    Point a = main.ledMap.ledGet(cursorStrand, cursorOrdinal, false);
     
     return new String[] {
       "cursorStrand: " + (cursorStrand + 1),
@@ -322,10 +322,10 @@ class HardwareTest extends Drawer {
     pg.fill(0, 15);
     pg.rect(0, 0, width, height);
     float factor = map(settings.getParam(settings.keySpeed), 0.0, 1.0, 0.02, 0.3);
-    int whichStrand = (int)(frameCount * factor) % p.getNumStrands();
+    int whichStrand = (int)(frameCount * factor) % main.ledMap.getNumStrands();
     color theColor = colors[whichStrand % colors.length];
-    final boolean portSide = p.isStrandPortSide(whichStrand);
-    for (Point point: p.pointsForStrand(whichStrand)) {
+    final boolean portSide = main.ledMap.isStrandPortSide(whichStrand);
+    for (Point point: main.ledMap.pointsForStrand(whichStrand)) {
       if (!portSide) {
         point.x = width - point.x;
       }
@@ -351,10 +351,10 @@ class HardwareTest extends Drawer {
     // Draw Each LED a separate color
     pg.background(color(220, 238, 191));
     
-    for (int whichStrand = 0; whichStrand < p.getNumStrands(); whichStrand++) {
-      int strandSize = p.getStrandSize(whichStrand);
+    for (int whichStrand = 0; whichStrand < main.ledMap.getNumStrands(); whichStrand++) {
+      int strandSize = main.ledMap.getStrandSize(whichStrand);
       for (int ordinal = 0; ordinal < strandSize; ordinal++) {
-        Point a = p.ledGet(whichStrand, ordinal);
+        Point a = main.ledMap.ledGet(whichStrand, ordinal);
         if (a.x < 0 || a.y < 0)
           continue;
         
@@ -419,10 +419,10 @@ class HardwareTest extends Drawer {
           if (i < 0) {
             continue;
           }
-          if (i >= p.getStrandSize(cursorStrand)) {
+          if (i >= main.ledMap.getStrandSize(cursorStrand)) {
             continue;
           }
-          Point a = p.ledGet(cursorStrand, i);
+          Point a = main.ledMap.ledGet(cursorStrand, i);
           color c = color(255, 255, 0);
           
           if (a.x >= 0 && a.y >= 0) {
@@ -438,7 +438,7 @@ class HardwareTest extends Drawer {
         factor = 2.0 - factor;
       }
       color c = color(0 * factor, 0 * factor, 255 * factor);
-      Point a = p.ledGet(cursorStrand, cursorOrdinal);
+      Point a = main.ledMap.ledGet(cursorStrand, cursorOrdinal);
       if (a.x >= 0 && a.y >= 0) {
         pg.set(a.x, a.y, c);
       }
