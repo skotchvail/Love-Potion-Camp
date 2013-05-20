@@ -46,6 +46,198 @@ class LedMap {
     trainingStrandMap = new int[getNumStrands() * maxPixelsPerStrand];
     
     initTotalControl();
+
+    if (false) {
+      writeOneStrand(3);
+      readOneStrand(3);
+    }
+    else {
+      for (int i = 0; i < getNumStrands(); i++) {
+        writeOneStrand(i);
+      }
+//      for (int i = 0; i < getNumStrands(); i++) {
+//        readOneStrand(i);
+//      }
+    }
+  }
+
+  /*
+   Data Format csv:
+   'Offsetter', ordinal, 0, x, y (delta to previous offsetters)
+   'set',       ordinal, 0, x, y
+   'missing',   ordinalStart, ordinalEnd
+   'unprogrammed', ordinalStart, ordinalEnd (not sure we need this)
+   */
+  
+  String fileNameForStrand(int whichStrand) {
+    return "data/strand" + (whichStrand + 1) + ".csv";
+  }
+  
+  static final String kCommandOffsetter = "offsetter";
+  static final String kCommandMap = "map";
+  static final String kCommandMissing = "missing";
+  static final String kCommandUnprogrammed = "unprogrammed";
+  
+  static final String kColumnCommand = "command";
+  static final String kColumnOrdinal = "ordinalStart";
+  static final String kColumnOrdinalEnd = "ordinalEnd";
+  static final String kColumnCoordX = "x";
+  static final String kColumnCoordY = "y";
+  
+  // TODO: not needed after 2.0b9
+  static final int STRING = 0;
+  static final int INT = 1;
+  static final int LONG = 2;
+  static final int FLOAT = 3;
+  static final int DOUBLE = 4;
+  static final int CATEGORY = 5;
+
+  
+  void writeOneStrand(int whichStrand) {
+    int strandSize = getStrandSize(whichStrand);
+//    strandSize = min(strandSize, 10);
+    Table table = new Table();
+    table.addColumn(kColumnCommand, STRING);
+    table.addColumn(kColumnOrdinal, INT);
+    table.addColumn(kColumnOrdinalEnd, INT);
+    table.addColumn(kColumnCoordX, INT);
+    table.addColumn(kColumnCoordY, INT);
+    
+    TableRow row = null;
+    
+    for (int whichLed = 0; whichLed < strandSize; whichLed++) {
+      
+      int value = ledGetRawValue(whichStrand, whichLed, false); // TODO: just pull it out directly for faster performance
+      if (value >= 0) {
+        Point p = i2c(value);
+
+        if (row != null) {
+          if (!row.getString(kColumnCommand).equals(kCommandMap)) {
+            row = null;
+            println("row = null, whichLed = " + whichLed + " reason = 1");
+          }
+          else {
+            int ordinalEnd = row.getInt(kColumnOrdinalEnd);
+            if (ordinalEnd + 1 != whichLed) {
+              row = null;
+              println("row = null, whichLed = " + whichLed + " reason = 2");
+            }
+            else {
+              // If prev is a map
+              // if prev.ordinalEnd + 1 == curr.ordinal
+              // if direction of pre => cur is the same
+              // change ordinalEnd, change x or y
+              
+              int numRows = table.getRowCount();
+              if (numRows >= 2) {
+                
+                TableRow startRow = table.getRow(numRows - 2);
+                if (startRow.getString(kColumnCommand).equals(kCommandMap)) {
+                  Point a, b;
+                  int startX = startRow.getInt(kColumnCoordX);
+                  int startY = startRow.getInt(kColumnCoordY);
+                  int endX = row.getInt(kColumnCoordX);
+                  int endY = row.getInt(kColumnCoordY);
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  if ((endX > startX && p.x == endX + 1) || (endX < startX && p.x == endX - 1)) {
+                    assert(startY == endY) : "startY = " + startY + " endY = " + endY + " whichLed = " + whichLed;
+                    assert(p.y == endY) : "p.y = " + p.y + " endY = " + endY + " whichLed = " + whichLed;
+                    row.setInt(kColumnCoordX, p.x);
+                    row.setInt(kColumnOrdinalEnd, whichLed);
+                  }
+                  if ((endY > startY && p.y == endY + 1) || (endY < startY && p.y == endY - 1)) {
+                    assert(startX == endX) : "startX = " + startX + " endX = " + endX + " whichLed = " + whichLed + " whichStrand = " + whichStrand;
+                    assert(p.x == endX) : "p.x = " + p.x + " endX = " + endX + " whichLed = " + whichLed;
+                    row.setInt(kColumnCoordY, p.y);
+                    row.setInt(kColumnOrdinalEnd, whichLed);
+                  }
+                  else {
+                    row = null;
+                    println("row = null, whichLed = " + whichLed + " reason = 3");
+                  }
+                }
+                else {
+                  row = null;
+                  println("row = null, whichLed = " + whichLed + " reason = 4");
+                }
+              }
+              else {
+                row = null;
+                println("row = null, whichLed = " + whichLed + " reason = 5");
+              }
+            }
+          }
+        }
+        
+        if (row == null) {
+          row = table.addRow();
+          row.setString(kColumnCommand, kCommandMap);
+          row.setInt(kColumnOrdinal, whichLed);
+          row.setInt(kColumnOrdinalEnd, whichLed);
+          row.setInt(kColumnCoordX, p.x);
+          row.setInt(kColumnCoordY, p.y);
+        }
+      }
+      else if (value == TC_PIXEL_UNUSED) {
+        
+        if (row != null) {
+          if (!row.getString(kColumnCommand).equals(kCommandMissing)) {
+            row = null;
+          }
+          else {
+            int ordinalEnd = row.getInt(kColumnOrdinalEnd);
+            if (ordinalEnd + 1 == whichLed) {
+              row.setInt(kColumnOrdinalEnd, whichLed);
+            }
+          }
+        }
+          
+        if (row == null) {
+          row = table.addRow();
+          row.setString(kColumnCommand, kCommandMissing);
+          row.setInt(kColumnOrdinal, whichLed);
+          row.setInt(kColumnOrdinalEnd, whichLed);
+        }
+      }
+      else {
+        assert (value == TC_PIXEL_DISCONNECTED || value == TC_PIXEL_UNDEFINED) : "unexpected value is " + value;
+      }
+    }
+    saveTable(table, fileNameForStrand(whichStrand));
+  }
+  
+  void readOneStrand(int whichStrand) {
+    Table table = loadTable(fileNameForStrand(whichStrand), "header");
+    
+    println(table.getRowCount() + " total rows in table");
+    
+    for (TableRow row : table.rows()) {
+      
+      String command = row.getString(kColumnCommand);
+      int ordinalStart = row.getInt(kColumnOrdinal);
+      int ordinalEnd = row.getInt(kColumnOrdinalEnd);
+      int coordX = row.getInt(kColumnCoordX);
+      int coordY = row.getInt(kColumnCoordY);
+      
+      if (command.equals(kCommandMap)) {
+        ledSet(whichStrand, ordinalEnd, coordX, coordY);
+      }
+      else if (command.equals(kCommandMissing)) {
+        for (int i = ordinalStart; i <= ordinalEnd; i++) {
+          ledMissing(whichStrand, i);
+        }
+      }
+      else {
+        assert false : "unimplemented command: " + command;
+      }
+    }
   }
   
   void copyPixels(int[] pixels, DrawType drawType) {
@@ -498,7 +690,7 @@ class LedMap {
     ledSet(panel, 249, 55, 9);
   }
   
-  
+  // TODO: working with this strand
   void mapLowerHalfTopDriverSide(int panel) {
     assert (panel < getNumStrands());
 
