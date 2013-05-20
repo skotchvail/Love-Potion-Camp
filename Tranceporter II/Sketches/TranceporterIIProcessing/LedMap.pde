@@ -46,19 +46,6 @@ class LedMap {
     trainingStrandMap = new int[getNumStrands() * maxPixelsPerStrand];
     
     initTotalControl();
-
-    if (false) {
-      writeOneStrand(3);
-      readOneStrand(3);
-    }
-    else {
-      for (int i = 0; i < getNumStrands(); i++) {
-        writeOneStrand(i);
-      }
-//      for (int i = 0; i < getNumStrands(); i++) {
-//        readOneStrand(i);
-//      }
-    }
   }
 
   /*
@@ -70,7 +57,7 @@ class LedMap {
    */
   
   String fileNameForStrand(int whichStrand) {
-    return "data/strand" + (whichStrand + 1) + ".csv";
+    return "strand" + (whichStrand + 1) + ".csv";
   }
   
   static final String kCommandOffsetter = "offsetter";
@@ -94,8 +81,10 @@ class LedMap {
 
   
   void writeOneStrand(int whichStrand) {
+    println("================== writeOneStrand " + (whichStrand + 1));
+    
     int strandSize = getStrandSize(whichStrand);
-//    strandSize = min(strandSize, 10);
+//    strandSize = min(strandSize, 50);
     Table table = new Table();
     table.addColumn(kColumnCommand, STRING);
     table.addColumn(kColumnOrdinal, INT);
@@ -114,13 +103,13 @@ class LedMap {
         if (row != null) {
           if (!row.getString(kColumnCommand).equals(kCommandMap)) {
             row = null;
-            println("row = null, whichLed = " + whichLed + " reason = 1");
+//            println("row = null, whichLed = " + whichLed + " reason = 1");
           }
           else {
             int ordinalEnd = row.getInt(kColumnOrdinalEnd);
             if (ordinalEnd + 1 != whichLed) {
               row = null;
-              println("row = null, whichLed = " + whichLed + " reason = 2");
+//              println("row = null, whichLed = " + whichLed + " reason = 2");
             }
             else {
               // If prev is a map
@@ -133,44 +122,45 @@ class LedMap {
                 
                 TableRow startRow = table.getRow(numRows - 2);
                 if (startRow.getString(kColumnCommand).equals(kCommandMap)) {
-                  Point a, b;
                   int startX = startRow.getInt(kColumnCoordX);
                   int startY = startRow.getInt(kColumnCoordY);
                   int endX = row.getInt(kColumnCoordX);
                   int endY = row.getInt(kColumnCoordY);
                   
+                  int deltaX = endX - startX;
+                  int deltaY = endY - startY;
+                  int ordinalStart = startRow.getInt(kColumnOrdinal);
+                  int deltaOrdinal = whichLed - ordinalStart;
                   
-                  
-                  
-                  
-                  
-                  
-                  
-                  if ((endX > startX && p.x == endX + 1) || (endX < startX && p.x == endX - 1)) {
+                  if ((deltaX == 0) == (deltaY == 0)) {
+                    row = null;
+//                    println("row = null, whichLed = " + whichLed + " reason = 6");
+                  }
+                  else if ((p.y == endY) && ((endX > startX && p.x == endX + 1 && p.x == startX + deltaOrdinal) ||
+                           (endX < startX && p.x == endX - 1 && p.x == startX - deltaOrdinal))) {
                     assert(startY == endY) : "startY = " + startY + " endY = " + endY + " whichLed = " + whichLed;
-                    assert(p.y == endY) : "p.y = " + p.y + " endY = " + endY + " whichLed = " + whichLed;
                     row.setInt(kColumnCoordX, p.x);
                     row.setInt(kColumnOrdinalEnd, whichLed);
                   }
-                  if ((endY > startY && p.y == endY + 1) || (endY < startY && p.y == endY - 1)) {
+                  else if ((p.x == endX) && ((endY > startY && p.y == endY + 1 && p.y == startY + deltaOrdinal) ||
+                      (endY < startY && p.y == endY - 1 && p.y == startY - deltaOrdinal))) {
                     assert(startX == endX) : "startX = " + startX + " endX = " + endX + " whichLed = " + whichLed + " whichStrand = " + whichStrand;
-                    assert(p.x == endX) : "p.x = " + p.x + " endX = " + endX + " whichLed = " + whichLed;
                     row.setInt(kColumnCoordY, p.y);
                     row.setInt(kColumnOrdinalEnd, whichLed);
                   }
                   else {
                     row = null;
-                    println("row = null, whichLed = " + whichLed + " reason = 3");
+//                    println("row = null, whichLed = " + whichLed + " deltaOrdinal = " + deltaOrdinal + " reason = 3");
                   }
                 }
                 else {
                   row = null;
-                  println("row = null, whichLed = " + whichLed + " reason = 4");
+//                  println("row = null, whichLed = " + whichLed + " reason = 4");
                 }
               }
               else {
                 row = null;
-                println("row = null, whichLed = " + whichLed + " reason = 5");
+//                println("row = null, whichLed = " + whichLed + " reason = 5");
               }
             }
           }
@@ -210,13 +200,22 @@ class LedMap {
         assert (value == TC_PIXEL_DISCONNECTED || value == TC_PIXEL_UNDEFINED) : "unexpected value is " + value;
       }
     }
-    saveTable(table, fileNameForStrand(whichStrand));
+    saveTable(table, "data/" + fileNameForStrand(whichStrand));
   }
   
   void readOneStrand(int whichStrand) {
+    
+    assert (whichStrand < getNumStrands());
+    
+    //top of top driver side
+    xOffsetter = 0;
+    yOffsetter = 0;
+    ordinalOffsetter = 0;
+    
     Table table = loadTable(fileNameForStrand(whichStrand), "header");
     
-    println(table.getRowCount() + " total rows in table");
+    println("strand " + (whichStrand + 1) + " rows: " + table.getRowCount());
+    assert table.getRowCount() > 0 : "rowCount = 0 for strand " + (whichStrand + 1);
     
     for (TableRow row : table.rows()) {
       
@@ -274,7 +273,7 @@ class LedMap {
       assert false : "unknown drawType = " + drawType;
     }
   }
-  
+  // LED MAP 3
   void mapDriverSideLowerPart1(int panel) {
     assert (panel < getNumStrands());
     
@@ -379,6 +378,7 @@ class LedMap {
     ledSet(panel, 849, 44, 4);
   }
   
+  // TODO: LED MAP 2
   void mapDriverSideLowerPart2(int panel) {
     assert (panel < getNumStrands());
     
@@ -552,6 +552,7 @@ class LedMap {
     ledSet(panel, 800, 63, 11);
   }
   
+  // TODO: LED MAP 8
   void mapPassengerSideLower1(int panel) {
     assert (panel < getNumStrands());
     //    Passenger Side Part 1:
@@ -654,6 +655,7 @@ class LedMap {
     ledSet(panel, 848, 44, 15);
   }
   
+  // TODO: LED MAP 7
   void mapPassengerSideLower2(int panel) {
     assert (panel < getNumStrands());
 
@@ -690,7 +692,7 @@ class LedMap {
     ledSet(panel, 249, 55, 9);
   }
   
-  // TODO: working with this strand
+  // TODO: LED MAP 4
   void mapLowerHalfTopDriverSide(int panel) {
     assert (panel < getNumStrands());
 
@@ -881,7 +883,7 @@ class LedMap {
     ledSet(panel, 996, 72, 9);
   }
   
-  
+  // TODO: LED MAP 6
   void mapLowerHalfTopPassengerSide(int panel) {
     
     assert (panel < getNumStrands());
@@ -1037,6 +1039,7 @@ class LedMap {
     ledSet(panel,  972, 68, 17);
   }
   
+  // TODO: LED MAP 1
   void mapUpperHalfTopDriverSide(int panel) {
     assert (panel < getNumStrands());
 
@@ -1219,7 +1222,7 @@ class LedMap {
     ledSet(panel,  1000, 76, 22);
   }
   
-  
+  // TODO: LED MAP 5
   void mapPassengerSideUpperTop1(int panel) {
     assert (panel < getNumStrands());
     
@@ -1411,19 +1414,6 @@ class LedMap {
     return 8;
   }
   
-  void mapAllLeds() {
-
-    mapUpperHalfTopDriverSide(0);
-    mapDriverSideLowerPart2(1);
-    mapDriverSideLowerPart1(2);
-    mapLowerHalfTopDriverSide(3);
-    
-    mapPassengerSideUpperTop1(4);
-    mapLowerHalfTopPassengerSide(5);
-    mapPassengerSideLower2(6);
-    mapPassengerSideLower1(7);
-  }
-  
   ////////////////////////////////////////////////////////////////////
   //Total Control
   
@@ -1612,7 +1602,7 @@ class LedMap {
     }
     
     assert(minStrand < getNumStrands());
-    assert(maxStrand <= getNumStrands());
+    assert(maxStrand < getNumStrands());
     
     for (int whichStrand = minStrand; whichStrand <= maxStrand; whichStrand++) {
       int minX = 10000;
@@ -1713,10 +1703,31 @@ class LedMap {
       }
     }
     
-    mapAllLeds();
+    if (false) {
+      mapUpperHalfTopDriverSide(0);
+      mapDriverSideLowerPart2(1);
+      mapDriverSideLowerPart1(2);
+      mapLowerHalfTopDriverSide(3);
+      
+      mapPassengerSideUpperTop1(4);
+      mapLowerHalfTopPassengerSide(5);
+      mapPassengerSideLower2(6);
+      mapPassengerSideLower1(7);
+      
+      if (true) {
+        for (int i = 0; i < getNumStrands(); i++) {
+          writeOneStrand(i);
+        }
+      }
+    }
+    else {
+      for (int i = 0; i < getNumStrands(); i++) {
+        readOneStrand(i);
+      }
+    }
     
     ledInterpolate();
-    //    ledMapDump(0, 2); //set which strands you want to dump
+    ledMapDump(0, 1); //set which strands you want to dump
     
     println("" + lowestX + " <= x <= " + biggestX + ", " + lowestY + " <= y <= " + biggestY);
     assert(lowestX == 0): "lowest LED should be X == 0";
