@@ -1727,7 +1727,7 @@ class LedMap {
     }
     
     ledInterpolate();
-    ledMapDump(0, 1); //set which strands you want to dump
+//    ledMapDump(2, 7); //set which strands you want to dump
     
     println("" + lowestX + " <= x <= " + biggestX + ", " + lowestY + " <= y <= " + biggestY);
     assert(lowestX == 0): "lowest LED should be X == 0";
