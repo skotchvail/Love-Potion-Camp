@@ -12,26 +12,31 @@ class LedMap {
   int maxPixelsPerStrand;
   private int[] strandMap;
   private int[] trainingStrandMap;
+  private Table[] strandTables;
 
+  static final String kCommandOffsetter = "offsetter";
+  static final String kCommandMap = "map";
+  static final String kCommandMissing = "missing";
+  static final String kCommandUnprogrammed = "unprogrammed";
+  
+  static final String kColumnCommand = "command";
+  static final String kColumnOrdinal = "ordinalStart";
+  static final String kColumnOrdinalEnd = "ordinalEnd";
+  static final String kColumnCoordX = "x";
+  static final String kColumnCoordY = "y";
+  
   LedMap() {
-    strandSizes = new int[]
-    {
-      1001, //mapUpperHalfTopDriverSide
-      400, //mapDriverSideLowerPart2
-      850, //mapDriverSideLowerPart1
-      997, //mapLowerHalfTopDriverSide
-      1175, //TODO: mapPassengerSideUpperTop1
-      
-      973, //mapLowerHalfTopPassengerSide
-      
-      250, //mapPassengerSideLower2
-      849, //mapPassengerSideLower1
-    };
+    strandSizes = new int[8];
     
-    
+    strandTables = new Table[getNumStrands()];
     int totalPixels = 0;
     maxPixelsPerStrand = 0;
     for (int i = 0; i < getNumStrands(); i++) {
+      
+      Table table = loadTable(fileNameForStrand(i), "header");
+      strandTables[i] = table;
+      TableRow lastRow = table.getRow(table.lastRowIndex());
+      strandSizes[i] = lastRow.getInt(kColumnOrdinalEnd) + 1;
       int strandSize = getStrandSize(i);
       if (strandSize > maxPixelsPerStrand) {
         maxPixelsPerStrand = strandSize;
@@ -59,17 +64,6 @@ class LedMap {
   String fileNameForStrand(int whichStrand) {
     return "strand" + (whichStrand + 1) + ".csv";
   }
-  
-  static final String kCommandOffsetter = "offsetter";
-  static final String kCommandMap = "map";
-  static final String kCommandMissing = "missing";
-  static final String kCommandUnprogrammed = "unprogrammed";
-  
-  static final String kColumnCommand = "command";
-  static final String kColumnOrdinal = "ordinalStart";
-  static final String kColumnOrdinalEnd = "ordinalEnd";
-  static final String kColumnCoordX = "x";
-  static final String kColumnCoordY = "y";
   
   // TODO: not needed after 2.0b9
   static final int STRING = 0;
@@ -103,20 +97,13 @@ class LedMap {
         if (row != null) {
           if (!row.getString(kColumnCommand).equals(kCommandMap)) {
             row = null;
-//            println("row = null, whichLed = " + whichLed + " reason = 1");
           }
           else {
             int ordinalEnd = row.getInt(kColumnOrdinalEnd);
             if (ordinalEnd + 1 != whichLed) {
               row = null;
-//              println("row = null, whichLed = " + whichLed + " reason = 2");
             }
             else {
-              // If prev is a map
-              // if prev.ordinalEnd + 1 == curr.ordinal
-              // if direction of pre => cur is the same
-              // change ordinalEnd, change x or y
-              
               int numRows = table.getRowCount();
               if (numRows >= 2) {
                 
@@ -134,7 +121,6 @@ class LedMap {
                   
                   if ((deltaX == 0) == (deltaY == 0)) {
                     row = null;
-//                    println("row = null, whichLed = " + whichLed + " reason = 6");
                   }
                   else if ((p.y == endY) && ((endX > startX && p.x == endX + 1 && p.x == startX + deltaOrdinal) ||
                            (endX < startX && p.x == endX - 1 && p.x == startX - deltaOrdinal))) {
@@ -150,17 +136,14 @@ class LedMap {
                   }
                   else {
                     row = null;
-//                    println("row = null, whichLed = " + whichLed + " deltaOrdinal = " + deltaOrdinal + " reason = 3");
                   }
                 }
                 else {
                   row = null;
-//                  println("row = null, whichLed = " + whichLed + " reason = 4");
                 }
               }
               else {
                 row = null;
-//                println("row = null, whichLed = " + whichLed + " reason = 5");
               }
             }
           }
@@ -212,7 +195,7 @@ class LedMap {
     yOffsetter = 0;
     ordinalOffsetter = 0;
     
-    Table table = loadTable(fileNameForStrand(whichStrand), "header");
+    Table table = strandTables[whichStrand];
     
     println("strand " + (whichStrand + 1) + " rows: " + table.getRowCount());
     assert table.getRowCount() > 0 : "rowCount = 0 for strand " + (whichStrand + 1);
@@ -275,7 +258,9 @@ class LedMap {
   }
   
   int getStrandSize(int whichStrand) {
-    return strandSizes[whichStrand];
+    int result = strandSizes[whichStrand];
+    assert result >= 0 : "strand " + (whichStrand + 1) + "size = " + result;
+    return result;
   }
   
   int getNumStrands() {
