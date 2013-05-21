@@ -65,26 +65,16 @@ class LedMap {
     return "strand" + (whichStrand + 1) + ".csv";
   }
   
-  // TODO: not needed after 2.0b9
-  static final int STRING = 0;
-  static final int INT = 1;
-  static final int LONG = 2;
-  static final int FLOAT = 3;
-  static final int DOUBLE = 4;
-  static final int CATEGORY = 5;
-
-  
   void writeOneStrand(int whichStrand) {
     println("================== writeOneStrand " + (whichStrand + 1));
     
     int strandSize = getStrandSize(whichStrand);
-//    strandSize = min(strandSize, 50);
     Table table = new Table();
-    table.addColumn(kColumnCommand, STRING);
-    table.addColumn(kColumnOrdinal, INT);
-    table.addColumn(kColumnOrdinalEnd, INT);
-    table.addColumn(kColumnCoordX, INT);
-    table.addColumn(kColumnCoordY, INT);
+    table.addColumn(kColumnCommand, Table.STRING);
+    table.addColumn(kColumnOrdinal, Table.INT);
+    table.addColumn(kColumnOrdinalEnd, Table.INT);
+    table.addColumn(kColumnCoordX, Table.INT);
+    table.addColumn(kColumnCoordY, Table.INT);
     
     TableRow row = null;
     
@@ -93,7 +83,7 @@ class LedMap {
       int value = ledGetRawValue(whichStrand, whichLed, false); // TODO: just pull it out directly for faster performance
       if (value >= 0) {
         Point p = i2c(value);
-
+        // TODO: this can probably be cleaned up to not have so many else row = null statements. 
         if (row != null) {
           if (!row.getString(kColumnCommand).equals(kCommandMap)) {
             row = null;
