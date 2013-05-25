@@ -17,14 +17,14 @@ class Pixels {
   final int ledBetween = 2;
   
   final int[][] ledStrand = {
-  {-1, -1,  0,  1,  2,  3,  4},
-  {10,  9,  8,  7, -1,  6,  5},
-  {11, 12, 13, 14, 15, 16, 17},
-  {24, 23, 22, 21, 20, 19, 18},
-  {25, 26, 27, 28, 29, 30, 31},
-  {32, 33, 34, 35, 36, 37, 38},
-  {45, 44, 43, 42, 41, 40, 39},
-  {46, 47, 48, -1, 49, 50, 51},
+  { 0,  7,  8,  9, 10, 11, 12}, //13
+  { 1,  6, 25, 24, 17, 16, 15}, //14
+  { 2,  5, 26, 23, 18, 39, 40},
+  { 3,  4, 27, 22, 19, 38, 41},
+  {30, 29, 28, 21, 20, 37, 42}, //43
+  {31, 32, 33, 34, 35, 36, 44}, //45-50
+  {56, 55, 54, -1, 53, 52, 51},
+  {57, 58, 59, -1, 60, 61, 62},
   };
   
   final int ledRows = ledStrand.length;
@@ -256,7 +256,10 @@ class Pixels {
           if (whichOridinal >= 0) {
             Point coordinate = main.ledMap.ledGet(whichStrand, whichOridinal);
             if (coordinate.x >= 0) {
-              ledColor = pixelData[coordinate.y * ledWidth + coordinate.x];
+              int index = coordinate.y * ledWidth + coordinate.x;
+              if (index < pixelData.length) {
+                ledColor = pixelData[coordinate.y * ledWidth + coordinate.x];
+              }
             }
           }
           fill(ledColor);

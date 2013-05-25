@@ -14,6 +14,8 @@ class HardwareTest extends Drawer {
   int drawMode = kModeLowPower;
   float lastTimeSwitched;
   int movementPixelFast;
+  boolean frontOfBottleToRight;
+  boolean iPadActionsAllowed;
   
   int[] strandColor = {
     color(255,  176,    33),    // strand 0
@@ -36,6 +38,7 @@ class HardwareTest extends Drawer {
   void setup(){
     colorMode(RGB, 255);
     settings.setParam(settings.keyFlash, 0.0);
+    cursorStrand = prefs.getInt("hardware.cursorStrand", 0);
   }
   
   String getName() { return "Hardware Test"; }
@@ -45,17 +48,18 @@ class HardwareTest extends Drawer {
   void enteredByUserAction() {
     drawMode = kModeVerticalLineSweep;
     sendToIPad();
+    iPadActionsAllowed = true;
   }
   
   void sendToIPad() {
     Point a = main.ledMap.ledGet(cursorStrand, cursorOrdinal, false);
     settings.sendMessageToIPad("/progLed/labelCoordinates", "" + a.x + ", " + a.y);
-    settings.sendMessageToIPad("/progLed/labelStrand", "Strand " + (cursorStrand + 1));
+    settings.sendMessageToIPad("/progLed/labelStrand", "Save Strand " + (cursorStrand + 1));
     settings.sendMessageToIPad("/progLed/labelOrdinal", "LED " + cursorOrdinal);
     for (int i = 0; i < 5; i++) {
       settings.sendMessageToIPad("/progLed/drawModeToggle/1/" + (i+1), (drawMode == i)?1:0);
     }
-    
+    settings.sendMessageToIPad("/progLed/frontOfBottleLabel", frontOfBottleToRight ? ">>  Front of Bottle >>" : "<<  Front of Bottle <<");
   }
   
   final int programStrandHigher = 1;
@@ -71,18 +75,37 @@ class HardwareTest extends Drawer {
   final int programLedOff = 11;
   
   void handleOscEvent(OscMessage msg) {
+    
     String addr = msg.addrPattern();
     if (!addr.startsWith("/progLed/"))
         return;
     String[] list = split(addr, '/');
     String action = list[2];
-    println("action = " + action);
+    println("hw action = " + action);
+    
+    if (!iPadActionsAllowed) {
+      println("iPad actions now allowed until 'Start Hardware Test' is pressed");
+      return;
+    }
     
     if (action.equals("drawModeToggle")) {
       boolean pressed = (msg.get(0).floatValue() == 1.0);
       if (pressed) {
         drawMode = Integer.parseInt(list[4]) - 1;
         sendToIPad();
+      }
+    }
+    else if (action.equals("frontOfBottleToggle")) {
+      boolean pressed = (msg.get(0).floatValue() == 1.0);
+      if (pressed) {
+        frontOfBottleToRight = !frontOfBottleToRight;
+        sendToIPad();
+      }
+    }
+    else if (action.equals("SaveStrand")) {
+      boolean pressed = (msg.get(0).floatValue() == 1.0);
+      if (pressed) {
+        main.ledMap.writeOneStrand(cursorStrand);
       }
     }
     else {
@@ -113,11 +136,11 @@ class HardwareTest extends Drawer {
         else if (action.equals("coordYLower")) {
           command = programCoordYLower;
         }
-        else if (action.equals("coordXHigher")) {
-          command = programCoordXHigher;
+        else if (action.equals("coordXLeft")) {
+          command = frontOfBottleToRight ? programCoordXHigher : programCoordXLower;
         }
-        else if (action.equals("coordXLower")) {
-          command = programCoordXLower;
+        else if (action.equals("coordXRight")) {
+          command = frontOfBottleToRight ? programCoordXLower : programCoordXHigher;
         }
         if (command != 0) {
           doProgramAction(command);
@@ -157,10 +180,10 @@ class HardwareTest extends Drawer {
           command = programCoordYLower;
         }
         else if (keyCode == LEFT) {
-          command = programCoordXLower;
+          command = frontOfBottleToRight ? programCoordXHigher: programCoordXLower;
         }
         else if (keyCode == RIGHT) {
-          command = programCoordXHigher;
+          command = frontOfBottleToRight ? programCoordXLower : programCoordXHigher;
         }
     }
 
@@ -177,9 +200,11 @@ class HardwareTest extends Drawer {
     // Which strand
     if (command == programStrandHigher) {
       cursorStrand++;
+      prefs.putInt("hardware.cursorStrand", cursorStrand);
     }
     else if (command == programStrandLower) {
       cursorStrand--;
+      prefs.putInt("hardware.cursorStrand", cursorStrand);
     }
     if (cursorStrand < 0) {
       cursorStrand += main.ledMap.getNumStrands();
@@ -238,11 +263,29 @@ class HardwareTest extends Drawer {
         }
         whichOrdinal--;
       };
-      if (a.x < 0) {
+      
+//      println("a.x: " + a.x + " a.y: " + a.y + " xChange: " + xChange + " yChange: " + yChange);
+      if (a.x < 0 && a.y < 0) {
         main.ledMap.ledRawSet(cursorStrand, cursorOrdinal, 0, 0);
       }
       else {
-        main.ledMap.ledRawSet(cursorStrand, cursorOrdinal, a.x + xChange, a.y + yChange);
+        int newX = a.x + xChange;
+        int newY = a.y + yChange;
+        
+        if (newX >= ledWidth) {
+          newX = 0;
+        }
+        else if (newX < 0) {
+          newX = ledWidth - 1;
+        }
+
+        if (newY >= ledHeight) {
+          newY = 0;
+        }
+        else if (newY < 0) {
+          newY = ledHeight - 1;
+        }
+        main.ledMap.ledRawSet(cursorStrand, cursorOrdinal, newX, newY);
       }
     }
     
@@ -335,15 +378,21 @@ class HardwareTest extends Drawer {
   
   void drawLineSweep() {
     pg.noStroke();
-    pg.fill(0, 100 * settings.getParam(settings.keySpeed));
+    pg.fill(0, 15);
     pg.rect(0, 0, width, height);
-    int counter = (frameCount) % (width + height);
-    pg.fill(255, 128, 0);
-    if (counter < width) {
-      pg.rect(counter, 0, 2, height + 1);
+    int halfWidth = width / 2;
+    int counter = (frameCount) % (halfWidth + height);
+    if (counter < halfWidth) {
+      pg.fill(255, 128, 0);
+      pg.rect(halfWidth - counter, 0, 2, height + 1);
+      pg.fill(134, 155, 210);
+      pg.rect(halfWidth + counter, 0, 2, height + 1);
     }
     else {
-      pg.rect(0, counter - width, width + 1, 2);
+      pg.fill(200, 50, 50);
+      pg.rect(0, counter - halfWidth, halfWidth, 2);
+      pg.fill(50, 200, 50);
+      pg.rect(halfWidth, counter - halfWidth, halfWidth, 2);
     }
   }
   
