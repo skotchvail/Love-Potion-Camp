@@ -104,6 +104,18 @@ class Drawer {
     lastMouseX = mx; 
     lastMouseY = my;
   }
+
+  void justEnteredSketch() {
+    println("just entered: " + getName());
+  }
+
+  void justExitedSketch() {
+    println("just exited: " + getName());
+  }
+
+  void sendToIPad() {
+    // Send any GUI to iPad
+  }
   
   void handleOscEvent(OscMessage msg) {
   }

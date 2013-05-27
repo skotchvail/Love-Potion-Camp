@@ -159,7 +159,8 @@ class MainClass {
     frameRate(FRAME_RATE);
     
     settings.sendEntireGUIToIPad();
-    
+    currentMode().justEnteredSketch();
+
     println("Done setup");
   }
 
@@ -345,7 +346,7 @@ class MainClass {
     pm.setPaletteType(settings.paletteType, NUM_COLORS, settings.palette);
     Drawer mode = currentMode();
     mode.setup();
-    mouseX = mode.mouseX; //let the mode set the mouseX, Y in their setup and honor that.
+    mouseX = mode.mouseX; // Let the mode set the mouseX, Y in their setup and honor that.
     mouseY = mode.mouseY;
     
     println("Initial mouseX:" + mouseX + " mouseY: " + mouseY);
@@ -414,6 +415,8 @@ class MainClass {
 
     assert(settings.palette != null);
     settings.sendControlValuesForThisSketchToIPad();
+    getMode(oldEffect).justExitedSketch();
+    currentMode().justEnteredSketch();
   }
   
   void gotoHardwareTest() {

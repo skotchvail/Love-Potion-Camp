@@ -554,10 +554,10 @@ class LedMap {
 //    ledMapDump(2, 7); //set which strands you want to dump
     
     println("" + lowestX + " <= x <= " + biggestX + ", " + lowestY + " <= y <= " + biggestY);
-    assert(lowestX == 0): "lowest LED should be X == 0";
-    assert(lowestY == 0): "lowest LED should be Y == 0";
-    assert((biggestX + 1) * 2 == ledWidth): "biggest LED should be X == " + ledWidth;
-    assert(biggestY + 1 == ledHeight): "biggest LED should be Y == " + ledHeight;
+    assert(lowestX == 0): "lowest LED should be X == 0, instead of " + lowestX;
+    assert(lowestY == 0): "lowest LED should be Y == 0, instead of " + lowestY;
+    assert((biggestX + 1) * 2 == ledWidth): "biggest LED should be X == " + (ledWidth / 2) + " instead of " + biggestX;
+    assert(biggestY + 1 == ledHeight): "biggest LED should be Y == " + ledHeight + " instead of " + biggestY;
     
     if (!useTotalControlHardware) {
       return;

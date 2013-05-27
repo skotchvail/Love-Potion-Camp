@@ -432,17 +432,11 @@ class Settings {
     }
 
     Drawer currentMode = main.currentMode();
-    
-    String name = currentMode.getName();
-    sendMessageToIPad(keyModeName, name);
-
-    name = currentMode.getCustom1Label();
-    sendMessageToIPad(keyCustom1Label, name);
-    
-    name = currentMode.getCustom2Label();
-    sendMessageToIPad(keyCustom2Label, name);
-    
+    sendMessageToIPad(keyModeName, currentMode.getName());
+    sendMessageToIPad(keyCustom1Label, currentMode.getCustom1Label());
+    sendMessageToIPad(keyCustom2Label, currentMode.getCustom2Label());
     sendMessageToIPad(keyPaletteName, main.pm.getPaletteDisplayName());
+    currentMode.sendToIPad();
   }
   
   /*

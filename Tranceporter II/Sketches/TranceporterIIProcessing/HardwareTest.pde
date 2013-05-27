@@ -39,6 +39,7 @@ class HardwareTest extends Drawer {
     colorMode(RGB, 255);
     settings.setParam(settings.keyFlash, 0.0);
     cursorStrand = prefs.getInt("hardware.cursorStrand", 0);
+    cursorOrdinal = prefs.getInt("hardware.cursorOrdinal", 0);
   }
   
   String getName() { return "Hardware Test"; }
@@ -47,11 +48,11 @@ class HardwareTest extends Drawer {
   
   void enteredByUserAction() {
     drawMode = kModeVerticalLineSweep;
-    sendToIPad();
     iPadActionsAllowed = true;
   }
   
   void sendToIPad() {
+    super.sendToIPad();
     Point a = main.ledMap.ledGet(cursorStrand, cursorOrdinal, false);
     settings.sendMessageToIPad("/progLed/labelCoordinates", "" + a.x + ", " + a.y);
     settings.sendMessageToIPad("/progLed/labelStrand", "Save Strand " + (cursorStrand + 1));
@@ -84,7 +85,7 @@ class HardwareTest extends Drawer {
     println("hw action = " + action);
     
     if (!iPadActionsAllowed) {
-      println("iPad actions now allowed until 'Start Hardware Test' is pressed");
+      println("iPad actions not allowed until 'Program LEDs' is pressed");
       return;
     }
     
@@ -194,17 +195,12 @@ class HardwareTest extends Drawer {
     
   void doProgramAction(int command) {
     
-    int oldCursorOrdinal = cursorOrdinal;
-    int oldCursorStrand = cursorStrand;
-    
     // Which strand
     if (command == programStrandHigher) {
       cursorStrand++;
-      prefs.putInt("hardware.cursorStrand", cursorStrand);
     }
     else if (command == programStrandLower) {
       cursorStrand--;
-      prefs.putInt("hardware.cursorStrand", cursorStrand);
     }
     if (cursorStrand < 0) {
       cursorStrand += main.ledMap.getNumStrands();
@@ -272,11 +268,12 @@ class HardwareTest extends Drawer {
         int newX = a.x + xChange;
         int newY = a.y + yChange;
         
-        if (newX >= ledWidth) {
+        int halfWidth = ledWidth / 2;
+        if (newX >= halfWidth) {
           newX = 0;
         }
         else if (newX < 0) {
-          newX = ledWidth - 1;
+          newX = halfWidth - 1;
         }
 
         if (newY >= ledHeight) {
@@ -288,7 +285,9 @@ class HardwareTest extends Drawer {
         main.ledMap.ledRawSet(cursorStrand, cursorOrdinal, newX, newY);
       }
     }
-    
+    prefs.putInt("hardware.cursorOrdinal", cursorOrdinal);
+    prefs.putInt("hardware.cursorStrand", cursorStrand);
+    needToFlushPrefs = true;
     sendToIPad();
   }
   
