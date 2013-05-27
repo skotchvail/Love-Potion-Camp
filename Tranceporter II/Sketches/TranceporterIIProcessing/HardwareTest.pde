@@ -9,7 +9,8 @@ class HardwareTest extends Drawer {
   final int kModeLedTraining = 1;
   final int kModeCheckerboard = 2;
   final int kModeEachLedPanel = 3;
-  final int kModeVerticalLineSweep = 4;
+  final int kModeUnused = 4;
+  final int kModeVerticalLineSweep = 5;
   
   int drawMode = kModeLowPower;
   float lastTimeSwitched;
@@ -27,9 +28,11 @@ class HardwareTest extends Drawer {
     color(200,  100,  0),       // strand 6
     color(200,  55,   100),     // strand 7
   };
+  final color lowPowerColor = color(0, 30, 0);
 
   int cursorStrand;
   int cursorOrdinal;
+  Point realCoordinate = new Point(); // Cursor Finder needs to temporarily overwrite the actual coordinates
   
   HardwareTest(Pixels p, Settings s) {
     super(p, s, JAVA2D, DrawType.TwoSides);
@@ -40,6 +43,7 @@ class HardwareTest extends Drawer {
     settings.setParam(settings.keyFlash, 0.0);
     cursorStrand = prefs.getInt("hardware.cursorStrand", 0);
     cursorOrdinal = prefs.getInt("hardware.cursorOrdinal", 0);
+    backupRealCoordinate();
   }
   
   String getName() { return "Hardware Test"; }
@@ -49,18 +53,33 @@ class HardwareTest extends Drawer {
   void enteredByUserAction() {
     drawMode = kModeVerticalLineSweep;
     iPadActionsAllowed = true;
+    sendToIPad();
   }
   
   void sendToIPad() {
     super.sendToIPad();
-    Point a = main.ledMap.ledGet(cursorStrand, cursorOrdinal, false);
-    settings.sendMessageToIPad("/progLed/labelCoordinates", "" + a.x + ", " + a.y);
+    Point a = realCoordinate;
+    if (a.x >= 0) {
+      settings.sendMessageToIPad("/progLed/labelCoordinates", "" + a.x + ", " + a.y);
+    }
+    else {
+      settings.sendMessageToIPad("/progLed/labelCoordinates", "missing");
+    }
     settings.sendMessageToIPad("/progLed/labelStrand", "Save Strand " + (cursorStrand + 1));
     settings.sendMessageToIPad("/progLed/labelOrdinal", "LED " + cursorOrdinal);
-    for (int i = 0; i < 5; i++) {
+    for (int i = 0; i < 6; i++) {
       settings.sendMessageToIPad("/progLed/drawModeToggle/1/" + (i+1), (drawMode == i)?1:0);
     }
     settings.sendMessageToIPad("/progLed/frontOfBottleLabel", frontOfBottleToRight ? ">>  Front of Bottle >>" : "<<  Front of Bottle <<");
+  }
+
+  void backupRealCoordinate() {
+    realCoordinate = main.ledMap.ledGet(cursorStrand, cursorOrdinal, false);
+    main.ledMap.ledRawSet(cursorStrand, cursorOrdinal, 0, 0);
+  }
+  
+  void restoreRealCoordinate() {
+    main.ledMap.ledRawSet(cursorStrand, cursorOrdinal, realCoordinate.x, realCoordinate.y);
   }
   
   final int programStrandHigher = 1;
@@ -106,14 +125,19 @@ class HardwareTest extends Drawer {
     else if (action.equals("SaveStrand")) {
       boolean pressed = (msg.get(0).floatValue() == 1.0);
       if (pressed) {
+        restoreRealCoordinate();
         main.ledMap.writeOneStrand(cursorStrand);
+        backupRealCoordinate();
       }
     }
     else {
       boolean pressed = (msg.get(0).floatValue() != 1.0);
       if (pressed) {
         int command = 0;
-        if (action.equals("strandHigher")) {
+        if (action.equals("missing")) {
+          command = programLedOff;
+        }
+        else if (action.equals("strandHigher")) {
           command = programStrandHigher;
         }
         else if (action.equals("strandLower")) {
@@ -195,6 +219,8 @@ class HardwareTest extends Drawer {
     
   void doProgramAction(int command) {
     
+    restoreRealCoordinate();
+    
     // Which strand
     if (command == programStrandHigher) {
       cursorStrand++;
@@ -230,7 +256,7 @@ class HardwareTest extends Drawer {
     cursorOrdinal %= strandSize;
     
     if (command == programLedOff) {
-      main.ledMap.ledRawSet(cursorStrand, cursorOrdinal, -999999, -999999);
+      main.ledMap.ledSetRawValue(cursorStrand, cursorOrdinal, TC_PIXEL_UNUSED);
     }
     
     int xChange = 0;
@@ -249,7 +275,8 @@ class HardwareTest extends Drawer {
     }
     
     if (xChange != 0 || yChange != 0) {
-      // Find the x, y for the cursorOrdinal, and modify it
+      // Find the the current x, y
+      // If current pixel is TC_PIXEL_UNUSED, base it on previous valid coordinate
       Point a = new Point(-1, -1);
       int whichOrdinal = cursorOrdinal;
       while (whichOrdinal >= 0) {
@@ -260,8 +287,7 @@ class HardwareTest extends Drawer {
         whichOrdinal--;
       };
       
-//      println("a.x: " + a.x + " a.y: " + a.y + " xChange: " + xChange + " yChange: " + yChange);
-      if (a.x < 0 && a.y < 0) {
+      if (a.x < 0) {
         main.ledMap.ledRawSet(cursorStrand, cursorOrdinal, 0, 0);
       }
       else {
@@ -288,12 +314,12 @@ class HardwareTest extends Drawer {
     prefs.putInt("hardware.cursorOrdinal", cursorOrdinal);
     prefs.putInt("hardware.cursorStrand", cursorStrand);
     needToFlushPrefs = true;
+    backupRealCoordinate();
     sendToIPad();
   }
   
   String[] getTextLines() {
-    
-    Point a = main.ledMap.ledGet(cursorStrand, cursorOrdinal, false);
+    Point a = realCoordinate;
     
     return new String[] {
       "cursorStrand: " + (cursorStrand + 1),
@@ -396,32 +422,37 @@ class HardwareTest extends Drawer {
   }
   
   void drawTrainingMode() {
-    // Draw Each LED a separate color
-    pg.background(color(220, 238, 191));
+    // Erase background
+    pg.noStroke();
+    pg.fill(0, 10);
+    pg.rect(0, 0, width, height);
+
+    // Draw this Strand in blue
+    int numLeds = main.ledMap.getStrandSize(cursorStrand);
+    pg.stroke(0, 0, 255, 20);
+    for (int ordinal = 0; ordinal < numLeds; ordinal++) {
+      Point a = main.ledMap.ledGet(cursorStrand, ordinal);
+      if (a.x < 0)
+        continue;
+      pg.point(a.x, a.y);
+    }
     
-    for (int whichStrand = 0; whichStrand < main.ledMap.getNumStrands(); whichStrand++) {
-      int strandSize = main.ledMap.getStrandSize(whichStrand);
-      for (int ordinal = 0; ordinal < strandSize; ordinal++) {
-        Point a = main.ledMap.ledGet(whichStrand, ordinal);
-        if (a.x < 0 || a.y < 0)
-          continue;
-        
-        int lastDigit = ordinal % 10;
-        int secondDigit = (ordinal % 100)/10;
-        int c = strandColor[whichStrand] ;
-        
-        if (lastDigit != 0) {
-          int color1 = color(140, 140, 140);
-          int color2 = color(25, 25, 25);
-          c = ((secondDigit % 2) == 1)?color1:color2;
-        }
-        
-        int whichPixel = (movementPixelFast + 1) % 10;
-        if (lastDigit == whichPixel) {
-          c = color(red(c)/2, green(c)/2, blue(c)/2);
-        }
-        pg.set(a.x, a.y, c);
-      }
+    // Point out where the cursor is
+    int half = 10;
+    int delay = 4;
+    int offset = (frameCount % ((half + 1) * delay)) / delay;
+    
+    color c = color(255, 255, 0);
+    int whichOrdinal = cursorOrdinal - half + offset;
+    if (whichOrdinal >= 0 && whichOrdinal < numLeds) {
+      Point a = main.ledMap.ledGet(cursorStrand, whichOrdinal);
+      pg.set(a.x,a.y,c);
+    }
+    
+    whichOrdinal = cursorOrdinal + half - offset;
+    if (whichOrdinal >= 0 && whichOrdinal < numLeds) {
+      Point a = main.ledMap.ledGet(cursorStrand, whichOrdinal);
+      pg.set(a.x,a.y,c);
     }
   }
   
@@ -442,7 +473,7 @@ class HardwareTest extends Drawer {
     }
     else if (mode == kModeLowPower) {
       // Draw solid low power color
-      pg.background(0, 30, 0);
+      pg.background(lowPowerColor);
     }
     else if (mode == kModeEachLedPanel) {
       useCursorFinder = true;
@@ -452,6 +483,11 @@ class HardwareTest extends Drawer {
       useCursorFinder = true;
       drawLineSweep();
     }
+    else if (mode == kModeUnused) {
+      useCursorFinder = true;
+      // Draw solid low power color
+      pg.background(lowPowerColor);
+    }
     else {
       assert mode == kModeLedTraining : "unknown training mode " + mode;
       useCursorFinder = true;
@@ -460,35 +496,16 @@ class HardwareTest extends Drawer {
     
     // Put in the cursor finder
     if (useCursorFinder) {
-      // Draw the LED's before and after the currently selected LED
-      int cursorFinder = (int)(settings.getParam(settings.keyCustom2) * 20);
-      if (cursorFinder > 0) {
-        for (int i = cursorOrdinal - cursorFinder; i < cursorOrdinal + cursorFinder; i++) {
-          if (i < 0) {
-            continue;
-          }
-          if (i >= main.ledMap.getStrandSize(cursorStrand)) {
-            continue;
-          }
-          Point a = main.ledMap.ledGet(cursorStrand, i);
-          color c = color(255, 255, 0);
-          
-          if (a.x >= 0 && a.y >= 0) {
-            pg.set(a.x, a.y, c);
-          }
-        }
-      }
-
       // Blink the currently selected LED
       final int FRAMES = 10;
       float factor = (frameCount % ( FRAMES * 2)) / (FRAMES * 1.0);
       if (factor > 1.0) {
         factor = 2.0 - factor;
       }
-      color c = color(0 * factor, 0 * factor, 255 * factor);
+      pg.stroke(factor * 255);
       Point a = main.ledMap.ledGet(cursorStrand, cursorOrdinal);
       if (a.x >= 0 && a.y >= 0) {
-        pg.set(a.x, a.y, c);
+        pg.point(a.x, a.y);
       }
     }
   }

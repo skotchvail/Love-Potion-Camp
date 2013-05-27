@@ -170,7 +170,7 @@ class LedMap {
         }
       }
       else {
-        assert (value == TC_PIXEL_DISCONNECTED || value == TC_PIXEL_UNDEFINED) : "unexpected value is " + value;
+        assert (value == TC_PIXEL_DISCONNECTED || value == TC_PIXEL_UNDEFINED) : "unexpected value is " + value + " for ordinal " + whichLed;
       }
     }
     saveTable(table, "data/" + fileNameForStrand(whichStrand));
@@ -370,9 +370,6 @@ class LedMap {
   
   Point ledGet(int whichStrand, int ordinal, boolean useTrainingMode) {
     int value = ledGetRawValue(whichStrand, ordinal, useTrainingMode);
-    if (value < 0) {
-      return new Point(-1, -1);
-    }
     return i2c(value);
   }
   

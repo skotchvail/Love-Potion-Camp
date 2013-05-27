@@ -16,6 +16,7 @@ class Pixels {
   final int ledSide = 15;
   final int ledBetween = 2;
   
+  // Simulation for figuring out to program LEDs, not useful in the real world
   final int[][] ledStrand = {
   { 0,  7,  8,  9, 10, 11, 12}, //13
   { 1,  6, 25, 24, 17, 16, 15}, //14
@@ -239,7 +240,8 @@ class Pixels {
       drawInstructions();
     }
     
-    if (true) {
+    boolean programStrandSimulation = true;
+    if (programStrandSimulation) {
       color[] pixelData = main.ledMap.pixelData;
       
       noStroke();
