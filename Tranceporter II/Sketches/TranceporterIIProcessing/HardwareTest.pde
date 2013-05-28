@@ -43,6 +43,8 @@ class HardwareTest extends Drawer {
     settings.setParam(settings.keyFlash, 0.0);
     cursorStrand = prefs.getInt("hardware.cursorStrand", 0);
     cursorOrdinal = prefs.getInt("hardware.cursorOrdinal", 0);
+    frontOfBottleToRight = prefs.getBoolean("hardware.frontOfBottleToRight", false);
+    p.mappedBottleRotation = frontOfBottleToRight ? 0.27 : 0.73;
     backupRealCoordinate();
   }
   
@@ -119,6 +121,8 @@ class HardwareTest extends Drawer {
       boolean pressed = (msg.get(0).floatValue() == 1.0);
       if (pressed) {
         frontOfBottleToRight = !frontOfBottleToRight;
+        prefs.putBoolean("hardware.frontOfBottleToRight", frontOfBottleToRight);
+        needToFlushPrefs = true;
         sendToIPad();
       }
     }
@@ -408,7 +412,7 @@ class HardwareTest extends Drawer {
     int halfWidth = width / 2;
     int counter = (frameCount) % (halfWidth + height);
     if (counter < halfWidth) {
-      pg.fill(255, 128, 0);
+      pg.fill(255, 190, 0);
       pg.rect(halfWidth - counter, 0, 2, height + 1);
       pg.fill(134, 155, 210);
       pg.rect(halfWidth + counter, 0, 2, height + 1);
@@ -505,6 +509,9 @@ class HardwareTest extends Drawer {
       pg.stroke(factor * 255);
       Point a = main.ledMap.ledGet(cursorStrand, cursorOrdinal);
       if (a.x >= 0 && a.y >= 0) {
+        if (!main.ledMap.isStrandPortSide(cursorStrand)) {
+          a.x += ledWidth / 2;
+        }
         pg.point(a.x, a.y);
       }
     }

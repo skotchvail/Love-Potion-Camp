@@ -12,7 +12,7 @@ class Pixels {
   
   private Rectangle box2d, box3d, boxLEDs;
   
-  private float rotation = 0.8;
+  float mappedBottleRotation = 0.8;
   final int ledSide = 15;
   final int ledBetween = 2;
   
@@ -210,9 +210,9 @@ class Pixels {
     
     pg3D.pushMatrix();
     
-    rotation = (rotation + rotationSpeed) % 1.0;
+    mappedBottleRotation = (mappedBottleRotation + rotationSpeed) % 1.0;
     float rX = PI/2;
-    float rY = map(rotation, 0, 1.0, -PI, PI);
+    float rY = map(mappedBottleRotation, 0, 1.0, -PI, PI);
     
     pg3D.translate(magicNum * 0.5, magicNum * 2.2, magicNum * -4.2);
     
@@ -250,6 +250,8 @@ class Pixels {
       
       fill(255);
       int whichStrand = main.hardwareTestEffect.cursorStrand;
+      final boolean portSide = main.ledMap.isStrandPortSide(whichStrand);
+
       final int ledInterval = ledSide + ledBetween;
       for (int x = 0; x < ledCols; x++) {
         for (int y = 0; y < ledRows; y++) {
@@ -259,8 +261,11 @@ class Pixels {
             Point coordinate = main.ledMap.ledGet(whichStrand, whichOridinal);
             if (coordinate.x >= 0) {
               int index = coordinate.y * ledWidth + coordinate.x;
+              if (!portSide) {
+                index += ledWidth / 2;
+              }
               if (index < pixelData.length) {
-                ledColor = pixelData[coordinate.y * ledWidth + coordinate.x];
+                ledColor = pixelData[index];
               }
             }
           }
