@@ -126,10 +126,6 @@ class Settings {
         public void function() {
           main.currentMode().manualFlash = true;
         }});
-    actions.put("/progLed/gotoHardwareTest",  new VoidFunction() {
-      public void function() {
-        main.gotoHardwareTest();
-      }});
     
     
     paramGlobalMap = new HashMap();
@@ -383,7 +379,7 @@ class Settings {
         // Just a page change, ignore
       }
       else if (addr.startsWith("/progLed/")) {
-        main.currentMode().handleOscEvent(msg);
+        main.hardwareTestEffect.handleOscEvent(msg);
       }
       else {
         print("### Received an unhandled osc message: " + msg.addrPattern() + " " + msg.typetag() + " ");
@@ -458,6 +454,7 @@ class Settings {
     updateLabelForAutoChanger();
     sendSketchGridTogglesToIPad();
     sendControlValuesForThisSketchToIPad();
+    main.hardwareTestEffect.sendToIPad();
   }
   
   

@@ -419,11 +419,17 @@ class MainClass {
     currentMode().justEnteredSketch();
   }
   
-  void gotoHardwareTest() {
-    ColumnRow hardwareTest = new ColumnRow(3, 0);
-    switchToNewEffect(hardwareTest);
-    assert(currentMode() == hardwareTestEffect);
-    hardwareTestEffect.enteredByUserAction();
+  void switchToDrawer(Drawer whichDrawer) {
+    for (int col = 0; col < modes.length; col++) {
+      for (int row = 0; row < modes[col].length; row++) {
+        if (whichDrawer == modes[col][row]) {
+          switchToNewEffect(new ColumnRow(col, row));
+          assert(currentMode() == whichDrawer);
+          return;
+        }
+      }
+    }
+    assert false : "cannot find Drawer to switch to: " + whichDrawer.getName();
   }
   
   void touchXY(int touchNum, float x, float y) {

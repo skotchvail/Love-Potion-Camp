@@ -9,13 +9,13 @@ class HardwareTest extends Drawer {
   final int kModeLedTraining = 1;
   final int kModeCheckerboard = 2;
   final int kModeEachLedPanel = 3;
-  final int kModeUnused = 4;
+  final int kModeLowPowerWithCursor = 4;
   final int kModeVerticalLineSweep = 5;
   
   int drawMode = kModeLowPower;
   float lastTimeSwitched;
   int movementPixelFast;
-  boolean frontOfBottleToRight;
+  boolean povOutside;
   boolean iPadActionsAllowed;
   
   int[] strandColor = {
@@ -43,8 +43,6 @@ class HardwareTest extends Drawer {
     settings.setParam(settings.keyFlash, 0.0);
     cursorStrand = prefs.getInt("hardware.cursorStrand", 0);
     cursorOrdinal = prefs.getInt("hardware.cursorOrdinal", 0);
-    frontOfBottleToRight = prefs.getBoolean("hardware.frontOfBottleToRight", false);
-    p.mappedBottleRotation = frontOfBottleToRight ? 0.27 : 0.73;
     backupRealCoordinate();
   }
   
@@ -52,10 +50,19 @@ class HardwareTest extends Drawer {
   String getCustom1Label() { return "Strand/Checks";}
   String getCustom2Label() { return "Cursor Finder";}
   
-  void enteredByUserAction() {
-    drawMode = kModeVerticalLineSweep;
-    iPadActionsAllowed = true;
+  void justExitedSketch() {
+    super.justExitedSketch();
+    iPadActionsAllowed = false;
     sendToIPad();
+  }
+  
+  boolean originToLeft() {
+    boolean portSide = main.ledMap.isStrandPortSide(cursorStrand);
+    return povOutside ? portSide : !portSide;
+  }
+  
+  void set3DAngle() {
+    p.mappedBottleRotation = originToLeft() ? 0.75 : 0.25;
   }
   
   void sendToIPad() {
@@ -70,9 +77,12 @@ class HardwareTest extends Drawer {
     settings.sendMessageToIPad("/progLed/labelStrand", "Save Strand " + (cursorStrand + 1));
     settings.sendMessageToIPad("/progLed/labelOrdinal", "LED " + cursorOrdinal);
     for (int i = 0; i < 6; i++) {
-      settings.sendMessageToIPad("/progLed/drawModeToggle/1/" + (i+1), (drawMode == i)?1:0);
+      settings.sendMessageToIPad("/progLed/drawModeToggle/1/" + (i+1), (iPadActionsAllowed && drawMode == i)?1:0);
     }
-    settings.sendMessageToIPad("/progLed/frontOfBottleLabel", frontOfBottleToRight ? ">>  Front of Bottle >>" : "<<  Front of Bottle <<");
+    int whichButton = povOutside ? 0 : 1;
+    for (int i = 0; i < 2; i++) {
+      settings.sendMessageToIPad("/progLed/toggleOutsideInside/1/" + (i+1), (iPadActionsAllowed && whichButton == i)?1:0);
+    }
   }
 
   void backupRealCoordinate() {
@@ -104,7 +114,25 @@ class HardwareTest extends Drawer {
     String[] list = split(addr, '/');
     String action = list[2];
     println("hw action = " + action);
-    
+
+    if (action.equals("toggleOutsideInside")) {
+      boolean pressed = (msg.get(0).floatValue() == 1.0);
+      if (pressed) {
+        if (main.currentMode() != this) {
+          main.switchToDrawer(this);
+        }
+        if (!iPadActionsAllowed) {
+          drawMode = kModeVerticalLineSweep;
+        }
+        int whichButton = Integer.parseInt(list[4]) - 1;
+        povOutside = whichButton == 0;
+        iPadActionsAllowed = true;
+        set3DAngle();
+        sendToIPad();
+        return;
+      }
+    }
+
     if (!iPadActionsAllowed) {
       println("iPad actions not allowed until 'Program LEDs' is pressed");
       return;
@@ -114,15 +142,6 @@ class HardwareTest extends Drawer {
       boolean pressed = (msg.get(0).floatValue() == 1.0);
       if (pressed) {
         drawMode = Integer.parseInt(list[4]) - 1;
-        sendToIPad();
-      }
-    }
-    else if (action.equals("frontOfBottleToggle")) {
-      boolean pressed = (msg.get(0).floatValue() == 1.0);
-      if (pressed) {
-        frontOfBottleToRight = !frontOfBottleToRight;
-        prefs.putBoolean("hardware.frontOfBottleToRight", frontOfBottleToRight);
-        needToFlushPrefs = true;
         sendToIPad();
       }
     }
@@ -166,10 +185,10 @@ class HardwareTest extends Drawer {
           command = programCoordYLower;
         }
         else if (action.equals("coordXLeft")) {
-          command = frontOfBottleToRight ? programCoordXHigher : programCoordXLower;
+          command = originToLeft() ? programCoordXLower : programCoordXHigher;
         }
         else if (action.equals("coordXRight")) {
-          command = frontOfBottleToRight ? programCoordXLower : programCoordXHigher;
+          command = originToLeft() ? programCoordXHigher : programCoordXLower;
         }
         if (command != 0) {
           doProgramAction(command);
@@ -209,10 +228,10 @@ class HardwareTest extends Drawer {
           command = programCoordYLower;
         }
         else if (keyCode == LEFT) {
-          command = frontOfBottleToRight ? programCoordXHigher: programCoordXLower;
+          command = originToLeft() ? programCoordXLower : programCoordXHigher;
         }
         else if (keyCode == RIGHT) {
-          command = frontOfBottleToRight ? programCoordXLower : programCoordXHigher;
+          command = originToLeft() ? programCoordXHigher : programCoordXLower;
         }
     }
 
@@ -222,6 +241,8 @@ class HardwareTest extends Drawer {
   }
     
   void doProgramAction(int command) {
+    
+    int oldCursorStrand = cursorStrand;
     
     restoreRealCoordinate();
     
@@ -320,6 +341,9 @@ class HardwareTest extends Drawer {
     needToFlushPrefs = true;
     backupRealCoordinate();
     sendToIPad();
+    if (oldCursorStrand != cursorStrand) {
+      set3DAngle();
+    }
   }
   
   String[] getTextLines() {
@@ -487,7 +511,7 @@ class HardwareTest extends Drawer {
       useCursorFinder = true;
       drawLineSweep();
     }
-    else if (mode == kModeUnused) {
+    else if (mode == kModeLowPowerWithCursor) {
       useCursorFinder = true;
       // Draw solid low power color
       pg.background(lowPowerColor);

@@ -487,7 +487,6 @@ class LedMap {
     }
   }
   
-  
   boolean isStrandPortSide(int whichStrand) {
     return whichStrand < getNumStrands() / 2;
   }
