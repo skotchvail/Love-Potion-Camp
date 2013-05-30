@@ -44,7 +44,7 @@ void setup() {
   utility = new Utility();
   prefs = Preferences.userNodeForPackage(this.getClass());
   draw2dGrid = prefs.getBoolean("draw2dGrid", true);
-  useTotalControlHardware = prefs.getBoolean("useTotalControlHardware", true);
+  useTotalControlHardware = prefs.getBoolean("useTotalControlHardware", false);
   draw3dSimulation = prefs.getBoolean("draw3dSimulation", true);
   rotationSpeed = prefs.getFloat("rotationSpeed", 1.0 / (FRAME_RATE * 30)); // default once every 30 seconds
   main = new MainClass();
