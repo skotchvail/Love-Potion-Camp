@@ -261,6 +261,8 @@ class Pixels {
             Point coordinate = main.ledMap.ledGet(whichStrand, whichOridinal);
             if (coordinate.x >= 0) {
               int index = coordinate.y * ledWidth + coordinate.x;
+              assert (index < pixelData.length) : "index " + index + " exceeds pixelData.length:" + pixelData.length;
+              // TODO: don't need portSide stuff
               if (!portSide) {
                 index += ledWidth / 2;
               }

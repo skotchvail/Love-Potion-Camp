@@ -87,11 +87,11 @@ class HardwareTest extends Drawer {
 
   void backupRealCoordinate() {
     realCoordinate = main.ledMap.ledGet(cursorStrand, cursorOrdinal, false);
-    main.ledMap.ledRawSet(cursorStrand, cursorOrdinal, 0, 0);
+    main.ledMap.ledProgramCoordinate(cursorStrand, cursorOrdinal, new Point (0, 0));
   }
   
   void restoreRealCoordinate() {
-    main.ledMap.ledRawSet(cursorStrand, cursorOrdinal, realCoordinate.x, realCoordinate.y);
+    main.ledMap.ledProgramCoordinate(cursorStrand, cursorOrdinal, realCoordinate);
   }
   
   final int programStrandHigher = 1;
@@ -149,7 +149,7 @@ class HardwareTest extends Drawer {
       boolean pressed = (msg.get(0).floatValue() == 1.0);
       if (pressed) {
         restoreRealCoordinate();
-        main.ledMap.writeOneStrand(cursorStrand);
+        main.ledMap.writeOneStrandToDisk(cursorStrand);
         backupRealCoordinate();
       }
     }
@@ -281,7 +281,7 @@ class HardwareTest extends Drawer {
     cursorOrdinal %= strandSize;
     
     if (command == programLedOff) {
-      main.ledMap.ledSetRawValue(cursorStrand, cursorOrdinal, TC_PIXEL_UNUSED);
+      main.ledMap.ledProgramMissing(cursorStrand, cursorOrdinal);
     }
     
     int xChange = 0;
@@ -313,7 +313,7 @@ class HardwareTest extends Drawer {
       };
       
       if (a.x < 0) {
-        main.ledMap.ledRawSet(cursorStrand, cursorOrdinal, 0, 0);
+        main.ledMap.ledProgramCoordinate(cursorStrand, cursorOrdinal, new Point(0, 0));
       }
       else {
         int newX = a.x + xChange;
@@ -333,7 +333,7 @@ class HardwareTest extends Drawer {
         else if (newY < 0) {
           newY = ledHeight - 1;
         }
-        main.ledMap.ledRawSet(cursorStrand, cursorOrdinal, newX, newY);
+        main.ledMap.ledProgramCoordinate(cursorStrand, cursorOrdinal, new Point(newX, newY));
       }
     }
     prefs.putInt("hardware.cursorOrdinal", cursorOrdinal);
