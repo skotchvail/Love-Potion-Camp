@@ -521,6 +521,7 @@ class LedMap {
     return (Point[]) points.toArray(new Point[0]);
   }
   
+  TotalControlConsumer totalControlConsumer;
   TotalControlConcurrent totalControlConcurrent;
   boolean hardwareAlreadySetup = false;
   
@@ -579,7 +580,8 @@ class LedMap {
       totalControlConcurrent = new TotalControlConcurrent(getNumStrands(), maxPixelsPerStrand, kUseBitBang);
     }
     else {
-      int status = setupTotalControl(getNumStrands(), maxPixelsPerStrand, kUseBitBang);
+      totalControlConsumer = new TotalControlConsumer();
+      int status = totalControlConsumer.setupTotalControl(getNumStrands(), maxPixelsPerStrand, kUseBitBang);
       if (status != 0) {
         //useTotalControlHardware = false;
         //println("turning off Total Control because of error during initialization");
@@ -604,7 +606,7 @@ class LedMap {
       totalControlConcurrent.put(thePixelData, theStrandMap);
     }
     else {
-      int status = writeOneFrame(thePixelData, theStrandMap);
+      int status = totalControlConsumer.writeOneFrame(thePixelData, theStrandMap);
     }
   }
 }

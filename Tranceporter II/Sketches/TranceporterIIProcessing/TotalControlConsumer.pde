@@ -1,37 +1,89 @@
-import TotalControl.*;
+import TotalControl.*;  // If you don't have the hardware driver, comment out this line
+
+
+static class TotalControlFake { // If you don't have the hardware driver, rename this class to TotalControl
+  static int open(int nStrands,int pixelsPerStrand)
+	{
+    return TC_OK;
+	}
+  
+  public static int setGamma()
+	{
+    return TC_OK;
+	}
+  
+	public static int setGamma(float g)
+	{
+    return TC_OK;
+	}
+  
+	public static int setGamma(
+                             int rMin,int rMax,float rGamma,
+                             int gMin,int gMax,float gGamma,
+                             int bMin,int bMax,float bGamma)
+	{
+    return TC_OK;
+	}
+  
+	public static void initStats()
+	{
+	}
+  
+	public static int refresh(int[] pixels, int[] remap)
+	{
+    return TC_OK;
+	}
+  
+  public static int setStrandPin(int strand,short bit)
+	{
+    return TC_OK;
+	}
+
+	public static void close()
+	{
+	}
+  
+	public static void printStats()
+	{
+	}
+  
+	public static void printError(int status)
+	{
+	}
+}
 
 /*
  Writes to the p9813 on a separate thread to increase our frame rate
  */
 
 
-final int TC_OK = 0;       /* Function completed successfully      */
-final int TC_ERR_VALUE = 1;     /* Parameter out of range               */
-final int TC_ERR_MALLOC = 2;    /* malloc() failure                     */
-final int TC_ERR_OPEN = 3;      /* Could not open FTDI device           */
-final int TC_ERR_WRITE = 4;     /* Error writing to FTDI device         */
-final int TC_ERR_MODE = 5;      /* Could not enable async bit bang mode */
-final int TC_ERR_DIVISOR = 6;   /* Could not set baud divisor           */
-final int TC_ERR_BAUDRATE = 7;   /* Could not set baud rate              */
+static final int TC_OK = 0;       /* Function completed successfully      */
+static final int TC_ERR_VALUE = 1;     /* Parameter out of range               */
+static final int TC_ERR_MALLOC = 2;    /* malloc() failure                     */
+static final int TC_ERR_OPEN = 3;      /* Could not open FTDI device           */
+static final int TC_ERR_WRITE = 4;     /* Error writing to FTDI device         */
+static final int TC_ERR_MODE = 5;      /* Could not enable async bit bang mode */
+static final int TC_ERR_DIVISOR = 6;   /* Could not set baud divisor           */
+static final int TC_ERR_BAUDRATE = 7;   /* Could not set baud rate              */
 
-final int TC_PIXEL_UNUSED =       -1;     // Pixel is attached but not used
-final int TC_PIXEL_DISCONNECTED = -2;     // Pixel is not attached to strand
-final int TC_PIXEL_UNDEFINED =    -3;     // Pixel not yet assigned a value
+static final int TC_PIXEL_UNUSED =       -1;     // Pixel is attached but not used
+static final int TC_PIXEL_DISCONNECTED = -2;     // Pixel is not attached to strand
+static final int TC_PIXEL_UNDEFINED =    -3;     // Pixel not yet assigned a value
 
 /* FTDI pin-to-bitmask mappings */
 
-final short  TC_FTDI_TX   = 0x01;  /* Avail on all FTDI adapters,  strand 0 default */
-final short  TC_FTDI_RX   = 0x02;  /* Avail on all FTDI adapters,  strand 1 default */
-final short  TC_FTDI_RTS  = 0x04;  /* Avail on FTDI-branded cable, strand 2 default */
-final short  TC_FTDI_CTS  = 0x08;  /* Avail on all FTDI adapters,  clock default    */
-final short  TC_FTDI_DTR  = 0x10;  /* Avail on third-party cables, strand 2 default */
-final short  TC_FTDI_DSR  = 0x20;  /* Avail on full breakout board */
-final short  TC_FTDI_DCD  = 0x40;  /* Avail on full breakout board */
-final short  TC_FTDI_RI   = 0x80;  /* Avail on full breakout board */
+static final short  TC_FTDI_TX   = 0x01;  /* Avail on all FTDI adapters,  strand 0 default */
+static final short  TC_FTDI_RX   = 0x02;  /* Avail on all FTDI adapters,  strand 1 default */
+static final short  TC_FTDI_RTS  = 0x04;  /* Avail on FTDI-branded cable, strand 2 default */
+static final short  TC_FTDI_CTS  = 0x08;  /* Avail on all FTDI adapters,  clock default    */
+static final short  TC_FTDI_DTR  = 0x10;  /* Avail on third-party cables, strand 2 default */
+static final short  TC_FTDI_DSR  = 0x20;  /* Avail on full breakout board */
+static final short  TC_FTDI_DCD  = 0x40;  /* Avail on full breakout board */
+static final short  TC_FTDI_RI   = 0x80;  /* Avail on full breakout board */
 
 
 /* Special mode bits optionally added to first parameter to TCopen()    */
-final int TC_CBUS_CLOCK = 8;   /* Use hardware for serial clock, not bitbang */
+static final int TC_CBUS_CLOCK = 8;   /* Use hardware for serial clock, not bitbang */
 /* Hardware (CBUS) clock yields 2X throughput boost but requires a full
  FTDI breakout board with a specially-configured chip; this will not
  work with standard FTDI adapter cable (e.g. LilyPad programmer).
@@ -56,7 +108,7 @@ final int TC_CBUS_CLOCK = 8;   /* Use hardware for serial clock, not bitbang */
  TCsetStrandPin(3, TC_FTDI_CTS);
  */
 
-//class foo {
+class TotalControlConsumer {
   
   int lastError;
   int lastStat;
@@ -111,16 +163,16 @@ final int TC_CBUS_CLOCK = 8;   /* Use hardware for serial clock, not bitbang */
       TotalControl.printStats();
     }
     return status;
-    
   }
   
-//}
+}
 
 class TotalControlConcurrent implements Runnable {
   private PixelDataAndMapQueue q;
   private int numStrands;
   private boolean useBitBang;
   private int pixelsPerStrand;
+  TotalControlConsumer totalControlConsumer;
   
   TotalControlConcurrent(int numStrands, int pixelsPerStrand, boolean useBitBang) {
     this.numStrands = numStrands;
@@ -136,7 +188,7 @@ class TotalControlConcurrent implements Runnable {
   }
   
   int getLastError() {
-    return lastError;
+    return totalControlConsumer.lastError;
   }
   
   void put(color[] pixelData, int[] strandMap) {
@@ -146,7 +198,8 @@ class TotalControlConcurrent implements Runnable {
   int[] lastStrandMap;
   
   public void run() {
-    setupTotalControl(numStrands, pixelsPerStrand, useBitBang);
+    totalControlConsumer = new TotalControlConsumer();
+    totalControlConsumer.setupTotalControl(numStrands, pixelsPerStrand, useBitBang);
     
     while(true) {
       PixelDataAndMap dm = q.get();
@@ -162,7 +215,7 @@ class TotalControlConcurrent implements Runnable {
                 );
       }
       
-      writeOneFrame(dm.pixelData, dm.strandMap);
+      totalControlConsumer.writeOneFrame(dm.pixelData, dm.strandMap);
     }
   }
   

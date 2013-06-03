@@ -26,15 +26,25 @@ found in Processing preferences. My path looks like this:
 Get the libraries [here](https://www.box.com/s/a351863d10c9046a2ac1) and move them
 into your `Libraries` folder. Ask Skotch for box permission if needed. 
 
-## Test and Run
+## If you are not going to drive the LED's
 
-That should be enough to get the simulation to run on your computer. You should be able to load and
-run `TranceporterIIProcessing.pde`. You will see an image of the bottle and some animations. 
+If you are going to drive the LED's, then skip this section. 
 
-## Adding Sketches
+Life is easier if you don't have to install the TotalControl drivers.
+If that is your case, you will need to modify some code to get
+everything to run. 
+Go to `TotalControlConsumer.PDE` and comment out the import line like this:
 
-See the document [ImportingSketches.md](./ImportingSketches.md) for info on how to add Sketches
-to the system. 
+     // import TotalControl.*;
+     
+Next rename the class `TotalControlFake` so that it looks like this:
+
+     static class TotalControl
+     
+That should be enough to bypass the driver. Be sure that you do not checkin 
+these changes. They are only to allow your system to run with a partial install.
+
+Skip the next section and go to "Test and Run"
 
 ## Setup to drive the LED's
 
@@ -58,6 +68,16 @@ Checkout and apply the patch:
     $ patch -p0 < ../Love-Potion-Camp/patch.txt
     $ make
     $ cd processing ; make && make install
+
+## Test and Run
+
+That should be enough to get the simulation to run on your computer. You should be able to load and
+run `TranceporterIIProcessing.pde`. You will see an image of the bottle and some animations. 
+
+## Adding Sketches
+
+See the document [ImportingSketches.md](./ImportingSketches.md) for info on how to add Sketches
+to the system. 
 
 
 ## Code notes
