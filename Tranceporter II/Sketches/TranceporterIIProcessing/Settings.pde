@@ -516,7 +516,7 @@ class Settings {
     
     for (int col = 0; col < numCols; col++) {
       for (int row = 0; row < numRows; row++) {
-        whichModes[col][row] = prefs.getBoolean(sketchName(col, row), false);
+        whichModes[col][row] = prefs.getBoolean(sketchName(col, row), true);
       }
     }
   }

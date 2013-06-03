@@ -42,7 +42,11 @@ void setup() {
 
   println("target FRAME_RATE:" + FRAME_RATE);
   utility = new Utility();
-  prefs = Preferences.userNodeForPackage(this.getClass());
+//  prefs = Preferences.userNodeForPackage(this.getClass());
+//  try {
+//    prefs.clear();
+//  }
+//  catch(Exception e) {}
   draw2dGrid = prefs.getBoolean("draw2dGrid", true);
   useTotalControlHardware = prefs.getBoolean("useTotalControlHardware", false);
   draw3dSimulation = prefs.getBoolean("draw3dSimulation", true);
@@ -140,8 +144,9 @@ class MainClass {
     settings.initOSC();
     pm.init(applet);
 
-    whichEffect.column = prefs.getInt("whichEffect.column", 2);
-    whichEffect.row = prefs.getInt("whichEffect.row", 0);
+    whichEffect.column = prefs.getInt("whichEffect.column", 1);
+    whichEffect.row = prefs.getInt("whichEffect.row", 3);
+    //settings.setSketchOn(2, 2, true);
     
     // Audio features
     minim = new Minim(applet);
