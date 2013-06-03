@@ -42,7 +42,7 @@ void setup() {
 
   println("target FRAME_RATE:" + FRAME_RATE);
   utility = new Utility();
-//  prefs = Preferences.userNodeForPackage(this.getClass());
+  prefs = Preferences.userNodeForPackage(this.getClass());
 //  try {
 //    prefs.clear();
 //  }
