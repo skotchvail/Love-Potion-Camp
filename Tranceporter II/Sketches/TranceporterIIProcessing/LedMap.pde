@@ -100,7 +100,9 @@ class LedMap {
 
       if (value >= 0) {
         Point p = indexToCoordinate(value);
-        // TODO: this can probably be cleaned up to not have so many else row = null statements. 
+        p = convertDoubleSidedPoint(p, whichStrand);
+        
+        // TODO: this can probably be cleaned up to not have so many else row = null statements.
         if (row != null) {
           if (!row.getString(kColumnCommand).equals(kCommandMap)) {
             row = null;
@@ -223,6 +225,7 @@ class LedMap {
         biggestY = max(coord.y, biggestY);
         int index = (whichStrand * maxPixelsPerStrand) + ordinalEnd;
         assert(strandMap[index] == TC_PIXEL_UNDEFINED) : "led " + ordinalEnd + " on strand " + whichStrand + " is already defined: " + strandMap[index];
+        coord = convertDoubleSidedPoint(coord, whichStrand);
         int pixelDataIndex = coordToIndex(coord);
         strandMap[index] = pixelDataIndex;
       }
@@ -342,20 +345,20 @@ class LedMap {
   // TODO: not sure if this method is needed
   Point convertDoubleSidedPoint(Point p, int whichStrand) {
     Point result = new Point(p);
-    if (p.x > 0 && isStrandPortSide(whichStrand)) {
+    if (p.x >= 0 && !isStrandPortSide(whichStrand)) {
       result.x = ledWidth - p.x - 1;
     }
     return result;
   }
   
   void ledProgramCoordinate(int whichStrand, int ordinal, Point p) {
-    if (false && p.x >= 0) {
+    if (p.x >= 0) {
       if (isStrandPortSide(whichStrand)) {
-        assert p.x < ledWidth / 2;
+        assert p.x < ledWidth / 2 : " invalid x: " + p.x + " for portside strand " + whichStrand;
       }
       else {
-        assert p.x > ledWidth / 2;
-        assert p.x < ledWidth;
+        assert p.x > ledWidth / 2 : " invalid x: " + p.x + " for starboard strand " + whichStrand;
+        assert p.x < ledWidth : " invalid x: " + p.x + " for starboard strand " + whichStrand;
       }
     }
     assert(whichStrand < getNumStrands()) : "not this many strands";

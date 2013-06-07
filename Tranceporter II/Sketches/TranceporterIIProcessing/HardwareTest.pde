@@ -87,7 +87,9 @@ class HardwareTest extends Drawer {
 
   void backupRealCoordinate() {
     realCoordinate = main.ledMap.ledGet(cursorStrand, cursorOrdinal, false);
-    main.ledMap.ledProgramCoordinate(cursorStrand, cursorOrdinal, new Point (0, 0));
+    Point zeroPoint = new Point (0, 0);
+    zeroPoint = main.ledMap.convertDoubleSidedPoint(zeroPoint, cursorStrand);
+    main.ledMap.ledProgramCoordinate(cursorStrand, cursorOrdinal, zeroPoint);
   }
   
   void restoreRealCoordinate() {

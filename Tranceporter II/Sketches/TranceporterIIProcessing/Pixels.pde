@@ -60,14 +60,8 @@ class Pixels {
       
       int numStrands = main.ledMap.getNumStrands();
       for (int whichStrand = 0; whichStrand < numStrands; whichStrand++) {
-        final boolean portSide = main.ledMap.isStrandPortSide(whichStrand);
         for (Point point: main.ledMap.pointsForStrand(whichStrand)) {
-          if (portSide) {
             maskPixels[point.y * ledWidth + point.x] = white;
-          }
-          else {
-            maskPixels[point.y * ledWidth + (ledWidth - point.x - 1)] = white;
-          }
         }
       }
     }
@@ -250,7 +244,6 @@ class Pixels {
       
       fill(255);
       int whichStrand = main.hardwareTestEffect.cursorStrand;
-      final boolean portSide = main.ledMap.isStrandPortSide(whichStrand);
 
       final int ledInterval = ledSide + ledBetween;
       for (int x = 0; x < ledCols; x++) {
@@ -262,13 +255,7 @@ class Pixels {
             if (coordinate.x >= 0) {
               int index = coordinate.y * ledWidth + coordinate.x;
               assert (index < pixelData.length) : "index " + index + " exceeds pixelData.length:" + pixelData.length;
-              // TODO: don't need portSide stuff
-              if (!portSide) {
-                index += ledWidth / 2;
-              }
-              if (index < pixelData.length) {
-                ledColor = pixelData[index];
-              }
+              ledColor = pixelData[index];
             }
           }
           fill(ledColor);

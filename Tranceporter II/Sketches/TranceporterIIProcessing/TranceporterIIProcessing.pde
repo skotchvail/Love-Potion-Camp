@@ -27,7 +27,7 @@ boolean useTotalControlHardware;
 boolean needToFlushPrefs;
 boolean pauseAnimations;
 float rotationSpeed;
-float  factorLowU = 0.2, factorHighU = 0.02, factorLowV = 0.02, factorHighV = 0.13;
+float factorLowU = 0.2, factorHighU = 0.02, factorLowV = 0.02, factorHighV = 0.13;
 
 MainClass main;
 Utility utility;
