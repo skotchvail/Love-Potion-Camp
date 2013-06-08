@@ -354,11 +354,10 @@ class LedMap {
   void ledProgramCoordinate(int whichStrand, int ordinal, Point p) {
     if (p.x >= 0) {
       if (isStrandPortSide(whichStrand)) {
-        assert p.x < ledWidth / 2 : " invalid x: " + p.x + " for portside strand " + whichStrand;
+        assert p.x < ledWidth / 2 : " invalid x: " + p.x + " for portside strand " + (whichStrand + 1);
       }
       else {
-        assert p.x > ledWidth / 2 : " invalid x: " + p.x + " for starboard strand " + whichStrand;
-        assert p.x < ledWidth : " invalid x: " + p.x + " for starboard strand " + whichStrand;
+        assert (p.x > ledWidth / 2) || (p.x < ledWidth): " invalid x: " + p.x + " for starboard strand " + (whichStrand + 1);
       }
     }
     assert(whichStrand < getNumStrands()) : "not this many strands";

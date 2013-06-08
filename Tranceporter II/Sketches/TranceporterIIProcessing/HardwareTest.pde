@@ -57,18 +57,17 @@ class HardwareTest extends Drawer {
   }
   
   boolean originToLeft() {
-    boolean portSide = main.ledMap.isStrandPortSide(cursorStrand);
-    return povOutside ? portSide : !portSide;
+    return povOutside;
   }
   
   void set3DAngle() {
-    p.mappedBottleRotation = originToLeft() ? 0.75 : 0.25;
+    p.mappedBottleRotation = main.ledMap.isStrandPortSide(cursorStrand) ? 0.75 : 0.25;
   }
   
   void sendToIPad() {
     super.sendToIPad();
-    Point a = realCoordinate;
-    if (a.x >= 0) {
+    if (realCoordinate.x >= 0) {
+      Point a = main.ledMap.convertDoubleSidedPoint(realCoordinate, cursorStrand);
       settings.sendMessageToIPad("/progLed/labelCoordinates", "" + a.x + ", " + a.y);
     }
     else {
@@ -87,7 +86,7 @@ class HardwareTest extends Drawer {
 
   void backupRealCoordinate() {
     realCoordinate = main.ledMap.ledGet(cursorStrand, cursorOrdinal, false);
-    Point zeroPoint = new Point (0, 0);
+    Point zeroPoint = new Point(0, 0);
     zeroPoint = main.ledMap.convertDoubleSidedPoint(zeroPoint, cursorStrand);
     main.ledMap.ledProgramCoordinate(cursorStrand, cursorOrdinal, zeroPoint);
   }
@@ -315,18 +314,28 @@ class HardwareTest extends Drawer {
       };
       
       if (a.x < 0) {
-        main.ledMap.ledProgramCoordinate(cursorStrand, cursorOrdinal, new Point(0, 0));
+        Point zeroPoint = new Point(0, 0);
+        zeroPoint = main.ledMap.convertDoubleSidedPoint(zeroPoint, cursorStrand);
+        main.ledMap.ledProgramCoordinate(cursorStrand, cursorOrdinal, zeroPoint);
       }
       else {
         int newX = a.x + xChange;
         int newY = a.y + yChange;
         
         int halfWidth = ledWidth / 2;
-        if (newX >= halfWidth) {
-          newX = 0;
+        boolean portSide = main.ledMap.isStrandPortSide(cursorStrand);
+        int maxX = halfWidth;
+        int minX = 0;
+        if (!portSide) {
+          maxX = ledWidth;
+          minX = halfWidth;
         }
-        else if (newX < 0) {
-          newX = halfWidth - 1;
+        
+        if (newX >= maxX) {
+          newX = minX;
+        }
+        else if (newX < minX) {
+          newX = maxX - 1;
         }
 
         if (newY >= ledHeight) {
@@ -350,7 +359,8 @@ class HardwareTest extends Drawer {
   
   String[] getTextLines() {
     Point a = realCoordinate;
-    
+    a = main.ledMap.convertDoubleSidedPoint(a, cursorStrand);
+
     return new String[] {
       "cursorStrand: " + (cursorStrand + 1),
       "cursorOrdinal: " + (cursorOrdinal + 0),
@@ -422,11 +432,7 @@ class HardwareTest extends Drawer {
     float factor = map(settings.getParam(settings.keySpeed), 0.0, 1.0, 0.02, 0.3);
     int whichStrand = (int)(frameCount * factor) % main.ledMap.getNumStrands();
     color theColor = colors[whichStrand % colors.length];
-    final boolean portSide = main.ledMap.isStrandPortSide(whichStrand);
     for (Point point: main.ledMap.pointsForStrand(whichStrand)) {
-      if (!portSide) {
-        point.x = width - point.x;
-      }
       pg.set(point.x, point.y, theColor);
     }
   }
@@ -534,10 +540,7 @@ class HardwareTest extends Drawer {
       }
       pg.stroke(factor * 255);
       Point a = main.ledMap.ledGet(cursorStrand, cursorOrdinal);
-      if (a.x >= 0 && a.y >= 0) {
-        if (!main.ledMap.isStrandPortSide(cursorStrand)) {
-          a.x += ledWidth / 2;
-        }
+      if (a.x >= 0) {
         pg.point(a.x, a.y);
       }
     }
