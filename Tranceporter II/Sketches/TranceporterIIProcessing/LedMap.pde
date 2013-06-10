@@ -371,7 +371,7 @@ class LedMap {
     ledProgramCoordinate(whichStrand, ordinal, indexToCoordinate(TC_PIXEL_UNUSED));
   }
 
-  boolean ledProgramOffset(int whichStrand, int ordinal, Point delta {
+  boolean ledProgramOffset(int whichStrand, int ordinal, Point delta) {
     int strandSize = getStrandSize(whichStrand);
     for (int i = ordinal; i < strandSize; i++) {
       Point point = ledGet(whichStrand, i, false);

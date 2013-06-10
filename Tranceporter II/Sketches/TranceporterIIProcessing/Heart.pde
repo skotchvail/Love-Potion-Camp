@@ -52,15 +52,18 @@ class Heart extends Drawer
   
   void draw()
   {
-    float scalex = 0.14;
+    float scalex = 0.37;
     pg.background(getColor(frame));
     pg.scale(scalex);
     
 
     // JJ - LOOK AT POSITIONING......
-    pg.image(images[frame], (4.0*width - (images[frame].width*scalex)), (height*5.0 - (images[frame].height*scalex))/2);
+ //   pg.image(images[frame], (4.0*width - (images[frame].width*scalex)), (height*5.0 - (images[frame].height*scalex))/2);
+ 
+  pg.rotate(-PI/4);
+    pg.image(images[frame], 0 - width/3, 0);
     
-    
+   
     // JJ Look at looping on the beat...
     // settings.isBeat(1);
     //settings.isBeat(2);
