@@ -11,6 +11,8 @@ class HardwareTest extends Drawer {
   final int kModeEachLedPanel = 3;
   final int kModeLowPowerWithCursor = 4;
   final int kModeVerticalLineSweep = 5;
+  final int kModeOverlap = 6;
+  final int kModeUnused = 7;
   
   int drawMode = kModeLowPower;
   float lastTimeSwitched;
@@ -73,7 +75,7 @@ class HardwareTest extends Drawer {
     else {
       settings.sendMessageToIPad("/progLed/labelCoordinates", "missing");
     }
-    settings.sendMessageToIPad("/progLed/labelStrand", "Save Strand " + (cursorStrand + 1));
+    settings.sendMessageToIPad("/progLed/labelStrand", "Strand " + (cursorStrand + 1));
     settings.sendMessageToIPad("/progLed/labelOrdinal", "LED " + cursorOrdinal);
     for (int i = 0; i < 6; i++) {
       settings.sendMessageToIPad("/progLed/drawModeToggle/1/" + (i+1), (iPadActionsAllowed && drawMode == i)?1:0);
@@ -103,9 +105,13 @@ class HardwareTest extends Drawer {
   final int programOrdinalMuchHigher = 6;
   final int programCoordYHigher = 7;
   final int programCoordYLower = 8;
-  final int programCoordXLower = 9;
-  final int programCoordXHigher = 10;
+  final int programCoordXHigher = 9;
+  final int programCoordXLower = 10;
   final int programLedOff = 11;
+  final int programOffsetYHigher = 12;
+  final int programOffsetYLower = 13;
+  final int programOffsetXHigher = 14;
+  final int programOffsetXLower = 15;
   
   void handleOscEvent(OscMessage msg) {
     
@@ -191,6 +197,19 @@ class HardwareTest extends Drawer {
         else if (action.equals("coordXRight")) {
           command = originToLeft() ? programCoordXHigher : programCoordXLower;
         }
+        else if (action.equals("offsetYHigher")) {
+          command = programOffsetYLower;
+        }
+        else if (action.equals("offsetYLower")) {
+          command = programOffsetYHigher;
+        }
+        else if (action.equals("offsetXRight")) {
+          command = originToLeft() ? programOffsetXHigher : programOffsetXLower;
+        }
+        else if (action.equals("offsetXLeft")) {
+          command = originToLeft() ? programOffsetXLower : programOffsetXHigher;
+        }
+
         if (command != 0) {
           doProgramAction(command);
         }
@@ -241,11 +260,31 @@ class HardwareTest extends Drawer {
     }
   }
     
-  void doProgramAction(int command) {
+  void doProgramAction(final int command) {
     
     int oldCursorStrand = cursorStrand;
     
     restoreRealCoordinate();
+    
+    //X and Y offsets
+    Point delta = new Point(0,0);
+    if (command == programOffsetYHigher) {
+      delta.y = +1;
+    }
+    else if (command == programOffsetYLower) {
+      delta.y = -1;
+    }
+    else if (command == programOffsetXHigher) {
+      delta.x = +1;
+    }
+    else if (command == programOffsetXLower) {
+      delta.x = -1;
+    }
+    if (delta.x != 0 || delta.y != 0) {
+      println("offset = " + delta);
+      main.ledMap.ledProgramOffset(cursorStrand, cursorOrdinal, delta);
+      p.forceUpdateMaskPixels();
+    }
     
     // Which strand
     if (command == programStrandHigher) {
@@ -283,6 +322,7 @@ class HardwareTest extends Drawer {
     
     if (command == programLedOff) {
       main.ledMap.ledProgramMissing(cursorStrand, cursorOrdinal);
+      p.forceUpdateMaskPixels();
     }
     
     int xChange = 0;
@@ -345,6 +385,7 @@ class HardwareTest extends Drawer {
           newY = ledHeight - 1;
         }
         main.ledMap.ledProgramCoordinate(cursorStrand, cursorOrdinal, new Point(newX, newY));
+        p.forceUpdateMaskPixels();
       }
     }
     prefs.putInt("hardware.cursorOrdinal", cursorOrdinal);
@@ -413,6 +454,34 @@ class HardwareTest extends Drawer {
     }
   }
   
+  void drawOverlap() {
+    color black = color(0, 0, 0);
+    Arrays.fill(pg.pixels, black);
+
+    color colors[] =   {
+      color(100, 0, 0),
+      color(0, 100, 0),
+      color(0, 0, 100),
+      color(0, 100, 100),
+    };
+
+    // Draw the pixels that overlap in a bright color
+    for (int whichStrand = 0; whichStrand < main.ledMap.getNumStrands(); whichStrand++) {
+      for (Point point: main.ledMap.pointsForStrand(whichStrand)) {
+        if (point.x >= 0) {
+          int index = point.y * pg.width + point.x;
+          if (pg.pixels[index] == black) {
+            pg.pixels[index] = colors[whichStrand % colors.length];
+          }
+          else {
+            pg.pixels[index] = color(255, 255, 0);
+          }
+        }
+      }
+    }
+    pg.updatePixels();
+  }
+  
   void drawEachLedPanel() {
     // Draw Each panel one after the other
     
@@ -427,11 +496,19 @@ class HardwareTest extends Drawer {
       color(255, 255, 0),
     };
     
+    int halfStrands = main.ledMap.getNumStrands() / 2;
+    
     pg.fill(0, 15);
     pg.rect(0, 0, width, height);
     float factor = map(settings.getParam(settings.keySpeed), 0.0, 1.0, 0.02, 0.3);
-    int whichStrand = (int)(frameCount * factor) % main.ledMap.getNumStrands();
+    
+    int whichStrand = (int)(frameCount * factor) % halfStrands;
     color theColor = colors[whichStrand % colors.length];
+    for (Point point: main.ledMap.pointsForStrand(whichStrand)) {
+      pg.set(point.x, point.y, theColor);
+    }
+
+    whichStrand += halfStrands;
     for (Point point: main.ledMap.pointsForStrand(whichStrand)) {
       pg.set(point.x, point.y, theColor);
     }
@@ -514,6 +591,14 @@ class HardwareTest extends Drawer {
     else if (mode == kModeEachLedPanel) {
       useCursorFinder = true;
       drawEachLedPanel();
+    }
+    else if (mode == kModeOverlap) {
+      useCursorFinder = true;
+      drawOverlap();
+    }
+    else if (mode == kModeUnused) {
+      useCursorFinder = false;
+      pg.background(lowPowerColor);
     }
     else if (mode == kModeVerticalLineSweep) {
       useCursorFinder = true;

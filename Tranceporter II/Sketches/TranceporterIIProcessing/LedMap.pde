@@ -363,11 +363,38 @@ class LedMap {
     assert(whichStrand < getNumStrands()) : "not this many strands";
     assert(ordinal < getStrandSize(whichStrand)) : "whichStrand exceeds number of leds per strand";
     int index = (whichStrand * maxPixelsPerStrand) + ordinal;
-    strandMap[index] = coordToIndex(p);
+    int newIndex = coordToIndex(p);
+    strandMap[index] = newIndex;
   }
   
   void ledProgramMissing(int whichStrand, int ordinal) {
     ledProgramCoordinate(whichStrand, ordinal, indexToCoordinate(TC_PIXEL_UNUSED));
+  }
+
+  boolean ledProgramOffset(int whichStrand, int ordinal, Point delta {
+    int strandSize = getStrandSize(whichStrand);
+    for (int i = ordinal; i < strandSize; i++) {
+      Point point = ledGet(whichStrand, i, false);
+      if (point.x >= 0) {
+        point.translate(delta.x, delta.y);
+        Point checker = convertDoubleSidedPoint(point, whichStrand);
+        if (checker.x < 0 || checker.x >= ledWidth / 2 || checker.y < 0 || checker.y >= ledHeight) {
+          //need to unroll the action, because we cannot go off the edge
+          delta.x = -delta.x;
+          delta.y = -delta.y;
+          for (int j = ordinal; j < i; j++) {
+            point = ledGet(whichStrand, i, false);
+            if (point.x >= 0) {
+              point.translate(delta.x, delta.y);
+              ledProgramCoordinate(whichStrand, i, point); // Put the point back to where it was before
+            }
+          }
+          return false;
+        }
+        ledProgramCoordinate(whichStrand, i, point);
+      }
+    }
+    return true;
   }
   
   int xOffsetter; // TODO: not sure we need the offsetters anymore
