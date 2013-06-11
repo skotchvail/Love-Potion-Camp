@@ -10,7 +10,7 @@ class Pixels {
   private OBJModel objModel;
   private PGraphics pg3D;
   
-  private Rectangle box2d, box3d, boxLEDs;
+  private Rectangle box2d, box3d, boxLEDs, boxEqualizer;
   
   float mappedBottleRotation = 0.8;
   final int ledSide = 15;
@@ -45,6 +45,7 @@ class Pixels {
                             box3d.y * 2 + box3d.height,
                             ledCols * ledSide + (ledCols + 1) * ledBetween,
                             ledRows * ledSide + (ledRows + 1) * ledBetween);
+    boxEqualizer = new Rectangle(boxLEDs.x + boxLEDs.width + box2d.x, boxLEDs.y, boxLEDs.width, boxLEDs.height);
     pg3D = createGraphics(box3d.width, box3d.height, P3D);
   }
   
@@ -262,6 +263,31 @@ class Pixels {
           rect(boxLEDs.x + (x * ledInterval) + ledBetween, boxLEDs.y + (y * ledInterval) + ledBetween, ledSide, ledSide);
         }
       }
+      fill(255);
+    }
+    
+    if (true) {
+//      rect(boxEqualizer.x, boxEqualizer.y, boxEqualizer.width, boxEqualizer.height);
+      
+
+      int gap = 3;
+      int width = (boxEqualizer.width - gap * (main.NUM_BANDS - 1)) / main.NUM_BANDS;
+      int height = (boxEqualizer.height - gap) / 2;
+      for (int band = 0; band < main.NUM_BANDS; band++) {
+        fill(255, 255, 0);
+        float pos1 = main.bd.beatPos("spectralFlux", band) * height;
+        rect(boxEqualizer.x + band * (width + gap), boxEqualizer.y + height - pos1, width, pos1);
+
+        if (false) {
+          fill(0, 255, 0);
+          float pos2 = (float)(main.bd.getMetricMean("spectrum", band, 0) * height);
+          rect(boxEqualizer.x + band * (width + gap), boxEqualizer.y + (2 * height + gap) - pos2, width, pos2);
+        }
+//        if (isBeat(i)) {
+//          speed += beatPos(i)*(Float)getParam(getKeyAudioSpeedChange(i));
+//        }
+      }
+
       fill(255);
     }
     
