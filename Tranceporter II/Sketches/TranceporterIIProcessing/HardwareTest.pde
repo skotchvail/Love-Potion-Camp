@@ -112,6 +112,8 @@ class HardwareTest extends Drawer {
   final int programOffsetYLower = 13;
   final int programOffsetXHigher = 14;
   final int programOffsetXLower = 15;
+  final int programOffsetOrdinalHigher = 16;
+  final int programOffsetOrdinalLower = 17;
   
   void handleOscEvent(OscMessage msg) {
     
@@ -150,6 +152,14 @@ class HardwareTest extends Drawer {
       if (pressed) {
         drawMode = Integer.parseInt(list[4]) - 1;
         sendToIPad();
+      }
+    }
+    else if (action.equals("ResetStrand")) {
+      boolean pressed = (msg.get(0).floatValue() == 1.0);
+      if (pressed) {
+        restoreRealCoordinate();
+        main.ledMap.readOneStrandFromDisk(cursorStrand);
+        backupRealCoordinate();
       }
     }
     else if (action.equals("SaveStrand")) {
@@ -240,6 +250,12 @@ class HardwareTest extends Drawer {
     else if (key == 'x') {
       command = programLedOff;
     }
+    else if (key == 'o') { // TODO: not really needed on keyPress GUI, since they work on the iPad
+      command = programOffsetOrdinalHigher;
+    }
+    else if (key == 'O') {
+      command = programOffsetOrdinalLower;
+    }
     else if (key == CODED) {
         if (keyCode == UP) {
           command = programCoordYHigher;
@@ -282,7 +298,7 @@ class HardwareTest extends Drawer {
     }
     if (delta.x != 0 || delta.y != 0) {
       println("offset = " + delta);
-      main.ledMap.ledProgramOffset(cursorStrand, cursorOrdinal, delta);
+      main.ledMap.ledProgramCoordinateOffset(cursorStrand, cursorOrdinal, delta);
       p.forceUpdateMaskPixels();
     }
     
@@ -323,6 +339,20 @@ class HardwareTest extends Drawer {
     if (command == programLedOff) {
       main.ledMap.ledProgramMissing(cursorStrand, cursorOrdinal);
       p.forceUpdateMaskPixels();
+    }
+    
+    int ordinalOffset = 0;
+    if (command == programOffsetOrdinalHigher) {
+      ordinalOffset = +1;
+    }
+    else if (command == programOffsetOrdinalLower) {
+      ordinalOffset = -1;
+    }
+    if (ordinalOffset != 0) {
+      if (main.ledMap.ledProgramOrdinalOffset(cursorStrand, cursorOrdinal, ordinalOffset)) {
+        cursorOrdinal += ordinalOffset;
+        p.forceUpdateMaskPixels();
+      }
     }
     
     int xChange = 0;
@@ -415,7 +445,7 @@ class HardwareTest extends Drawer {
     myStrings.add(new String("← ↑ → ↓\tnavigate coordinates"));
     myStrings.add(new String("< >\tnavigate strands"));
     myStrings.add(new String("_ + - =\tnavigate LED's"));
-    
+    myStrings.add(new String("o\tordinal offset"));
     return myStrings;
   }
   

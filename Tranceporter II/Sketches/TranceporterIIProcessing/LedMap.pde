@@ -56,7 +56,7 @@ class LedMap {
       }
       totalPixels += strandSize;
     }
-    
+    assert (totalPixels < ledWidth * ledHeight);
     int pixelDataSize = max(totalPixels, ledWidth * ledHeight);
     pixelData = new color[pixelDataSize];
     
@@ -198,6 +198,12 @@ class LedMap {
   void readOneStrandFromDisk(int whichStrand) {
     
     assert whichStrand < getNumStrands() : "not this many strands";
+    
+    int start = whichStrand * maxPixelsPerStrand;
+    int boundary = (whichStrand + 1) * maxPixelsPerStrand;
+    for (int i = start; i < boundary; i++) {
+      strandMap[i] = TC_PIXEL_UNDEFINED;
+    }
     
     xOffsetter = 0;
     yOffsetter = 0;
@@ -371,9 +377,9 @@ class LedMap {
     ledProgramCoordinate(whichStrand, ordinal, indexToCoordinate(TC_PIXEL_UNUSED));
   }
 
-  boolean ledProgramOffset(int whichStrand, int ordinal, Point delta) {
+  boolean ledProgramCoordinateOffset(int whichStrand, int startOrdinal, Point delta) {
     int strandSize = getStrandSize(whichStrand);
-    for (int i = ordinal; i < strandSize; i++) {
+    for (int i = startOrdinal; i < strandSize; i++) {
       Point point = ledGet(whichStrand, i, false);
       if (point.x >= 0) {
         point.translate(delta.x, delta.y);
@@ -382,7 +388,7 @@ class LedMap {
           //need to unroll the action, because we cannot go off the edge
           delta.x = -delta.x;
           delta.y = -delta.y;
-          for (int j = ordinal; j < i; j++) {
+          for (int j = startOrdinal; j < i; j++) {
             point = ledGet(whichStrand, i, false);
             if (point.x >= 0) {
               point.translate(delta.x, delta.y);
@@ -396,6 +402,51 @@ class LedMap {
     }
     return true;
   }
+
+  boolean ledProgramOrdinalOffset(int whichStrand, int startOrdinal, int deltaOrdinal) {
+    
+    
+    println("ledProgramOrdinalOffset() " + deltaOrdinal);
+    
+    int oldStrandSize = getStrandSize(whichStrand);
+    int newStrandSize = oldStrandSize + deltaOrdinal;
+    if (newStrandSize > maxPixelsPerStrand || newStrandSize < 0 || deltaOrdinal == 0) {
+      return false;
+    }
+
+    if (newStrandSize > oldStrandSize) {
+      // Strand grows
+      strandSizes[whichStrand] = newStrandSize;
+      
+      // Move existing pixels to new ordinals
+      for (int i = oldStrandSize - 1; i >= startOrdinal; i--) {
+        Point point = ledGet(whichStrand, i, false);
+        ledProgramCoordinate(whichStrand, i + deltaOrdinal, point);
+      }
+      
+      // Set new ordinals to missing pixels
+      for (int i = startOrdinal; i < startOrdinal + deltaOrdinal; i++) {
+        ledProgramMissing(whichStrand, i);
+      }
+    }
+    else {
+      // Strand shrinks
+      for (int i = startOrdinal; i < oldStrandSize; i++) {
+        Point point = ledGet(whichStrand, i, false);
+        ledProgramCoordinate(whichStrand, i + deltaOrdinal, point);
+      }
+
+      for(int i = newStrandSize; i < oldStrandSize; i++) {
+        ledProgramCoordinate(whichStrand, i, indexToCoordinate(TC_PIXEL_UNDEFINED));
+      }
+
+      strandSizes[whichStrand] = newStrandSize;
+    }
+  
+    setupTrainingStrandMap();
+    return true;
+  }
+
   
   int xOffsetter; // TODO: not sure we need the offsetters anymore
   int yOffsetter;
@@ -554,24 +605,14 @@ class LedMap {
   TotalControlConcurrent totalControlConcurrent;
   boolean hardwareAlreadySetup = false;
   
-  void initTotalControl() {
+  void setupTrainingStrandMap() {
     int stealPixel = 0;
-    int boundary = 0;
-    //create the trainingStrandMap
     for (int whichStrand = 0; whichStrand < getNumStrands(); whichStrand++) {
       int numPixels = getStrandSize(whichStrand);
-      int start = 0;
-      if (true) {
-        start = whichStrand * maxPixelsPerStrand;
-        boundary = start + numPixels;
-      }
-      else {
-        start = boundary;
-        boundary = start + numPixels;
-      }
+      int start = whichStrand * maxPixelsPerStrand;
+      int boundary = start + numPixels;
       int j;
       for (j = start; j < boundary; j++) {
-        strandMap[j] = TC_PIXEL_UNDEFINED;
         trainingStrandMap[j] = stealPixel++;
         Point tester = indexToCoordinate(trainingStrandMap[j]);
         assert(tester.x < ledWidth && trainingStrandMap[j] < pixelData.length) : "Strands have more LEDs than we have pixels to assign them\n" + " x:" + tester.x + " y:" + tester.y + " strand: " + whichStrand + " ordinal:" + (j-start) + " rawValue:" + trainingStrandMap[j];
@@ -580,11 +621,14 @@ class LedMap {
       if (true) {
         int end = start + maxPixelsPerStrand;
         for (; j < end; j++) {
-          strandMap[j] = TC_PIXEL_DISCONNECTED;
           trainingStrandMap[j] = TC_PIXEL_DISCONNECTED;
         }
       }
     }
+  }
+  
+  void initTotalControl() {
+    setupTrainingStrandMap();
     
     for (int i = 0; i < getNumStrands(); i++) {
       readOneStrandFromDisk(i);
