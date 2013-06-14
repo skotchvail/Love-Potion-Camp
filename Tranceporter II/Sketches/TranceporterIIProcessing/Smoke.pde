@@ -33,9 +33,9 @@ class Smoke extends Drawer {
   float randomGustXvel;
   float randomGustYvel;
   float speedFactor;
-  float SCALE = 0.5;
+  float SCALE = 1.0;
   
-  final int startBlockWidth = 20;
+  final int startBlockWidth = 30;
   int startPosition;
   
   
@@ -88,7 +88,7 @@ class Smoke extends Drawer {
 
   float newParticleY()
   {
-    return random(scaledHeight-startBlockWidth/2, scaledHeight) - startBlockWidth * 0.25;
+    return random(scaledHeight-startBlockWidth * 0.25, scaledHeight) - startBlockWidth * 0.05;
   }
 
   
@@ -135,7 +135,10 @@ class Smoke extends Drawer {
         
         randomGustSize = 25;
         
-        randomGustXvel = -scaledWidth/100.0;
+        randomGustXvel = -scaledWidth/50.0;
+        if ((randomGustMax % 2) == 0) {
+          randomGustXvel *= -1;
+        }
         randomGustYvel = -scaledWidth/100.0;
       }
       randomGust--;
@@ -200,7 +203,7 @@ class Gust
     intensity = min(intensity, 255);
     c = replaceAlpha(c, intensity);
     pg.fill(c);
-    pg.ellipse(location.x, location.y, 20, 20);
+    pg.ellipse(location.x, location.y, 15, 15);
   }
 }
   
