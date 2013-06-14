@@ -7,72 +7,84 @@ import java.util.HashMap;
 import ddf.minim.analysis.*;
 
 class BeatDetect {
+
   String[] metricNames = {"spectralFlux", "spectrum"}; 
+
   HashMap onsetHists, thresholds, metrics, metricSDs;
-  long[] lastOnsetTimes; 
   
   CircularArray[] fullSpec;
-  int numBands, historySize;
-  FFT fft;
-  float[] bandFreqs;
-  float MIN_FREQ = 100, MAX_FREQ = 10000;
-  float MIN_THRESHOLD = 0; 
-  int SHORT_HIST_SIZE=3, LONG_HIST_SIZE=5; 
-  int[] fftBandMap;
   boolean[] analyzeBands;
-  int[] NUM_NEIGHBORS = {1, 5, 5};
+  float[] bandFreqs;
   float[] threshSensitivity;
+  long[] lastOnsetTimes; 
+  int[] fftBandMap;
   int[] beatLength;
+  int numBands;
+  int historySize;
+  FFT fft;
+
+  float MIN_FREQ         = 100;
+  float MAX_FREQ         = 10000;
+  float MIN_THRESHOLD    = 0; 
+  int[] NUM_NEIGHBORS    = {1, 5, 5};
+  int SHORT_HIST_SIZE    = 3;
+  int LONG_HIST_SIZE     = 5; 
+  int THRESH_SENSITIVITY = 5;
+  int BEAT_LENGTH        = 200;
+
   
   BeatDetect(FFT fft, int numBands, int historySize) {
-    MIN_FREQ = max(MIN_FREQ, SAMPLE_RATE/SAMPLE_SIZE);
-    this.fft = fft;
-    this.historySize = historySize;
+
+    MIN_FREQ          = max(MIN_FREQ, SAMPLE_RATE/SAMPLE_SIZE);
+    this.fft          = fft;
+    this.historySize  = historySize;
     
-    beatLength = new int[numBands];
+    beatLength        = new int[numBands];
     threshSensitivity = new float[numBands];
     for (int i=0; i<numBands; i++) {
-      threshSensitivity[i] = 5;
-      beatLength[i] = 200;
+      threshSensitivity[i] = THRESH_SENSITIVITY;
+      beatLength[i]        = BEAT_LENGTH;
     }
     
     analyzeBands = new boolean[numBands];
-    for (int i=0; i<numBands; i++) analyzeBands[i] = true;
+    for (int i=0; i<numBands; i++) {
+        analyzeBands[i] = true;
+    }
     
-    bandFreqs = new float[numBands];
+    bandFreqs          = new float[numBands];
     float logBandwidth = (log(MAX_FREQ) - log(MIN_FREQ)) / (numBands - 1);
-    println("Using log bandwidth " + logBandwidth);
+    // println("Using log bandwidth " + logBandwidth);
     for (int i=0; i<numBands; i++) {
       bandFreqs[i] = MIN_FREQ * exp(i*logBandwidth);
-      println("Band " + i + " using frequency " + bandFreqs[i]);
+      // println("Band " + i + " using frequency " + bandFreqs[i]);
     }
     
     // map fft bands (samplesize/2+1) to our band definition
     fftBandMap = new int[fft.specSize()];
     for (int i=0; i<fftBandMap.length; i++) {
-      float freq = fft.indexToFreq(i);
-      int ind = round(log(freq/MIN_FREQ) / logBandwidth);
+      float freq    = fft.indexToFreq(i);
+      int ind       = round(log(freq/MIN_FREQ) / logBandwidth);
       fftBandMap[i] = ind;
-     // println("Mapping fft band " + i + " with freq " + freq + " to band " + ind);
+      // println("Mapping fft band " + i + " with freq " + freq + " to band " + ind);
     }
     
     this.numBands = numBands;
     
-    onsetHists = new HashMap();
-    thresholds = new HashMap();
-    metrics = new HashMap();
-    metricSDs = new HashMap();
+    onsetHists    = new HashMap();
+    thresholds    = new HashMap();
+    metrics       = new HashMap();
+    metricSDs     = new HashMap();
 
     for (int i=0; i<metricNames.length; i++) {
-      CircularArrayWithAvgs[] m = new CircularArrayWithAvgs[numBands];
+      CircularArrayWithAvgs[] m  = new CircularArrayWithAvgs[numBands];
       CircularArrayWithAvgs[] sd = new CircularArrayWithAvgs[numBands];
-      CircularArray[] o = new CircularArray[numBands];
-      CircularArray[] t = new CircularArray[numBands];
+      CircularArray[] o          = new CircularArray[numBands];
+      CircularArray[] t          = new CircularArray[numBands];
       for (int j=0; j<numBands; j++) {
-        m[j] = new CircularArrayWithAvgs(historySize, SHORT_HIST_SIZE, LONG_HIST_SIZE);
+        m[j]  = new CircularArrayWithAvgs(historySize, SHORT_HIST_SIZE, LONG_HIST_SIZE);
         sd[j] = new CircularArrayWithAvgs(historySize, SHORT_HIST_SIZE, LONG_HIST_SIZE);
-        o[j] = new CircularArray(historySize);
-        t[j] = new CircularArray(historySize);
+        o[j]  = new CircularArray(historySize);
+        t[j]  = new CircularArray(historySize);
       }
       
       onsetHists.put(metricNames[i], o);
@@ -85,10 +97,10 @@ class BeatDetect {
 
   private CircularArray getArray(String type, String metricName, int band) {
     HashMap hm;
-    if (type.equals("metric")) hm = metrics;
+    if (type.equals("metric")) hm         = metrics;
     else if (type.equals("onsetHist")) hm = onsetHists;
     else if (type.equals("threshold")) hm = thresholds;
-    else if (type.equals("sd")) hm = metricSDs;
+    else if (type.equals("sd")) hm        = metricSDs;
     else {
       assert(false):"Invalid array type " + type;
       return null;
@@ -116,17 +128,19 @@ class BeatDetect {
   }
   
   void update(AudioBuffer data) {
+
     fft.forward(data);
     
     for (int i=0; i< main.NUM_BANDS; i++) {
       if (!analyzeBands[i]) continue;
-      
+    
       // multiply neighbors
       int fftBand = fft.freqToIndex(bandFreqs[i]);
       double val = 1;
       for (int j=max(0, fftBand-NUM_NEIGHBORS[i]); j<=min(fft.specSize()-1, fftBand+NUM_NEIGHBORS[i]); j++) {
         val *= fft.getBand(j);
       }
+      // println("Band " + i + " val " + val);
       getArray("metric", "spectrum", i).add(val);
       
       //spectrum[i].add(specSums[i] / counts[i]);
@@ -149,15 +163,18 @@ class BeatDetect {
       
       thresh = getArrayAvgs("metric", "spectralFlux", i).getEMA2(ind-1) + threshSensitivity[i] * getArrayAvgs("sd", "spectralFlux", i).getEMA2(ind-1);
       getArray("threshold", "spectralFlux", i).add(thresh);
-      if (getArrayAvgs("metric", "spectralFlux", i).getEMA1(ind) > max((float)thresh, MIN_THRESHOLD) && millis()
-          - lastOnsetTimes[i] >= beatLength[i]) {
+      if (getArrayAvgs("metric", "spectralFlux", i).getEMA1(ind) > 
+            max((float)thresh, MIN_THRESHOLD) && millis() - lastOnsetTimes[i] >= beatLength[i]) {
         getArray("onsetHist", "spectralFlux", i).add(1);
-        //println("beat gap" + (i+1) + ": " + (millis() - lastOnsetTimes[i]));
+
+
+        // HERE! RIGHT THE FUCK HERE!!!!
+        // println("beat gap" + (i+1) + ": " + (millis() - lastOnsetTimes[i]));
         lastOnsetTimes[i] = millis();
       } else {
         getArray("onsetHist", "spectralFlux", i).add(0);
       }
-    }    
+    }
   }
   
   void analyzeBand(int band, boolean on) { analyzeBands[band] = on; }
@@ -189,15 +206,19 @@ class BeatDetect {
   boolean isBeat(String type, int band) { 
     return (millis() - lastOnsetTimes[band]) < beatLength[band]; 
   }
-  
+
   float beatPos(String type, int band) {
     float diff = (millis() - lastOnsetTimes[band]) / float(beatLength[band]);
-    if (diff <= 1){
-     float val = sin(diff*PI/2);
-     //float val = 1 - abs(diff-0.5) * 2; //exp(-pow(diff - 0.5, 2.0)*25);
-     return val;
+    if (diff <= 1) { 
+      // println("Band " + band + " Got diff  " + diff + " from millis " + millis() + " lOT: " + lastOnsetTimes[band] + " bl: " + beatLength[band]);
+      float val = sin(diff*PI/2);
+      //float val = 1 - abs(diff-0.5) * 2; //exp(-pow(diff - 0.5, 2.0)*25);
+      // println("Returning val " + val + " from diff " + diff);
+      return val;
     }
-    else return 0;
+    else {
+      return 0;
+    }
   }
   
   float beatPosSimple(String type, int band) {
