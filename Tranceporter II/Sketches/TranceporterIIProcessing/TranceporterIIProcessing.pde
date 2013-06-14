@@ -77,7 +77,7 @@ class MainClass {
   float DEFAULT_GAMMA = 2.5;
   
   // Audio
-  BeatDetect bd;
+  BeatDetect beatDetect;
   int HISTORY_SIZE = 50;
   int NUM_BANDS = 3;
   boolean[] analyzeBands = {true, true, true };
@@ -153,10 +153,10 @@ class MainClass {
     audioIn = minim.getLineIn(Minim.STEREO, SAMPLE_SIZE, SAMPLE_RATE);
     fft = new FFT(SAMPLE_SIZE, SAMPLE_RATE);
     
-    bd = new BeatDetect(fft, NUM_BANDS, HISTORY_SIZE);
+    beatDetect = new BeatDetect(fft, NUM_BANDS, HISTORY_SIZE);
     for (int i=0; i<NUM_BANDS; i++)
-      bd.analyzeBand(i, analyzeBands[i]);
-    bd.setFFTWindow();
+      beatDetect.analyzeBand(i, analyzeBands[i]);
+    beatDetect.setFFTWindow();
     
     newEffectFirstTime();
     
@@ -201,13 +201,13 @@ class MainClass {
     for (int i=0; i<NUM_BANDS; i++) {
       float userSet = settings.getParam(settings.getKeyAudioSensitivity(i));
       float audioSensitivity = 1 - userSet;
-      bd.setSensitivity(i, audioSensitivity * MAX_AUDIO_SENSITIVITY, (int)(settings.getParam(settings.keyBeatLength)*MAX_BEAT_LENGTH));
-      bd.analyzeBand(i, (userSet != 0));
+      beatDetect.setSensitivity(i, audioSensitivity * MAX_AUDIO_SENSITIVITY, (int)(settings.getParam(settings.keyBeatLength)*MAX_BEAT_LENGTH));
+      beatDetect.analyzeBand(i, (userSet != 0));
       
     }
-    bd.update(audioIn.mix);
+    beatDetect.update(audioIn.mix);
     for (int i=0; i<NUM_BANDS; i++)
-      settings.setIsBeat(i, bd.isBeat("spectralFlux", i));
+      settings.setIsBeat(i, beatDetect.isBeat("spectralFlux", i));
     Drawer d = currentMode();
     
     if (settings.palette == null) {

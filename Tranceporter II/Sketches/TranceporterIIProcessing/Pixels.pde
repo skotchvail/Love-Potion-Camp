@@ -275,12 +275,12 @@ class Pixels {
       int height = (boxEqualizer.height - gap) / 2;
       for (int band = 0; band < main.NUM_BANDS; band++) {
         fill(255, 255, 0);
-        float pos1 = main.bd.beatPos("spectralFlux", band) * height;
+        float pos1 = main.beatDetect.beatPos("spectralFlux", band) * height;
         rect(boxEqualizer.x + band * (width + gap), boxEqualizer.y + height - pos1, width, pos1);
 
         if (false) {
           fill(0, 255, 0);
-          float pos2 = (float)(main.bd.getMetricMean("spectrum", band, 0) * height);
+          float pos2 = (float)(main.beatDetect.getMetricMean("spectrum", band, 0) * height);
           rect(boxEqualizer.x + band * (width + gap), boxEqualizer.y + (2 * height + gap) - pos2, width, pos2);
         }
 //        if (isBeat(i)) {

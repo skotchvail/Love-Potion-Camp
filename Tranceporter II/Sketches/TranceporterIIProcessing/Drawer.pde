@@ -64,10 +64,10 @@ class Drawer {
     pg.beginDraw();
     int band = 0;
     
-    boolean flash1 = main.bd.isOnset("spectrum", band, 0);
-    boolean flash2 = main.bd.isOnset("spectrum", band, 1);
-    boolean flash3 = main.bd.isOnset("spectralFlux", band, 0);
-    boolean flash4 = main.bd.isOnset("spectralFlux", band, 1);
+    boolean flash1 = main.beatDetect.isOnset("spectrum", band, 0);
+    boolean flash2 = main.beatDetect.isOnset("spectrum", band, 1);
+    boolean flash3 = main.beatDetect.isOnset("spectralFlux", band, 0);
+    boolean flash4 = main.beatDetect.isOnset("spectralFlux", band, 1);
     
     boolean flash = (flash1 && !onsetOn1) || (flash2 && !onsetOn2) || (flash3 && !onsetOn3) || (flash4 && !onsetOn4);
     

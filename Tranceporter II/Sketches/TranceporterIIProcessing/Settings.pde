@@ -151,11 +151,11 @@ class Settings {
   }
   
   float beatPos(int band) {
-    return main.bd.beatPos("spectralFlux", band);
+    return main.beatDetect.beatPos("spectralFlux", band);
   }
   
   float beatPosSimple(int band) {
-    return main.bd.beatPosSimple("spectralFlux", band);
+    return main.beatDetect.beatPosSimple("spectralFlux", band);
   }
   
   ////////////////////////////////////////////////////////////////////
