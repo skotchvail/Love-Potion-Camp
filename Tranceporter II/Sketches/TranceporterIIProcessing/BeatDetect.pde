@@ -179,21 +179,21 @@ class BeatDetect {
   
   void analyzeBand(int band, boolean on) { analyzeBands[band] = on; }
   
-  double getMetric(String type, int band, int index) {
-    return getArray("metric", type, band).get(index);
-  }
+  // double getMetric(String type, int band, int index) {
+  //   return getArray("metric", type, band).get(index);
+  // }
   
-  double getMetricMean(String type, int band, int index) {
-    return getArrayAvgs("metric", type, band).getEMA1(index);
-  }
+  // double getMetricMean(String type, int band, int index) {
+  //   return getArrayAvgs("metric", type, band).getEMA1(index);
+  // }
   
-  double getThreshold(String type, int band, int index) {
-    return getArray("threshold", type, band).get(index);
-  }
+  // double getThreshold(String type, int band, int index) {
+  //   return getArray("threshold", type, band).get(index);
+  // }
   
-  double getMetricMax(String type, int band) {
-    return getArray("metric", type, band).maxVal();
-  }
+  // double getMetricMax(String type, int band) {
+  //   return getArray("metric", type, band).maxVal();
+  // }
   
   boolean isOnset(String type, int band, int index) {
     return getArray("onsetHist", type, band).get(index) == 1;
