@@ -17,9 +17,11 @@ final int screenWidth = 950;
 final int screenHeight = 400;
 
 final int SAMPLE_RATE = 44100;
-final int SAMPLE_SIZE = 1024;
+final int SAMPLE_SIZE = 512;
 final int FRAME_RATE = 24;
 
+int FFT_BAND_PER_OCT  = 12;
+int FFT_BASE_FREQ     = 55;
 
 boolean draw2dGrid;
 boolean draw3dSimulation;
@@ -86,7 +88,7 @@ class MainClass {
   AudioOutput out;
   FFT fft;
   Minim minim;
-  int MAX_BEAT_LENGTH = 750, MAX_AUDIO_SENSITIVITY = 12;
+  int MAX_BEAT_LENGTH = 750; // , MAX_AUDIO_SENSITIVITY = 12;
   HardwareTest hardwareTestEffect;
   
   Drawer[][] modes;
@@ -106,12 +108,24 @@ class MainClass {
       println("Error redirecting stdout/stderr: " + e);
     }
     
+
+    System.out.println("0.1");
+    delay(5);
+
     ledMap = new LedMap();
     display = new Pixels(applet);
     display.setup();
     
+
+    System.out.println("0.2");
+    delay(5);
+
     hardwareTestEffect =  new HardwareTest(display, settings);
     
+
+    System.out.println("0.3");
+    delay(5);
+
     modes = new Drawer[][] {
       //column 0
       {
@@ -141,9 +155,15 @@ class MainClass {
       },
       
     };
+
+
+    System.out.println("0.4");
+    delay(5);
+
     settings.initOSC();
     pm.init(applet);
 
+    
     whichEffect.column = prefs.getInt("whichEffect.column", 1);
     whichEffect.row = prefs.getInt("whichEffect.row", 3);
     //settings.setSketchOn(2, 2, true);
@@ -151,16 +171,22 @@ class MainClass {
     // Audio features
     minim = new Minim(applet);
     audioIn = minim.getLineIn(Minim.STEREO, SAMPLE_SIZE, SAMPLE_RATE);
-    fft = new FFT(SAMPLE_SIZE, SAMPLE_RATE);
     
+    fft = new FFT(SAMPLE_SIZE, SAMPLE_RATE);
+    fft.logAverages(FFT_BASE_FREQ, FFT_BAND_PER_OCT);
+    System.out.println("Sound Control: FFT on " + fft.avgSize()
+      + " log bands. samplerate: " + SAMPLE_RATE + "Hz. "
+      + SAMPLE_RATE / SAMPLE_SIZE + " buffers of "
+      + SAMPLE_SIZE + " samples per second.");
+    delay(100);
+
     beatDetect = new BeatDetect(fft, NUM_BANDS, HISTORY_SIZE);
     for (int i=0; i<NUM_BANDS; i++)
       beatDetect.analyzeBand(i, analyzeBands[i]);
     beatDetect.setFFTWindow();
-    
+        
     newEffectFirstTime();
     
-    //frameRate(SAMPLE_RATE/SAMPLE_SIZE);
     frameRate(FRAME_RATE);
     
     settings.sendEntireGUIToIPad();
@@ -198,14 +224,15 @@ class MainClass {
     
     settings.heartBeat();
     
-    for (int i=0; i<NUM_BANDS; i++) {
-      float userSet = settings.getParam(settings.getKeyAudioSensitivity(i));
-      float audioSensitivity = 1 - userSet;
-      beatDetect.setSensitivity(i, audioSensitivity * MAX_AUDIO_SENSITIVITY, (int)(settings.getParam(settings.keyBeatLength)*MAX_BEAT_LENGTH));
-      beatDetect.analyzeBand(i, (userSet != 0));
-      
-    }
+    // for (int i=0; i<NUM_BANDS; i++) {
+      // float userSet = settings.getParam(settings.getKeyAudioSensitivity(i));
+      // float audioSensitivity = 1 - userSet;
+      // beatDetect.setSensitivity(i, audioSensitivity * MAX_AUDIO_SENSITIVITY, (int)(settings.getParam(settings.keyBeatLength)*MAX_BEAT_LENGTH));
+      // beatDetect.analyzeBand(i, (userSet != 0));
+    // }
+
     beatDetect.update(audioIn.mix);
+
     for (int i=0; i<NUM_BANDS; i++)
       settings.setIsBeat(i, beatDetect.isBeat("spectralFlux", i));
     Drawer d = currentMode();
