@@ -1,40 +1,31 @@
 // Class to detect beats
-// Implementation by Greg Friedland in 2012 based on methods described by Simon Dixon in 
+// Original Implementation by Greg Friedland in 2012 based on methods described by Simon Dixon in 
 // "ONSET DETECTION REVISITED" Proc. of the 9th Int. Conference on Digital Audio Effects (DAFx-06), Montreal, Canada, September 18-20, 2006
 // ( http://www.dafx.ca/proceedings/papers/p_133.pdf )
+
+// re-engineed using logic from Henri David
+// http://motscousus.com/stuff/2008-02_Processing.org_patterns/test_beat.pde
+
 
 import java.util.HashMap;
 import ddf.minim.analysis.*;
 
 class BeatDetect {
 
-  // String[] metricNames = {"spectralFlux", "spectrum"}; 
-
-  // HashMap onsetHists, thresholds, metrics, metricSDs;
-  
   CircularArray[] fullSpec;
   boolean[] analyzeBands;
   float[] bandFreqs;
   float[] threshSensitivity;
   long[] lastOnsetTimes;
-  // int[] fftBandMap;
   int[] beatLength;
   int numBands;
   int historySize;
   FFT fft;
 
-  // float MIN_FREQ         = 100;
-  // float MAX_FREQ         = 10000;
-  // float MIN_THRESHOLD    = 0; 
-  // int[] NUM_NEIGHBORS    = {1, 5, 5};
-  // int SHORT_HIST_SIZE    = 3;
-  // int LONG_HIST_SIZE     = 5; 
-  // int THRESH_SENSITIVITY = 1;
   int BEAT_LENGTH           = 150;
 
   boolean[] isBandOnset;
 
-  // This is The New Stuff
   int config_SAMPLERATE        = 44100;
   int config_BUFFERSIZE        = 512;
   int config_BPM               = 140;
@@ -52,13 +43,12 @@ class BeatDetect {
   private float leveldB          = -100;
   private int lastBand           = 0;
   private int lastBandCount      = 0;
-  private int nbAverage          = config_SAMPLERATE / config_BUFFERSIZE * 2; // one second
+  private int nbAverage          = config_SAMPLERATE / config_BUFFERSIZE * 2 / 8 ; // adjusted for our overhead
   private float modulationSmooth = 0.30f;
 
-  private int nbAverageLongTerm  = 8 * config_SAMPLERATE / config_BUFFERSIZE;
-  private int nbAverageShortTerm = config_SAMPLERATE / config_BUFFERSIZE / 3;
-  // skip beat for a quarter of beat
-  private int repeatDelay        = (int) ((60f / config_BPM / 4f) * (config_SAMPLERATE / config_BUFFERSIZE));
+  private int nbAverageLongTerm  = 8 * config_SAMPLERATE / config_BUFFERSIZE / 8 ; // adjusted for our overhead
+  private int nbAverageShortTerm = config_SAMPLERATE / config_BUFFERSIZE / 3 / 8 ; // adjusted for our overhead
+  // private int repeatDelay        = (int) ((60f / config_BPM / 4f) * (config_SAMPLERATE / config_BUFFERSIZE));
 
   public int numZones      = 0;
   public boolean zoneEnabled[];
@@ -75,15 +65,11 @@ class BeatDetect {
   private int playheadLongTerm  = 0;
   private int skipFrames        = 0;
 
-  // private float[] zoneEnergyVuMeter;
-  // private float[] zoneEnergyPeak;
-  // private int[] zoneEnergyPeakHoldTimes;
-  // private int peakHoldTime        = 30; // hold longer
-  // private float peakDecayRate     = 0.98f; // decay slower
   private float linearEQIntercept = 0.8f; // reduced gain at lowest frequency
   private float linearEQSlope     = 0.2f; // increasing gain at higher frequencies
 
-  // End This is The New Stuff
+   PrintWriter output;
+
 
   /**
    * BeatDetect Class Constructor Method
@@ -95,8 +81,7 @@ class BeatDetect {
    */
   BeatDetect(FFT fft, int numBands, int historySize) {
 
-    // the low end of the frequencies we watch
-    // MIN_FREQ          = max(MIN_FREQ, SAMPLE_RATE/SAMPLE_SIZE);
+    output = createWriter("tranceporter.txt"); 
 
     // assign arguments to class members
     this.fft          = fft;
@@ -113,7 +98,6 @@ class BeatDetect {
 
     // assign the default values to all bands for now. They can be reset later.
     for (int i=0; i<numBands; i++) {
-      // threshSensitivity[i] = THRESH_SENSITIVITY;
       beatLength[i]        = BEAT_LENGTH;
     }
 
@@ -127,58 +111,7 @@ class BeatDetect {
     // whether this is onset for the band
     isBandOnset = new boolean[numBands];
 
-    // // bandFreqs is an array that contains the frequecies of our sub-bands    
-    // bandFreqs          = new float[numBands];
-    // float logBandwidth = (log(MAX_FREQ) - log(MIN_FREQ)) / (numBands - 1);
-    // // println("Using log bandwidth " + logBandwidth);
-    // for (int i=0; i<numBands; i++) {
-    //   bandFreqs[i] = MIN_FREQ * exp(i*logBandwidth);
-    //   // println("Band " + i + " using frequency " + bandFreqs[i]);
-    // }
-    
-    // this appears to be unused
-    // // fftBandMap maps fft bands (samplesize/2+1) to our band definition
-    // fftBandMap = new int[fft.specSize()];
-    // for (int i=0; i<fftBandMap.length; i++) {
-    //   float freq    = fft.indexToFreq(i);
-    //   int ind       = round(log(freq/MIN_FREQ) / logBandwidth);
-    //   fftBandMap[i] = ind;
-    //   println("Mapping fft band " + i + " with freq " + freq + " to our band " + ind);
-    // }
-    
-    // more historical data holders, but these are hashes whose keys are our metric names defined above
-    // onsetHists    = new HashMap();
-    // thresholds    = new HashMap();
-    // metrics       = new HashMap();
-    // metricSDs     = new HashMap();
-
-    // initialize a set of "circular arrays"
-    // for (int i=0; i<metricNames.length; i++) {
-      // CircularArrayWithAvgs[] m  = new CircularArrayWithAvgs[numBands];
-      // CircularArrayWithAvgs[] sd = new CircularArrayWithAvgs[numBands];
-      // // CircularArray[] o          = new CircularArray[numBands];
-      // CircularArray[] t          = new CircularArray[numBands];
-
-      // populate our circular arrays with default values
-      // for (int j=0; j<numBands; j++) {
-        // m[j]  = new CircularArrayWithAvgs(historySize, SHORT_HIST_SIZE, LONG_HIST_SIZE);
-        // sd[j] = new CircularArrayWithAvgs(historySize, SHORT_HIST_SIZE, LONG_HIST_SIZE);
-        // o[j]  = new CircularArray(historySize);
-        // t[j]  = new CircularArray(historySize);
-      // }
-      
-      // map our metric names to the default values we just defined
-      // onsetHists.put(metricNames[i], o);
-      // thresholds.put(metricNames[i], t);
-      // metrics.put(metricNames[i], m);
-      // metricSDs.put(metricNames[i], sd);
-    // }
-
-    // lastOnsetTimes holds the last time we detected a new beat for each given band
     lastOnsetTimes = new long[numBands];    
-
-
-    // ////////////////////////everything below this is The New Stuff
 
     numZones = fft.avgSize();
 
@@ -187,10 +120,6 @@ class BeatDetect {
     zoneScore               = new float[numZones][];
     zoneEnabled             = new boolean[numZones];
     
-    // zoneEnergyVuMeter       = new float[numZones];
-    // zoneEnergyPeak          = new float[numZones];
-    // zoneEnergyPeakHoldTimes = new int[numZones];
-
     for (int i = 0; i < numZones; i++) {
       zoneEnergy[i]          = new float[nbAverage];
       zoneScore[i]           = new float[nbAverage];
@@ -198,46 +127,7 @@ class BeatDetect {
       zoneEnabled[i]         = true;
     }
 
-    // everything above this is The New Stuff
-
   }
-
-  // /**
-  //  * Not quite sure what's going on here
-  //  */
-  // private CircularArray getArray(String type, String metricName, int band) {
-  //   HashMap hm;
-  //   if (type.equals("metric")) hm         = metrics;
-  //   // else if (type.equals("onsetHist")) hm = onsetHists;
-  //   // else if (type.equals("threshold")) hm = thresholds;
-  //   // else if (type.equals("sd")) hm        = metricSDs;
-  //   else {
-  //     assert(false):"Invalid array type " + type;
-  //     return null;
-  //   }
-    
-  //   CircularArray[] ca = (CircularArray[]) hm.get(metricName);
-  //   return ca[band];
-  // }  
-  
-  // /**
-  //  * Not quite sure what's going on here
-  //  */
-  // private CircularArrayWithAvgs getArrayAvgs(String type, String metricName, int band) {
-  //   return (CircularArrayWithAvgs) getArray(type, metricName, band);
-  // }
-
-  /**
-   * Set the object's thresholdSensititivy and beatLength for the given band
-   *
-   * @arg int band  the band we're setting values for
-   * @arg float threshSensitivity   the threshhold sentivity value to set
-   * @arg int beatLength    The beat length to set
-   */
-  // void setSensitivity(int band, float threshSensitivity, int beatLength) {
-  //   this.threshSensitivity[band] = threshSensitivity;
-  //   this.beatLength[band] = beatLength;
-  // }
 
   /**
    * Set the object's thresholdSensititivy and beatLength for the given band
@@ -248,14 +138,6 @@ class BeatDetect {
   void setBeatLength(int band, int beatLength) {
     this.beatLength[band] = beatLength;
   }
-
-  // this appears to be unused
-  // /**
-  //  * Get the FFT band map for the given band
-  //  */
-  // int getBandMapping(int fftBand) {
-  //   return fftBandMap[fftBand];
-  // }
 
   /**
    * Set the FFT Window
@@ -273,8 +155,6 @@ class BeatDetect {
 
     fft.forward(data);
     
-    // ////////////////// The New Stuff
-
     // update our round robins heads
     int playhead2          = (playhead + 1) % nbAverage;
     int playheadLongTerm2  = (playheadLongTerm + 1) % nbAverageLongTerm;
@@ -287,24 +167,6 @@ class BeatDetect {
       // get energy
       zoneEnergy[i][playhead2] = fft.getAvg(i) * (linearEQIntercept + i * linearEQSlope);
       // System.out.println("ZONE " + i + " got zoneenergy for " + playhead2 + " of " + zoneEnergy[i][playhead2]);
-
-      // // // compute peaks
-      // if (zoneEnergy[i][playhead2] >= zoneEnergyPeak[i]) {
-
-      //   // save new peak level, also reset the hold timer
-      //   zoneEnergyPeak[i] = zoneEnergy[i][playhead2];
-      //   zoneEnergyPeakHoldTimes[i] = peakHoldTime;
-      // } else {
-
-      //   // current average does not exceed peak, so hold or decay the peak
-      //   if (zoneEnergyPeakHoldTimes[i] > 0) {
-      //     zoneEnergyPeakHoldTimes[i]--;
-      //   } else {
-      //     zoneEnergyPeak[i] *= peakDecayRate;
-      //   }
-      // }
-
-      // zoneEnergyVuMeter[i] = zoneEnergy[i][playhead2];
 
       zoneEnergyShortTerm[i][playheadShortTerm2] = zoneEnergy[i][playhead2];
       // System.out.println(zoneEnergy[i][playhead2]+" "+average(zoneEnergy[i]));
@@ -356,7 +218,6 @@ class BeatDetect {
 
     } else {
 
-      // these do nothing but print output  
       // if (thres == lastBandCount) {
       //   // System.out.print(bandmaxE+" "+fft.getBandWidth()*bandmaxE+"Hz ");
       //   if (bandmaxE > 0) {
@@ -385,16 +246,11 @@ class BeatDetect {
       scoreLongTerm[playheadLongTerm2] = score[playhead2]/ numZoneEnabled;
     }
 
-    // only used for the graphic equalizer    
-    // float smooth = 0.9f;
-    // if (score2 * smooth < score[playhead2]) {
-    //   score2 = score[playhead2];
-    // } else {
-    //   score2 *= smooth;
-    // }
-
     // are we on the beat ?
-    if (skipFrames <= 0 && score[playhead2] > beatSense) {
+    // this used "skipframes" to induce a delay in the original code,
+    // but that code doesn't have our overhead and runs much faster, so we don't really need it
+    // if (skipFrames <= 0 && score[playhead2] > beatSense) {
+    if (score[playhead2] > beatSense) {
 
       // if we weren't already on the beat, this is the onset
       if(!onBeat) {
@@ -408,7 +264,7 @@ class BeatDetect {
       }
 
       onBeat = true;
-      skipFrames = repeatDelay;
+      // skipFrames = repeatDelay;
     }
     else {
       for(int i=0;i<numBands;i++) {
@@ -417,11 +273,11 @@ class BeatDetect {
       onBeat = false;
     }
 
-    if (skipFrames > 0) {
-      skipFrames--;
-    }
+    // if (skipFrames > 0) {
+    //   skipFrames--;
+    // }
 
-    // compute auto beat sense
+    // compute auto beat sense 
     float max = max(score);
     if (max > 30) {
       max = 30;
@@ -447,66 +303,31 @@ class BeatDetect {
     playheadShortTerm = playheadShortTerm2;
     playheadLongTerm  = playheadLongTerm2;
 
-    System.out.println("threshold : "     + this.beatSense);
-    System.out.println("current score : " + score[playhead2]);
-    System.out.println("on Beat :"        + this.onBeat);
+    // int s = second();  // Values from 0 - 59
+    // int m = minute();  // Values from 0 - 59
+    // int h = hour();    // Values from 0 - 23
+    // output.println("TIME: " + h + ":" + m + ":" + s);
+    // output.println("max\t" + max + "\tavg\t" + avg + "\tbeatSense\t" + beatSense);
+    // output.println("nbAverage\t" + nbAverage + "\tnbAverageShortTerm\t" + nbAverageShortTerm + "\tnbAverageLongTerm\t" + nbAverageLongTerm);
+
+    // output.println("skipFrames " + skipFrames + " left of " + repeatDelay);
+    // output.println("threshold : "     + this.beatSense);
+    // output.println("current score : " + score[playhead2]);
+    // output.println("on Beat :"        + this.onBeat);
+    // output.flush(); // Writes the remaining data to the file
+
+    // System.out.println("TIME: " + h + ":" + m + ":" + s);
+    // System.out.println("threshold : "     + this.beatSense);
+    // System.out.println("current score : " + score[playhead2]);
+    // System.out.println("on Beat :"        + this.onBeat);
 
     // set all our bands to this band's value
     for (int i=0; i< main.NUM_BANDS; i++) {
-        if(onBeat) {
-          int myMillis = millis();
-          lastOnsetTimes[i] = myMillis;
-        }
+      if(onBeat) {
+        int myMillis = millis();
+        lastOnsetTimes[i] = myMillis;
+      }
     }
-
-    // ////////////////// END The New Stuff
-
-
-    // for (int i=0; i< main.NUM_BANDS; i++) {
-
-      // if (!analyzeBands[i]) continue;
-    
-      // // multiply neighbors
-      // int fftBand = fft.freqToIndex(bandFreqs[i]);
-      // double val = 1;
-      // for (int j=max(0, fftBand-NUM_NEIGHBORS[i]); j<=min(fft.specSize()-1, fftBand+NUM_NEIGHBORS[i]); j++) {
-      //   val *= fft.getBand(j);
-      // }
-      // // println("Band " + i + " val " + val);
-      // getArray("metric", "spectrum", i).add(val);
-      
-      // //spectrum[i].add(specSums[i] / counts[i]);
-      // int ind = getArray("metric", "spectrum", i).getIndex();
-      // getArray("sd", "spectrum", i).add(getArray("metric", "spectrum", i).sd(ind-LONG_HIST_SIZE+1, ind));
-
-      // // calculate GF metric
-      // double thresh = getArrayAvgs("metric", "spectrum", i).getEMA2(ind-1) + threshSensitivity[i] * getArrayAvgs("sd", "spectrum", i).getEMA2(ind-1);
-      // getArray("threshold", "spectrum", i).add(thresh);
-      // if (getArrayAvgs("metric", "spectrum", i).getEMA1(ind) > max((float)thresh, MIN_THRESHOLD)) {
-      //   getArray("onsetHist", "spectrum", i).add(1);
-      // } else {
-      //   getArray("onsetHist", "spectrum", i).add(0);
-      // }
-      
-      // // calculate spectral flux     
-      // float diff = abs((float)getArray("metric", "spectrum", i).get()) - abs((float)getArray("metric", "spectrum", i).getPrev());
-      // getArray("metric", "spectralFlux", i).add((diff + abs(diff)) / 2.0);
-      // getArray("sd", "spectralFlux", i).add(getArray("metric", "spectralFlux", i).sd(ind-LONG_HIST_SIZE+1, ind));
-      
-      // thresh = getArrayAvgs("metric", "spectralFlux", i).getEMA2(ind-1) + threshSensitivity[i] * getArrayAvgs("sd", "spectralFlux", i).getEMA2(ind-1);
-      // getArray("threshold", "spectralFlux", i).add(thresh);
-      // if (getArrayAvgs("metric", "spectralFlux", i).getEMA1(ind) > 
-      //       max((float)thresh, MIN_THRESHOLD) && millis() - lastOnsetTimes[i] >= beatLength[i]) {
-      //   getArray("onsetHist", "spectralFlux", i).add(1);
-
-
-      //   // HERE! RIGHT THE FUCK HERE!!!!
-      //   // println("beat gap" + (i+1) + ": " + (millis() - lastOnsetTimes[i]));
-      //   lastOnsetTimes[i] = millis();
-      // } else {
-        // getArray("onsetHist", "spectralFlux", i).add(0);
-      // }
-    // }
   }
   
   /**
@@ -545,20 +366,12 @@ class BeatDetect {
     // return getArray("onsetHist", type, band).get(index) == 1;
     return isBandOnset[band];
   }
-  
-  // /**
-  //  * metricNames getter class
-  //  */
-  // String[] getMetricNames() {
-  //   return metricNames;
-  // }
-  
+    
   /**
    * Is the given type and band currently in a beat
    */
   boolean isBeat(String type, int band) { 
     return (millis() - lastOnsetTimes[band]) < beatLength[band]; 
-    // return onBeat;
   }
 
   /**
@@ -607,7 +420,6 @@ class BeatDetect {
     }
     return (array3);
   } // end method sum
-
 
 }
 
