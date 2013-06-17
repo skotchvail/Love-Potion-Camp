@@ -10,7 +10,7 @@ included in our code have been updated to work with version 2.
 
 Apps are build to run with huge widths and heights, but our bus is only 92x58 pixels. So you before
 you try to integrate the sketch, you should first figure out how to scale it down to our size. 
-Set width = 92, height = 58 and see how your sketch looks. You may need to play with scale or do other
+Set the size() method to be size(92, 58) and see how your sketch looks. You may need to play with scale or do other
 things to make it work right. 
 
 ## Get Processing Running our App
