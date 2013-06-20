@@ -108,7 +108,7 @@ class MainClass {
       println("Error redirecting stdout/stderr: " + e);
     }
     
-
+    // TODO: why all of these delays?
     System.out.println("0.1");
     delay(5);
 
@@ -228,13 +228,6 @@ class MainClass {
     
     settings.heartBeat();
     
-    // for (int i=0; i<NUM_BANDS; i++) {
-      // float userSet = settings.getParam(settings.getKeyAudioSensitivity(i));
-      // float audioSensitivity = 1 - userSet;
-      // beatDetect.setSensitivity(i, audioSensitivity * MAX_AUDIO_SENSITIVITY, (int)(settings.getParam(settings.keyBeatLength)*MAX_BEAT_LENGTH));
-      // beatDetect.analyzeBand(i, (userSet != 0));
-    // }
-
     beatDetect.update(audioIn.mix);
 
     for (int i=0; i<NUM_BANDS; i++)
