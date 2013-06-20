@@ -166,6 +166,10 @@ class MainClass {
     
     whichEffect.column = prefs.getInt("whichEffect.column", 1);
     whichEffect.row = prefs.getInt("whichEffect.row", 3);
+      
+    if (whichEffect.column >= modes.length || whichEffect.row >= modes[whichEffect.column].length) {
+        whichEffect = new ColumnRow(0, 0);
+    }
     //settings.setSketchOn(2, 2, true);
     
     // Audio features

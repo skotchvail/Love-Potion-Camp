@@ -14,11 +14,16 @@ class Fire extends Drawer {
   String getName() { return "Fire"; }
   String getCustom1Label() { return "Which Color";}
   String getCustom2Label() { return "Cluster Size";}
-
+  boolean oldStyle = false;
   
   Fire(Pixels p, Settings s) {
     super(p, s, JAVA2D, DrawType.MirrorSides);
-    height2 = height+6;
+    if (oldStyle) {
+      height2 = height + 6;
+    }
+    else {
+      height2 = height - 6;
+    }
 
     calc1 = new int[width];
     calc3 = new int[width];
@@ -38,7 +43,12 @@ class Fire extends Drawer {
       //Hue goes from 0 to 85: red to yellow
       //Saturation is always the maximum: 255
       //Lightness is 0..255 for x=0..128, and 255 for x=128..255
-      palette[x] = color(x/3, 255, constrain(x*3, 0, 255));
+      if (oldStyle) {
+        palette[x] = color(x/3, 255, constrain(x * 3, 0, 255));
+      }
+      else {
+        palette[x] = color(x/3, 255, constrain(x * 5, 0, 255));
+      }
     }
   
     // Precalculate which pixel values to add during animation loop
@@ -91,6 +101,11 @@ class Fire extends Drawer {
         } else {
           pg.pixels[counter++] = palette[fireVal];
         }
+      }
+    }
+    for (int y = height2; y < height; y++) {
+      for(int x = 0; x < width; x++) {
+        pg.pixels[y * width + x] = color(255, 128, 0);
       }
     }
     pg.updatePixels();    

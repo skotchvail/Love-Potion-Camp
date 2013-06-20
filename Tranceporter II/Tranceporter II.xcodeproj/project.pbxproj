@@ -12,9 +12,7 @@
 		E02F9B2815C37B19003EDFDA /* AlienBlob.pde */ = {isa = PBXFileReference; explicitFileType = sourcecode.java; lineEnding = 0; path = AlienBlob.pde; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.java; };
 		E02F9B4A15C37B19003EDFDA /* BeatDetect.pde */ = {isa = PBXFileReference; explicitFileType = sourcecode.java; path = BeatDetect.pde; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.java; };
 		E02F9B4B15C37B19003EDFDA /* BouncingBalls2D.pde */ = {isa = PBXFileReference; explicitFileType = sourcecode.java; path = BouncingBalls2D.pde; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.java; };
-		E02F9B4C15C37B19003EDFDA /* BouncingBalls3D.pde */ = {isa = PBXFileReference; explicitFileType = sourcecode.java; path = BouncingBalls3D.pde; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.java; };
-		E02F9B4D15C37B19003EDFDA /* BouncingBallsToAudio.pde */ = {isa = PBXFileReference; explicitFileType = sourcecode.java; path = BouncingBallsToAudio.pde; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.java; };
-		E02F9B4E15C37B19003EDFDA /* BZR.pde */ = {isa = PBXFileReference; explicitFileType = sourcecode.java; lineEnding = 0; path = BZR.pde; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.java; };
+		E02F9B4E15C37B19003EDFDA /* BZR3.pde */ = {isa = PBXFileReference; explicitFileType = sourcecode.java; lineEnding = 0; path = BZR3.pde; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.java; };
 		E02F9B4F15C37B19003EDFDA /* CircularArray.pde */ = {isa = PBXFileReference; explicitFileType = sourcecode.java; path = CircularArray.pde; sourceTree = "<group>"; };
 		E02F9B5015C37B19003EDFDA /* Console.pde */ = {isa = PBXFileReference; explicitFileType = sourcecode.java; path = Console.pde; sourceTree = "<group>"; };
 		E02F9B5115C37B19003EDFDA /* Drawer.pde */ = {isa = PBXFileReference; explicitFileType = sourcecode.java; lineEnding = 0; path = Drawer.pde; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.java; };
@@ -74,9 +72,7 @@
 				E02F9B2815C37B19003EDFDA /* AlienBlob.pde */,
 				E02F9B4A15C37B19003EDFDA /* BeatDetect.pde */,
 				E02F9B4B15C37B19003EDFDA /* BouncingBalls2D.pde */,
-				E02F9B4C15C37B19003EDFDA /* BouncingBalls3D.pde */,
-				E02F9B4D15C37B19003EDFDA /* BouncingBallsToAudio.pde */,
-				E02F9B4E15C37B19003EDFDA /* BZR.pde */,
+				E02F9B4E15C37B19003EDFDA /* BZR3.pde */,
 				E02F9B4F15C37B19003EDFDA /* CircularArray.pde */,
 				E02F9B5015C37B19003EDFDA /* Console.pde */,
 				E02F9B5115C37B19003EDFDA /* Drawer.pde */,

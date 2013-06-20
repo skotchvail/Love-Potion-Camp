@@ -11,7 +11,7 @@ class EyeMotion extends Drawer {
   int edge = 200;
   int inner = edge + radius;
   int i = 10;
-  float SCALE = 0.07;
+  float SCALE = 0.14;
   float trippy;
   float lastmx, lastmy;
   int MINX, MINY;
@@ -68,10 +68,8 @@ class EyeMotion extends Drawer {
   
   void draw() {
     
- //   SCALE = ((frameCount % 250) + 25) / 1000.0;
-    translateX = (int)(-100 * SCALE) + 350;
-    translateY = (int)(-100 * SCALE) + 280;
- //   println("scale = " + SCALE);
+    translateX = 60;
+    translateY = 40;
 
     
     trippy = settings.getParam(settings.keyCustom1);
@@ -84,7 +82,6 @@ class EyeMotion extends Drawer {
     float totalSecondsForMovement = secondsForSpeed(MIN_SECONDS_TO_FOCUS, MAX_SECONDS_TO_FOCUS, 1.0-speed);
     easing = 1.0/(totalSecondsForMovement * FRAME_RATE);
     
- //   println("touchX: " + touchX + " touchY: " + touchY);
     pg.scale(SCALE);
     pg.noStroke();
     pg.smooth();

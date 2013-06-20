@@ -6,6 +6,13 @@ one of the sample Sketches that comes with it. Note that some Sketches on the we
 designed to run with version 2 of Processing and those may have problems. All of the Sketches
 included in our code have been updated to work with version 2. 
 
+## Get app running at small size
+
+Apps are build to run with huge widths and heights, but our bus is only 92x58 pixels. So you before
+you try to integrate the sketch, you should first figure out how to scale it down to our size. 
+Set the size() method to be size(92, 58) and see how your sketch looks. You may need to play with scale or do other
+things to make it work right. 
+
 ## Get Processing Running our App
 
 Open this file into Processing app:
