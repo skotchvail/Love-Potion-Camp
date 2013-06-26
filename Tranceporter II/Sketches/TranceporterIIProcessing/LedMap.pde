@@ -1,69 +1,102 @@
 /*
- Tracks the pixels for each Sketch and sends them to the hardware
+ This class initializes:
+ 1. The pixel metadata: including mapping of LEDs to x/y coordinates and vice versa
+    This is accomplished by reading metadata from a set of csv files
+ 2. The LCD hardware
+ 3. The data structure that instructs the hardware how to illuminate the LED strands
  
- pixelData: 
+ var pixelData: 
     contains the colors for each pixel as they are drawn on screen (in the 2D double sided view).
     The starboard side is indexed as [length - x - 1]. The data is sent as is to the hardware
     without modification.
- strandMap:
+ 
+ var strandMap:
     contains the x, y coordinates of each LED. It is effectively a 2D array, where each
     strand is one dimension, and the ordinal is another. The X,Y coordinates for each LED
     are encoded in an integer. These map to the same coordinates used by pixel Data. This
     data is sent to the hardware without modification.
- trainingStrandMap: 
+
+ var trainingStrandMap: 
     an alternate strandmap used by HardwareTest, which is also sent to the hardware without
     modification.
+
  */
 
 class LedMap {
   
+  // TCL settings
   final boolean runConcurrent = true;
   final boolean kUseBitBang = true;
 
+  // array of data representing the current color for each given pixel in our flat array
   color[] pixelData;
+
+  // array of values for the actual length of each strand
   int[] strandSizes;
+
+  // the longest strand we'll tolerate
   int maxPixelsPerStrand;
+
+  // array of integers that maps a strand index to a coordinate pair
   private int[] strandMap;
+
+  // same thing, but a reduced "training" version
   private int[] trainingStrandMap;
+
+  // "Table" (2d array) of data we've read from the csv files
   private Table[] strandTables;
 
-  static final String kCommandOffsetter = "offsetter";
+  // static final String kCommandOffsetter = "offsetter";
+  // the legal commands we can find in our LED-defining csv files
   static final String kCommandMap = "map";
   static final String kCommandMissing = "missing";
   static final String kCommandUnprogrammed = "unprogrammed";
   
+  // the columns in our LED-defining csv files
   static final String kColumnCommand = "command";
   static final String kColumnOrdinal = "ordinalStart";
   static final String kColumnOrdinalEnd = "ordinalEnd";
   static final String kColumnCoordX = "x";
   static final String kColumnCoordY = "y";
   
+  // constructor
   LedMap() {
-    strandSizes = new int[8];
-    
-    strandTables = new Table[getNumStrands()];
-    int totalPixels = 0;
+
+    // initialize class variables
+    strandSizes        = new int[getNumStrands()];    
+    strandTables       = new Table[getNumStrands()];
+    int totalPixels    = 0;
     maxPixelsPerStrand = 0;
+
+    // loop through each strand and read data from csv files
     for (int i = 0; i < getNumStrands(); i++) {
       
       Table table = loadTable(fileNameForStrand(i), "header");
       strandTables[i] = table;
       TableRow lastRow = table.getRow(table.lastRowIndex());
       strandSizes[i] = lastRow.getInt(kColumnOrdinalEnd) + 1;
+      System.out.println("Strand " + (i + 1) + " has length " + strandSizes[i]);
       int strandSize = getStrandSize(i);
       if (strandSize > maxPixelsPerStrand) {
         maxPixelsPerStrand = strandSize;
       }
       totalPixels += strandSize;
     }
+
+    // make sure we haven't exceeded our maximum number of pixels
     assert (totalPixels < ledWidth * ledHeight);
+
+    // set the total number of pixels we're dealing with
     int pixelDataSize = max(totalPixels, ledWidth * ledHeight);
-    pixelData = new color[pixelDataSize];
-    
+
+    // initialize more class variables
+    pixelData = new color[pixelDataSize];    
     strandMap = new int[getNumStrands() * maxPixelsPerStrand];
     trainingStrandMap = new int[getNumStrands() * maxPixelsPerStrand];
     
+    // initialize TCL interface
     initTotalControl();
+
   }
 
   /*
@@ -74,10 +107,12 @@ class LedMap {
    'unprogrammed', ordinalStart, ordinalEnd (not sure we need this)
    */
   
+  // get the filename for a given strand
   String fileNameForStrand(int whichStrand) {
     return "strand" + (whichStrand + 1) + ".csv";
   }
   
+  // write strand data to a csv file
   void writeOneStrandToDisk(int whichStrand) {
     println("================== writeOneStrandToDisk " + (whichStrand + 1));
     assert whichStrand < getNumStrands() : "not this many strands";
@@ -95,7 +130,8 @@ class LedMap {
     for (int whichLed = 0; whichLed < strandSize; whichLed++) {
       
       int index = (whichStrand * maxPixelsPerStrand) + whichLed;
-      assert index < strandMap.length : "strand: " + whichStrand + " whichLed: " + whichLed + " goes beyond end of strandMap (" + index + " >= " + strandMap.length + ")";
+      assert index < strandMap.length : "strand: " + whichStrand + " whichLed: " + 
+        whichLed + " goes beyond end of strandMap (" + index + " >= " + strandMap.length + ")";
       int value = strandMap[index];
 
       if (value >= 0) {
@@ -195,35 +231,42 @@ class LedMap {
     saveTable(table, "data/" + fileNameForStrand(whichStrand));
   }
   
+  // read strand data to a csv file
   void readOneStrandFromDisk(int whichStrand) {
-    
+
+    // println("Reading Strand " + whichStrand);    
     assert whichStrand < getNumStrands() : "not this many strands";
-    
+
+    // first pass - fill in all legal values with "UNDEFINED"
     int start = whichStrand * maxPixelsPerStrand;
     int boundary = (whichStrand + 1) * maxPixelsPerStrand;
     for (int i = start; i < boundary; i++) {
+      // println("index: " + i + " Undefined ");
       strandMap[i] = TC_PIXEL_UNDEFINED;
     }
-    
-    xOffsetter = 0;
-    yOffsetter = 0;
-    ordinalOffsetter = 0;
+
+    // unused    
+    // xOffsetter = 0;
+    // yOffsetter = 0;
+    // ordinalOffsetter = 0;
     
     Table table = strandTables[whichStrand];
-    
-    println("strand " + (whichStrand + 1) + " rows: " + table.getRowCount());
+    // println("strand " + (whichStrand + 1) + " rows: " + table.getRowCount());    
     assert table.getRowCount() > 0 : "rowCount = 0 for strand " + (whichStrand + 1);
     
     for (TableRow row : table.rows()) {
-      
+
+      // get the "command" for this row      
       String command = row.getString(kColumnCommand);
-      int ordinalStart = row.getInt(kColumnOrdinal) + ordinalOffsetter;
-      int ordinalEnd = row.getInt(kColumnOrdinalEnd) + ordinalOffsetter;
-      
+      int ordinalStart = row.getInt(kColumnOrdinal); // + ordinalOffsetter;
+      int ordinalEnd = row.getInt(kColumnOrdinalEnd); // + ordinalOffsetter;
+
+      // println("Strand " + whichStrand + "\t" + command + "," + ordinalStart 
+      //   + "," + ordinalEnd + "," + row.getInt(kColumnCoordX) + "," + row.getInt(kColumnCoordY) );
       if (command.equals(kCommandMap)) {
         Point coord = new Point(row.getInt(kColumnCoordX), row.getInt(kColumnCoordY));
-        coord.x += xOffsetter;
-        coord.y += yOffsetter;
+        // coord.x += xOffsetter;
+        // coord.y += yOffsetter;
         
         lowestX = min(coord.x, lowestX);
         lowestY = min(coord.y, lowestY);
@@ -234,12 +277,14 @@ class LedMap {
         coord = convertDoubleSidedPoint(coord, whichStrand);
         int pixelDataIndex = coordToIndex(coord);
         strandMap[index] = pixelDataIndex;
+        // println("index: " + index + " pixelDataIndex: " + pixelDataIndex);
       }
       else if (command.equals(kCommandMissing)) {
         for (int ordinal = ordinalStart; ordinal <= ordinalEnd; ordinal++) {
           int index = (whichStrand * maxPixelsPerStrand) + ordinal;
           assert(strandMap[index] == TC_PIXEL_UNDEFINED) : "led " + ordinal + " on strand " + whichStrand + " is already defined: " + strandMap[index];
           strandMap[index] = TC_PIXEL_UNUSED;
+          // println("index: " + index + " Unused ");
         }
       }
       else {
@@ -248,6 +293,7 @@ class LedMap {
     }
   }
   
+  // write passed data array to pixelData array
   void copyPixels(int[] pixels, DrawType drawType) {
     final int halfWidth = ledWidth / 2;
     
@@ -282,13 +328,15 @@ class LedMap {
       assert false : "unknown drawType = " + drawType;
     }
   }
-  
+
+  // get number of pixels in a given strand  
   int getStrandSize(int whichStrand) {
     int result = strandSizes[whichStrand];
     assert result >= 0 : "strand " + (whichStrand + 1) + "size = " + result;
     return result;
   }
   
+  // get the total number of strands we have
   int getNumStrands() {
     return 8;
   }
@@ -338,7 +386,8 @@ class LedMap {
   private int coordToIndex(Point p) {
     return (p.y * ledWidth) + p.x;
   }
-  
+
+  // Convert index into pixel coordinates  
   private Point indexToCoordinate(int index) {
     Point p = new Point();
     p.y = index / ledWidth;
@@ -356,7 +405,8 @@ class LedMap {
     }
     return result;
   }
-  
+
+  // write passed point data to specified strand and index
   void ledProgramCoordinate(int whichStrand, int ordinal, Point p) {
     if (p.x >= 0) {
       if (isStrandPortSide(whichStrand)) {
@@ -370,12 +420,15 @@ class LedMap {
     assert(ordinal < getStrandSize(whichStrand)) : "whichStrand exceeds number of leds per strand";
     int index = (whichStrand * maxPixelsPerStrand) + ordinal;
     int newIndex = coordToIndex(p);
+    // println("LPC: index " + index + " pixelDataIndex " + newIndex);
     strandMap[index] = newIndex;
   }
   
+  // write "Unused" data to a strand and index
   void ledProgramMissing(int whichStrand, int ordinal) {
     ledProgramCoordinate(whichStrand, ordinal, indexToCoordinate(TC_PIXEL_UNUSED));
   }
+
 
   boolean ledProgramCoordinateOffset(int whichStrand, int startOrdinal, Point delta) {
     int strandSize = getStrandSize(whichStrand);
@@ -448,16 +501,16 @@ class LedMap {
   }
 
   
-  int xOffsetter; // TODO: not sure we need the offsetters anymore
-  int yOffsetter;
-  int ordinalOffsetter;
+  // int xOffsetter; // TODO: not sure we need the offsetters anymore
+  // int yOffsetter;
+  // int ordinalOffsetter;
   
   int lowestX = Integer.MAX_VALUE;
   int lowestY = Integer.MAX_VALUE;
   int biggestX = Integer.MIN_VALUE;
   int biggestY = Integer.MIN_VALUE;
   
-  
+  // get data for a given strand and index - specify training mode
   Point ledGet(int whichStrand, int ordinal, boolean useTrainingMode) {
     assert whichStrand < getNumStrands() : "not this many strands";
     assert ordinal < getStrandSize(whichStrand) : "ordinal exceeds number of leds per strand";
@@ -468,10 +521,13 @@ class LedMap {
     return indexToCoordinate(value);
   }
   
+  // get data for a given strand and index
   Point ledGet(int whichStrand, int ordinal) {
     return ledGet(whichStrand, ordinal, main.currentMode().isTrainingMode());
   }
-  
+
+  // go back through the strand data we read from disk
+  // fill in the missing values  
   void ledInterpolate() {
     int available = 0;
     
@@ -518,6 +574,7 @@ class LedMap {
                     int x = a.x + inc * xChange;
                     int y = a.y + inc * yChange;
                     strandMap[j] = coordToIndex(new Point(x, y));
+                    // println("LI: index " + j + " pixelDataIndex " + strandMap[j]);
                   }
                 }
               }
@@ -530,6 +587,7 @@ class LedMap {
     }
   }
   
+  // dump the strand data we've read from disk for the specified range of strands
   void ledMapDump(int minStrand, int maxStrand) {
     if (maxStrand < minStrand) {
       return;
@@ -581,10 +639,12 @@ class LedMap {
     }
   }
   
+  // is the strand on the port side of the bus?
   boolean isStrandPortSide(int whichStrand) {
     return whichStrand < getNumStrands() / 2;
   }
   
+  // get coordinate points for a given strand
   Point[] pointsForStrand(int whichStrand) {
     assert whichStrand < getNumStrands();
     int strandSize = getStrandSize(whichStrand);
@@ -605,6 +665,7 @@ class LedMap {
   TotalControlConcurrent totalControlConcurrent;
   boolean hardwareAlreadySetup = false;
   
+  // create "training strand" data map
   void setupTrainingStrandMap() {
     int stealPixel = 0;
     for (int whichStrand = 0; whichStrand < getNumStrands(); whichStrand++) {
@@ -615,7 +676,9 @@ class LedMap {
       for (j = start; j < boundary; j++) {
         trainingStrandMap[j] = stealPixel++;
         Point tester = indexToCoordinate(trainingStrandMap[j]);
-        assert(tester.x < ledWidth && trainingStrandMap[j] < pixelData.length) : "Strands have more LEDs than we have pixels to assign them\n" + " x:" + tester.x + " y:" + tester.y + " strand: " + whichStrand + " ordinal:" + (j-start) + " rawValue:" + trainingStrandMap[j];
+        assert(tester.x < ledWidth && trainingStrandMap[j] < pixelData.length) : 
+            "Strands have more LEDs than we have pixels to assign them\n" + " x:" + tester.x + " y:" + tester.y + 
+            " strand: " + whichStrand + " ordinal:" + (j-start) + " rawValue:" + trainingStrandMap[j];
         
       }
       if (true) {
@@ -627,6 +690,7 @@ class LedMap {
     }
   }
   
+  // initialize the total control hardware
   void initTotalControl() {
     setupTrainingStrandMap();
     
