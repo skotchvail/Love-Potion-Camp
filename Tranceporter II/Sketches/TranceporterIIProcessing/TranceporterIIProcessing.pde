@@ -108,23 +108,11 @@ class MainClass {
       println("Error redirecting stdout/stderr: " + e);
     }
     
-    // TODO: why all of these delays?
-    System.out.println("0.1");
-    delay(5);
-
     ledMap = new LedMap();
     display = new Pixels(applet);
     display.setup();
     
-
-    System.out.println("0.2");
-    delay(5);
-
-    hardwareTestEffect =  new HardwareTest(display, settings);
-    
-
-    System.out.println("0.3");
-    delay(5);
+    hardwareTestEffect =  new HardwareTest(display, settings);    
 
     modes = new Drawer[][] {
       //column 0
@@ -156,13 +144,8 @@ class MainClass {
       
     };
 
-
-    System.out.println("0.4");
-    delay(5);
-
     settings.initOSC();
     pm.init(applet);
-
     
     whichEffect.column = prefs.getInt("whichEffect.column", 1);
     whichEffect.row = prefs.getInt("whichEffect.row", 3);
