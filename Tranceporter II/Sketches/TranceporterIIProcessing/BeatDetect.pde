@@ -22,10 +22,7 @@ class BeatDetect {
   // number of bands we're using 
   int numBands;
 
-  int[] minFrequency;
-  int[] maxFrequency;
-  int[] minBandIndex;
-  int[] maxBandIndex;
+  int[] zoneToBand;
 
   // int historySize;   // @REVIEW may be unused
   FFT fft;
@@ -45,6 +42,7 @@ class BeatDetect {
   public boolean autoBeatSense = true;
 
   public float beatSense         = 4; // the threshold for beat intensity
+  public float[] beatSenses;          // the threshold for beat intensity
   public float beatSenseFloor    = 1.1; // our minimum threshold for beat intensity
   public float beatSenseSense    = 1; // @REVIEW not sure of the purpose - only used as a multiplier
   private long lastbeatTimestamp = 0;
@@ -63,13 +61,17 @@ class BeatDetect {
   // number of specific frequency ranges we're sampling
   public int numZones      = 0;
   public boolean zoneEnabled[];
-  private float score2     = 0;
-  private float modulation = 0;
   private float[][] zoneEnergy;
   private float[][] zoneEnergyShortTerm;
   private float[][] zoneScore;
   private float[] score         = new float[historySize];
   private float[] scoreLongTerm = new float[historySizeLongTerm];
+
+  private float[][] scores;
+  private float[][] scoresLongTerm;
+
+  private int[] zonesPerBand;
+
   private float maxScore        = 100;
   private float maxMaxScore     = 30;
   private float minAvg          = 1.5f;
@@ -102,38 +104,21 @@ class BeatDetect {
     // this.historySize  = historySize;    // @REVIEW may be unused
     this.numBands = numBands;
 
-    // create historical data objects
-    
     // threshSensitivity is used to determine whether a band has enough volume to count as a beat
     // @REVIEW may be unused
     // threshSensitivity = new float[numBands];
 
     // beatLength tells us how long a beat may last until we call it a new beat
     beatLength        = new int[numBands];
-    // assign the default values to all bands for now. They can be reset later.
-    for (int i=0; i<numBands; i++) {
-      beatLength[i]        = BEAT_LENGTH;
-    }
-
-    // define our band frequency min/max in hertz
-    minFrequency = new int[numBands];
-    maxFrequency = new int[numBands];
-    minBandIndex = new int[numBands];
-    maxBandIndex = new int[numBands];
-    // this is kind of awful, but for now it's what we're doing
-    // This should stay fairly stable
-    minFrequency[0] = 16; // lowest audible
-    maxFrequency[0] = 250; 
-    minFrequency[1] = 251; 
-    minFrequency[1] = 523; // lowest note for a piccolo
-    minFrequency[2] = 524;
-    minFrequency[2] = 16000; // highest audible
-
     // analyzeBands is an array that tells us whether we care about a given band. 
     // For now they're all set to 'true'    
     analyzeBands = new boolean[numBands];
     for (int i=0; i<numBands; i++) {
-        analyzeBands[i] = true;
+      // turn all bands on
+      analyzeBands[i] = true;
+
+      // assign the default values to all bands for now. They can be reset later.
+      beatLength[i]        = BEAT_LENGTH;
     }
 
     // whether this is onset for the band
@@ -141,6 +126,9 @@ class BeatDetect {
 
     // the last time this band had an onset (in milliseconds)
     lastOnsetTimes = new long[numBands];    
+
+    // what the threshhold is for each band
+    beatSenses     = new float[numBands];
 
     // the number of averages currently being calculated - the sub-bands
     numZones = fft.avgSize();
@@ -159,6 +147,52 @@ class BeatDetect {
       zoneEnergyShortTerm[i] = new float[historySizeShortTerm];
       zoneEnabled[i]         = true;
     }
+
+    // create scoring data objects for each zone/sub-band
+    scores         = new float[numZones][historySize];
+    scoresLongTerm = new float[numZones][historySizeLongTerm];
+    zonesPerBand   = new int[numZones];
+
+    // define our mapping of zones/sub-bands to bands
+    zoneToBand = new int[numZones];
+
+    for (int i = 0; i < numZones; i++) {
+    
+      float myFreq = fft.indexToFreq(i);
+
+      // lowest audible
+      if(myFreq < 16) {  
+        // no-op
+      }
+
+      // somewhere below middle c
+      else if(myFreq < 250) {
+        zoneToBand[i] = 0;
+        zonesPerBand[0]++;
+      }
+
+      // lowest note of a piccolo
+      else if(myFreq < 523) {
+        zoneToBand[i] = 1;
+        zonesPerBand[1]++;
+      }
+
+      // highest audible
+      else if(myFreq < 20000) {
+        zoneToBand[i] = 2;
+        zonesPerBand[2]++;
+      }
+
+    }
+
+    // @REVIEW debug
+    // for (int i = 0; i < numZones; i++) {
+    //     println("Zone " + i + " is in band " + zoneToBand[i]);
+    // }
+    // for (int i = 0; i < numBands; i++) {
+    //     println("Band " + i + " has zones " + zonesPerBand[i]);
+    // }
+
   }
 
   /**
@@ -230,12 +264,17 @@ class BeatDetect {
         // increment the localAvg value
         localAvg += zoneEnergy[i][playhead2];
 
+        // which band is this zone in?
+        int bandIndex = zoneToBand[i];
+
         // if the zone score is less than the maximum, increment the score by that much
         if (zoneScore[i][playhead2] < maxScore) {
           score[playhead2] += zoneScore[i][playhead2];
+          scores[bandIndex][playhead2] += zoneScore[i][playhead2];
         } else {
           // otherwise, increment by maxScore
           score[playhead2] += maxScore;
+          scores[bandIndex][playhead2] += maxScore;
         }
 
         // if(zoneScore[i][playhead2]>25) {
@@ -244,19 +283,19 @@ class BeatDetect {
       }
     } // end loop through all zones
 
-    // pitch detect
-    float maxEnergy   = 0;
-    int maxEnergyZone = 0;
-    int firstZone     = 0;
-    // int thres    = 0; // @REVIEW appears to be unused
-    for (int i = firstZone; i < numZones; i++) {
-      if (zoneEnergy[i][playhead2] > maxEnergy && zoneEnabled[i]) {
-        maxEnergyZone = i;
-        maxEnergy = zoneEnergy[i][playhead2];
-      }
-    }
-
     // @REVIEW - this entire block appears to only be used for printing/debugging
+    // // pitch detect
+    // float maxEnergy   = 0;
+    // int maxEnergyZone = 0;
+    // int firstZone     = 0;
+    // // int thres    = 0; // @REVIEW appears to be unused
+    // for (int i = firstZone; i < numZones; i++) {
+    //   if (zoneEnergy[i][playhead2] > maxEnergy && zoneEnabled[i]) {
+    //     maxEnergyZone = i;
+    //     maxEnergy = zoneEnergy[i][playhead2];
+    //   }
+    // }
+    // 
     // if (maxEnergyZone != lastBand) {
     //
     //   if (lastBandCount > thres) {
@@ -291,16 +330,19 @@ class BeatDetect {
       numZoneEnabled += (zoneEnabled[ii]) ? 1 : 0;
     }
 
-    // this is where we need to set score and scoreLongTerm for each band
-
     // if we don't have enabled zones, set the score and long-term score to 0
     if (numZoneEnabled == 0) {
-      score[playhead2] = 0;
-      scoreLongTerm[playheadLongTerm2] = 0;
+      for (int ii = 0; ii < numBands; ii++) {
+        scores[ii][playhead2] = 0;
+        scoresLongTerm[ii][playheadLongTerm2] = 0;
+      }
+
     } else {
       // if we have enabled zones, set the score/longTermScore to averages instead of sums
-      score[playhead2] = score[playhead2] / numZoneEnabled;
-      scoreLongTerm[playheadLongTerm2] = score[playhead2]/ numZoneEnabled;
+      for (int ii = 0; ii < numBands; ii++) {
+        scores[ii][playhead2]                 = scores[ii][playhead2] / zonesPerBand[ii];
+        scoresLongTerm[ii][playheadLongTerm2] = scores[ii][playhead2] / zonesPerBand[ii];
+      }
     }
 
     // are we on the beat?
@@ -308,59 +350,46 @@ class BeatDetect {
     // this used "skipframes" to induce a delay in the original code,
     // but that code doesn't have our overhead and runs much faster, so we don't really need it
     // if (skipFrames <= 0 && score[playhead2] > beatSense) {
-    if (score[playhead2] > beatSense) {
+    for(int i=0;i<numBands;i++) {
 
-      // if we weren't already on the beat, this is the onset
-      if(!onBeat) {
-        for(int i=0;i<numBands;i++) {
+        if (scores[i][playhead2] > beatSenses[i]) {
           if(isBandOnset[i]) { 
-            isBandOnset[i] = false;
-          } else {
-            isBandOnset[i] = true;
+            isBandOnset[i]    = false;
+            } else {
+            isBandOnset[i]    = true;
+            int myMillis      = millis();
+            lastOnsetTimes[i] = myMillis;  
           }
         }
-      }
+        else {
+          isBandOnset[i] = false;
+        }
 
-      onBeat = true;
-      // skipFrames = repeatDelay;
+        // find the highest score we found this round (with ceiling)
+        float max = max(scores[i]);
+        if (max > maxMaxScore) {
+          max = maxMaxScore;
+        }
+
+        // float min = min(score); // @REVIEW used only for debugging
+        // find the average score we've had in the long-term with ceiling
+        float avg = average(scoresLongTerm[i]);
+        if (avg < minAvg) {
+          avg = minAvg;
+        }
+
+        // if we're using autoBeatSense our and max is greater than some arbitrary value...
+        // update our beatSense threshhold to take our recent max into account
+        if (autoBeatSense && max > beatSenseFloor) {
+          beatSenses[i] = beatSenses[i] * 0.995f + 0.002f * max * beatSenseSense + 0.003f * avg * beatSenseSense;
+
+          // beatSense has a minimum value
+          if (beatSenses[i] < beatSenseFloor) {
+            beatSenses[i] = beatSenseFloor;
+          }
+        }
+
     }
-    else {
-      for(int i=0;i<numBands;i++) {
-        isBandOnset[i] = false;
-      }
-      onBeat = false;
-    }
-
-    // @REVIEW unused
-    // if (skipFrames > 0) {
-    //   skipFrames--;
-    // }
-
-    // find the highest score we found this round (with ceiling)
-    float max = max(score);
-    if (max > maxMaxScore) {
-      max = maxMaxScore;
-    }
-
-    // float min = min(score); // @REVIEW used only for debugging
-    // find the average score we've had in the long-term with ceiling
-    float avg = average(scoreLongTerm);
-    if (avg < minAvg) {
-      avg = minAvg;
-    }
-
-    // if we're using autoBeatSense our and max is greater than some arbitrary value...
-    // update our beatSense threshhold to take our recent max into account
-    if (autoBeatSense && max > beatSenseFloor) {
-      beatSense = beatSense * 0.995f + 0.002f * max * beatSenseSense + 0.003f * avg * beatSenseSense;
-
-      // beatSense has a minimum value
-      if (beatSense < beatSenseFloor) {
-        beatSense = beatSenseFloor;
-      }
-    }
-
-    // System.out.println(" max:"+max+" min:"+min+" avg:"+avg+" var:"+average(score));
 
     // we're all done - update our round-robin playheads to match each other 
     playhead          = playhead2;
@@ -385,13 +414,13 @@ class BeatDetect {
     // System.out.println("current score : " + score[playhead2]);
     // System.out.println("on Beat :"        + this.onBeat);
 
-    // set all our bands to this band's value
-    for (int i=0; i< main.NUM_BANDS; i++) {
-      if(onBeat) {
-        int myMillis = millis();
-        lastOnsetTimes[i] = myMillis;
-      }
-    }
+    // // set all our bands to this band's value
+    // for (int i=0; i< main.NUM_BANDS; i++) {
+    //   if(onBeat) {
+    //     int myMillis = millis();
+    //     lastOnsetTimes[i] = myMillis;
+    //   }
+    // }
   }
   
   /**
