@@ -159,18 +159,39 @@ class MainClass {
     minim = new Minim(applet);
     audioIn = minim.getLineIn(Minim.STEREO, SAMPLE_SIZE, SAMPLE_RATE);
     
+    // create a new Fast Fourier Transform object
     fft = new FFT(SAMPLE_SIZE, SAMPLE_RATE);
+
+    // Sets the number of averages used when computing
+    // the spectrum based on the minimum bandwidth for an octave           
+    // and the number of bands per octave.
     fft.logAverages(FFT_BASE_FREQ, FFT_BAND_PER_OCT);
     System.out.println("Sound Control: FFT on " + fft.avgSize()
       + " log bands. samplerate: " + SAMPLE_RATE + "Hz. "
       + SAMPLE_RATE / SAMPLE_SIZE + " buffers of "
       + SAMPLE_SIZE + " samples per second.");
+
+    // pause for 100 milliseconds - presumably to give the hardware time to catch up
     delay(100);
 
+    // Sets the window to use on the samples 
+    // before taking the forward transform.
+    // The result of using a window is to reduce the noise in the spectrum somewhat.
+    fft.window(FFT.HAMMING);
+
+    // create our new beat detect object (passing it the FFT as an argument)
     beatDetect = new BeatDetect(fft, NUM_BANDS, HISTORY_SIZE);
-    for (int i=0; i<NUM_BANDS; i++)
+  
+    // define which bands we are analyzing
+    for (int i=0; i<NUM_BANDS; i++) {
       beatDetect.analyzeBand(i, analyzeBands[i]);
-    beatDetect.setFFTWindow();
+    }
+
+    // // Sets the window to use on the samples 
+    // // before taking the forward transform.
+    // @REVIEW now done above when we call fft.window(); 
+    // Because why not do it here where we're initializing the object already?
+    // beatDetect.setFFTWindow();
         
     newEffectFirstTime();
     
