@@ -721,7 +721,7 @@ class LedMap {
       int status = totalControlConsumer.setupTotalControl(getNumStrands(), maxPixelsPerStrand, kUseBitBang);
       if (status != 0) {
         //useTotalControlHardware = false;
-        //println("turning off Total Control because of error during initialization");
+        println("Total Control error during initialization " + status);
       }
     }
   }
@@ -746,4 +746,10 @@ class LedMap {
       int status = totalControlConsumer.writeOneFrame(thePixelData, theStrandMap);
     }
   }
+  
+  void shutdown() {
+    TotalControl.close();
+    println("LEDMAP shutting down");
+  }
+  
 }

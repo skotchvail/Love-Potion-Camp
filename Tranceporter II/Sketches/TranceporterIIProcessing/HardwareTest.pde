@@ -30,7 +30,7 @@ class HardwareTest extends Drawer {
     color(200,  100,  0),       // strand 6
     color(200,  55,   100),     // strand 7
   };
-  final color lowPowerColor = color(0, 30, 0);
+  final color lowPowerColor = color(50, 0, 0);
 
   int cursorStrand;
   int cursorOrdinal;
@@ -45,6 +45,9 @@ class HardwareTest extends Drawer {
     settings.setParam(settings.keyFlash, 0.0);
     cursorStrand = prefs.getInt("hardware.cursorStrand", 0);
     cursorOrdinal = prefs.getInt("hardware.cursorOrdinal", 0);
+    if (cursorOrdinal >= main.ledMap.getStrandSize(cursorStrand)) {
+      cursorOrdinal = 0;
+    }
     backupRealCoordinate();
   }
   
@@ -143,7 +146,7 @@ class HardwareTest extends Drawer {
     }
 
     if (!iPadActionsAllowed) {
-      println("iPad actions not allowed until 'Program LEDs' is pressed");
+      println("iPad actions not allowed until 'Outside' or 'Inside' is pressed");
       return;
     }
     

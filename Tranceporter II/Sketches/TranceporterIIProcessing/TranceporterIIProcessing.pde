@@ -55,6 +55,7 @@ void setup() {
   rotationSpeed = prefs.getFloat("rotationSpeed", 1.0 / (FRAME_RATE * 30)); // default once every 30 seconds
   main = new MainClass();
   main.setup(this);
+  prepareExitHandler();
 }
 
 void draw() {
@@ -67,6 +68,15 @@ void mouseClicked() {
 
 void keyPressed() {
   main.keyPressed();
+}
+
+private void prepareExitHandler() {
+
+  Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
+    public void run () {
+      main.shutdown();
+  }
+  }));
 }
 
 class MainClass {
@@ -101,11 +111,13 @@ class MainClass {
 
   void setup(PApplet applet) {
     
-    // redirect stdout/err
-    try {
-      console = new Console();
-    } catch(Exception e) {
-      println("Error redirecting stdout/stderr: " + e);
+    if (true) {
+      // redirect stdout/err
+      try {
+        console = new Console();
+      } catch(Exception e) {
+        println("Error redirecting stdout/stderr: " + e);
+      }
     }
     
     ledMap = new LedMap();
@@ -203,6 +215,10 @@ class MainClass {
     println("Done setup");
   }
 
+  void shutdown() {
+    ledMap.shutdown();
+  }
+  
   void draw() {
     
     if (needToFlushPrefs) {
