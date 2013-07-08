@@ -11,7 +11,7 @@ beautiful animations timed to music.
 
 The display code runs in a Java-based programming environment called
 "Processing". Each animation is called a "Sketch". To install Processing on your computer, get the latest
-version [here](http://www.processing.org/download/). Note that you will need at least version 2.0b9. 
+version [here](http://www.processing.org/download/). Note that you will need at least version 2.0. 
 
 Test that you can run one of the sample Sketches that comes with Processing.
 
@@ -23,7 +23,7 @@ found in Processing preferences. My path looks like this:
 
     /Volumes/Data/skotchvail/Documents/Processing/Libraries
 
-Get the libraries [here](https://www.box.com/s/a351863d10c9046a2ac1) and move them
+Get the libraries [here](https://www.box.com/s/oh7azkw7puogdaeprcga) and move them
 into your `Libraries` folder. Ask Skotch for box permission if needed. 
 
 ## If you are not going to drive the LED's
@@ -52,20 +52,27 @@ Using the hardware depends on an interface library that in turn depends
 on the D2XX library. If you are not going to be driving the hardware,
 but just want to use the simulation, then you don't need to do this. 
 
-Download the [D2XX library](http://www.ftdichip.com/Drivers/D2XX.htm)
+Download the [D2XX library](http://www.ftdichip.com/Drivers/D2XX.htm). (NOT clear if we need Virtual COM Port drivers or VCP drivers, please update this documentation when sure. Skotch *thinks* it is Virtual COM Port drivers). 
 
-Copy the i386 version of the library into `/usr/local/lib`.  Symlink the
-base .dylib name to the versioned path.  Copy the *.h files into
+1. Copy the i386 version of the library into `/usr/local/lib`.  
+2. Symlink the base .dylib name to the versioned path. 
+   e.g.  `ln -s /usr/local/lib/libftd2xx.1.2.2.dylib /usr/local/lib/libftd2xx.dylib`  
+3. Copy the *.h files into `/usr/local/include`
 
-    /usr/local/include
 
-
-Checkout and apply the patch:
-(from the parent dir of Love-Potion-Camp checkout)
+Make the PaintYourDragon stuff: 
 
     $ git clone git://github.com/PaintYourDragon/p9813.git
+    
+On Skotch's Mac, he had to modify the two Makefile's (`p9813/Makefile` and `p9813/Processing/Makefile`) to use
+`CC         = llvm-gcc-4.2`
+but only try this if you are getting compile or link errors. 
+
+If that doesn't fix things, you might want to try the older instructions tried to use a patch found in the parent dir of Love-Potion-Camp checkout: `$ patch -p0 < ../Love-Potion-Camp/patch.txt`
+
+In any event, you need to run both Makefiles from the command line. 
+
     $ cd p9813
-    $ patch -p0 < ../Love-Potion-Camp/patch.txt
     $ make
     $ cd processing ; make && make install
 

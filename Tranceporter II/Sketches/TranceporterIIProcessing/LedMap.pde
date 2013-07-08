@@ -749,7 +749,7 @@ class LedMap {
   
   void shutdown() {
     TotalControl.close();
-    println("LEDMAP shutting down");
+    println("closed TotalControl driver");
   }
   
 }
