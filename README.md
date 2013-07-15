@@ -52,7 +52,7 @@ Using the hardware depends on an interface library that in turn depends
 on the D2XX library. If you are not going to be driving the hardware,
 but just want to use the simulation, then you don't need to do this. 
 
-Download the [D2XX library](http://www.ftdichip.com/Drivers/D2XX.htm). (NOT clear if we need Virtual COM Port drivers or VCP drivers, please update this documentation when sure. Skotch *thinks* it is Virtual COM Port drivers). 
+Download the [D2XX library](http://www.ftdichip.com/Drivers/D2XX.htm) Virtual COM Port (VCP) drivers.
 
 1. Copy the i386 version of the library into `/usr/local/lib`.  
 2. Symlink the base .dylib name to the versioned path. 
