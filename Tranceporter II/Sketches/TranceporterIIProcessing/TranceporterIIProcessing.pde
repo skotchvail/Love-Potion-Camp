@@ -495,9 +495,9 @@ class MainClass {
   
   void mouseClicked() {
     Point p = new Point(mouseX, mouseY);
-    if (display.getBox2D().contains(p)) {
-      newEffect();
-    }
+//    if (display.getBox2D().contains(p)) {
+//      newEffect();
+//    }
   }
   
   void debugPaletteType(String extra) {
