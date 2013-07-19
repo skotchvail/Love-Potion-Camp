@@ -16,9 +16,11 @@ class HardwareTest extends Drawer {
   
   int drawMode = kModeLowPower;
   float lastTimeSwitched;
+  float fader1Percent = 1.0;
   int movementPixelFast;
   boolean povOutside;
   boolean iPadActionsAllowed;
+  int sweepLine;
   
   int[] strandColor = {
     color(255,  176,    33),    // strand 0
@@ -71,6 +73,7 @@ class HardwareTest extends Drawer {
   
   void sendToIPad() {
     super.sendToIPad();
+    settings.sendMessageToIPad("/progLed/fader1", "" + fader1Percent);
     if (realCoordinate.x >= 0) {
       Point a = main.ledMap.convertDoubleSidedPoint(realCoordinate, cursorStrand);
       settings.sendMessageToIPad("/progLed/labelCoordinates", "" + a.x + ", " + a.y);
@@ -172,6 +175,9 @@ class HardwareTest extends Drawer {
         main.ledMap.writeOneStrandToDisk(cursorStrand);
         backupRealCoordinate();
       }
+    }
+    else if (action.equals("fader1")) {
+      fader1Percent = msg.get(0).floatValue();
     }
     else {
       boolean pressed = (msg.get(0).floatValue() != 1.0);
@@ -553,7 +559,13 @@ class HardwareTest extends Drawer {
     pg.fill(0, 15);
     pg.rect(0, 0, width, height);
     int halfWidth = width / 2;
-    int counter = (frameCount) % (halfWidth + height);
+
+    final int kLevels = 20;
+    int interval = kLevels - (int)(fader1Percent * (kLevels - 1));
+    if (interval < kLevels && (frameCount % interval) == 0) {
+      sweepLine++;
+    }
+    int counter = (sweepLine) % (halfWidth + height);
     if (counter < halfWidth) {
       pg.fill(255, 190, 0);
       pg.rect(halfWidth - counter, 0, 2, height + 1);
