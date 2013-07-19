@@ -434,22 +434,24 @@ class LedMap {
     int strandSize = getStrandSize(whichStrand);
     for (int i = startOrdinal; i < strandSize; i++) {
       Point point = ledGet(whichStrand, i, false);
+      Point originalPoint = (Point)point.clone();
       if (point.x >= 0) {
         point.translate(delta.x, delta.y);
         Point checker = convertDoubleSidedPoint(point, whichStrand);
         if (checker.x < 0 || checker.x >= ledWidth / 2 || checker.y < 0 || checker.y >= ledHeight) {
-          //need to unroll the action, because we cannot go off the edge
-          delta.x = -delta.x;
-          delta.y = -delta.y;
+          println("Cannot offset coordinate: " + i + " " + originalPoint + " -> " + point);
+          // Need to unroll the action, because we cannot go off the edge
           for (int j = startOrdinal; j < i; j++) {
-            point = ledGet(whichStrand, i, false);
+            point = ledGet(whichStrand, j, false);
             if (point.x >= 0) {
-              point.translate(delta.x, delta.y);
-              ledProgramCoordinate(whichStrand, i, point); // Put the point back to where it was before
+              point.translate(-delta.x, -delta.y);
+              println("unrolling ordinal " + j + " to " + point);
+              ledProgramCoordinate(whichStrand, j, point); // Put the point back to where it was before
             }
           }
           return false;
         }
+        println("offset ordinal " + i + " originalPoint " + originalPoint + " to " + point);
         ledProgramCoordinate(whichStrand, i, point);
       }
     }
@@ -457,7 +459,6 @@ class LedMap {
   }
 
   boolean ledProgramOrdinalOffset(int whichStrand, int startOrdinal, int deltaOrdinal) {
-    
     
     println("ledProgramOrdinalOffset() " + deltaOrdinal);
     
@@ -702,10 +703,18 @@ class LedMap {
 //    ledMapDump(2, 7); //set which strands you want to dump
     
     println("" + lowestX + " <= x <= " + biggestX + ", " + lowestY + " <= y <= " + biggestY);
-    assert(lowestX == 0): "lowest LED should be X == 0, instead of " + lowestX;
-    assert(lowestY == 0): "lowest LED should be Y == 0, instead of " + lowestY;
-    assert((biggestX + 1) * 2 == ledWidth): "biggest LED should be X == " + (ledWidth / 2) + " instead of " + biggestX;
-    assert(biggestY + 1 == ledHeight): "biggest LED should be Y == " + ledHeight + " instead of " + biggestY;
+    if (lowestX == 0) {
+      println("ERROR: lowest LED should be X == 0, instead of " + lowestX);
+    }
+    if (lowestY == 0) {
+      println ("ERROR: lowest LED should be Y == 0, instead of " + lowestY);
+    }
+    if ((biggestX + 1) * 2 == ledWidth) {
+      println("ERROR: biggest LED should be X == " + (ledWidth / 2) + " instead of " + biggestX);
+    }
+    if (biggestY + 1 == ledHeight) {
+      println("ERROR: biggest LED should be Y == " + ledHeight + " instead of " + biggestY);
+    }
     
     if (!useTotalControlHardware) {
       return;

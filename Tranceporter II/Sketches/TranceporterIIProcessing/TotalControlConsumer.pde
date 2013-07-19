@@ -160,7 +160,9 @@ class TotalControlConsumer {
     }
     if (millis() - lastStat > 3000) {
       lastStat = millis();
-      TotalControl.printStats();
+      if (false) {
+        TotalControl.printStats();
+      }
     }
     return status;
   }

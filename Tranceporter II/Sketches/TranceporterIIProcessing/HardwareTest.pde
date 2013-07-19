@@ -378,6 +378,7 @@ class HardwareTest extends Drawer {
       // If current pixel is TC_PIXEL_UNUSED, base it on previous valid coordinate
       Point a = new Point(-1, -1);
       int whichOrdinal = cursorOrdinal;
+      println("xChange + " + xChange + " yChange " + yChange + " ordinal " + whichOrdinal);
       while (whichOrdinal >= 0) {
         a = main.ledMap.ledGet(cursorStrand, whichOrdinal, false);
         if (a.x >= 0) {
