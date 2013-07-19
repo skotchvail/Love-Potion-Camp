@@ -280,7 +280,7 @@ class MainClass {
     ArrayList<String> myStrings = new ArrayList();
     myStrings.add(new String("space\tfreeze"));
     myStrings.add(new String("n\tnext Sketch"));
-    myStrings.add(new String("t\tconnect to Hardware"));
+    myStrings.add(new String("t\tconnect to Hardware " + (useTotalControlHardware ? "(on)" : "(off)")));
     myStrings.add(new String("p\tprogram LED's"));
     myStrings.add(new String("2 3\tshow/hide 2d or 3d display"));
     myStrings.add(new String("[ ]\t3D display rotation speed"));
