@@ -40,7 +40,7 @@
       debugDocumentVersioning = "YES"
       allowLocationSimulation = "YES">
       <PathRunnable
-         FilePath = "/Volumes/Data/skotchvail/processing-java">
+         FilePath = "/usr/bin/processing-java">
       </PathRunnable>
       <MacroExpansion>
          <BuildableReference

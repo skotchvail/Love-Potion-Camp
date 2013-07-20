@@ -25,7 +25,7 @@
 class LedMap {
   
   // TCL settings
-  final boolean runConcurrent = true;
+  final boolean runConcurrent = false;
   final boolean kUseBitBang = true;
 
   // array of data representing the current color for each given pixel in our flat array
@@ -292,6 +292,9 @@ class LedMap {
 //            println("index: " + index + " Unused ");
 //          }
         }
+      }
+      else if (command.equals("")) {
+        // Ignore blank lines
       }
       else {
         assert false : "unimplemented command: " + command;
