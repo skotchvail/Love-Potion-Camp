@@ -16,7 +16,7 @@ class HardwareTest extends Drawer {
   
   int drawMode = kModeLowPower;
   float lastTimeSwitched;
-  float fader1Percent = 1.0;
+  float fader1Percent = 0.7;
   int movementPixelFast;
   boolean povOutside;
   boolean iPadActionsAllowed;
@@ -165,7 +165,10 @@ class HardwareTest extends Drawer {
       if (pressed) {
         restoreRealCoordinate();
         main.ledMap.readOneStrandFromDisk(cursorStrand);
+        main.ledMap.ledInterpolate();
         backupRealCoordinate();
+        p.forceUpdateMaskPixels();
+        sendToIPad();
       }
     }
     else if (action.equals("SaveStrand")) {

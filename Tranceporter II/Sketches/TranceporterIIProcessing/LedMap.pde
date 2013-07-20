@@ -251,7 +251,7 @@ class LedMap {
     // ordinalOffsetter = 0;
     
     Table table = strandTables[whichStrand];
-    // println("strand " + (whichStrand + 1) + " rows: " + table.getRowCount());    
+//    println("strand " + (whichStrand + 1) + " rows: " + table.getRowCount());
     assert table.getRowCount() > 0 : "rowCount = 0 for strand " + (whichStrand + 1);
     
     for (TableRow row : table.rows()) {
@@ -261,8 +261,10 @@ class LedMap {
       int ordinalStart = row.getInt(kColumnOrdinal); // + ordinalOffsetter;
       int ordinalEnd = row.getInt(kColumnOrdinalEnd); // + ordinalOffsetter;
 
-      // println("Strand " + whichStrand + "\t" + command + "," + ordinalStart 
-      //   + "," + ordinalEnd + "," + row.getInt(kColumnCoordX) + "," + row.getInt(kColumnCoordY) );
+//      if (whichStrand == 0) {
+//        println("Strand " + whichStrand + "\t" + command + "," + ordinalStart
+//           + "," + ordinalEnd + "," + row.getInt(kColumnCoordX) + "," + row.getInt(kColumnCoordY) );
+//      }
       if (command.equals(kCommandMap)) {
         Point coord = new Point(row.getInt(kColumnCoordX), row.getInt(kColumnCoordY));
         // coord.x += xOffsetter;
@@ -277,14 +279,18 @@ class LedMap {
         coord = convertDoubleSidedPoint(coord, whichStrand);
         int pixelDataIndex = coordToIndex(coord);
         strandMap[index] = pixelDataIndex;
-        // println("index: " + index + " pixelDataIndex: " + pixelDataIndex);
+//        if (whichStrand == 0) {
+//          println("index: " + index + " pixelDataIndex: " + pixelDataIndex);
+//        }
       }
       else if (command.equals(kCommandMissing)) {
         for (int ordinal = ordinalStart; ordinal <= ordinalEnd; ordinal++) {
           int index = (whichStrand * maxPixelsPerStrand) + ordinal;
           assert(strandMap[index] == TC_PIXEL_UNDEFINED) : "led " + ordinal + " on strand " + whichStrand + " is already defined: " + strandMap[index];
           strandMap[index] = TC_PIXEL_UNUSED;
-          // println("index: " + index + " Unused ");
+//          if (whichStrand == 0) {
+//            println("index: " + index + " Unused ");
+//          }
         }
       }
       else {
