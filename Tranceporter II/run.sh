@@ -12,5 +12,5 @@ set
 
 SAVEIFS=$IFS
 IFS=$(echo -en "\n\b")
-processing-java --sketch=./Sketches/TranceporterIIProcessing/ --output=${TMPDIR}tranceporterTempDir --run --force
+processing-java --sketch="${PWD}/Sketches/TranceporterIIProcessing" --output=${TMPDIR}tranceporterTempDir --run --force
 IFS=$SAVEIFS
