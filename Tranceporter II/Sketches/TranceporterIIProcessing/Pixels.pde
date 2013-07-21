@@ -58,11 +58,14 @@ class Pixels {
     if (maskPixels == null) {
       // Mask out any pixels that are not mapped
       maskPixels = new color[ledWidth * ledHeight];
-      
+      int length = maskPixels.length;
       int numStrands = main.ledMap.getNumStrands();
       for (int whichStrand = 0; whichStrand < numStrands; whichStrand++) {
         for (Point point: main.ledMap.pointsForStrand(whichStrand)) {
-            maskPixels[point.y * ledWidth + point.x] = white;
+          int offset = point.y * ledWidth + point.x;
+          if (offset < length) {
+            maskPixels[offset] = white;
+          }
         }
       }
     }
@@ -255,7 +258,9 @@ class Pixels {
             Point coordinate = main.ledMap.ledGet(whichStrand, whichOridinal);
             if (coordinate.x >= 0) {
               int index = coordinate.y * ledWidth + coordinate.x;
-              assert (index < pixelData.length) : "index " + index + " exceeds pixelData.length:" + pixelData.length;
+              if (index >= pixelData.length) {
+                continue;
+              }
               ledColor = pixelData[index];
             }
           }

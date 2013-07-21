@@ -305,6 +305,7 @@ class LedMap {
   // write passed data array to pixelData array
   void copyPixels(int[] pixels, DrawType drawType) {
     final int halfWidth = ledWidth / 2;
+    int length = pixels.length;
     
     if (drawType == DrawType.MirrorSides) {
       // Image is mirrored
@@ -312,9 +313,12 @@ class LedMap {
         final int baseY = y * halfWidth;
         final int baseYData = y * ledWidth;
         for (int x = 0; x < halfWidth; x++) {
-          color pixel = pixels[baseY + x];
-          pixelData[baseYData + x] = pixel;
-          pixelData[baseYData + (ledWidth - x - 1)] = pixel;
+          int offset = baseY + x;
+          if (offset < length) {
+            color pixel = pixels[offset];
+            pixelData[baseYData + x] = pixel;
+            pixelData[baseYData + (ledWidth - x - 1)] = pixel;
+          }
         }
       }
     }
@@ -324,9 +328,12 @@ class LedMap {
         final int baseY = y * halfWidth;
         final int baseYData = y * ledWidth;
         for (int x = 0; x < halfWidth; x++) {
-          color pixel = pixels[baseY + x];
-          pixelData[baseYData + x] = pixel;
-          pixelData[baseYData + x + halfWidth] = pixel;
+          int offset = baseY + x;
+          if (offset < length) {
+            color pixel = pixels[offset];
+            pixelData[baseYData + x] = pixel;
+            pixelData[baseYData + x + halfWidth] = pixel;
+          }
         }
       }
     }
@@ -417,14 +424,14 @@ class LedMap {
 
   // write passed point data to specified strand and index
   void ledProgramCoordinate(int whichStrand, int ordinal, Point p) {
-    if (p.x >= 0) {
-      if (isStrandPortSide(whichStrand)) {
-        assert p.x < ledWidth / 2 : " invalid x: " + p.x + " for portside strand " + (whichStrand + 1);
-      }
-      else {
-        assert (p.x > ledWidth / 2) || (p.x < ledWidth): " invalid x: " + p.x + " for starboard strand " + (whichStrand + 1);
-      }
-    }
+//    if (p.x >= 0) {
+//      if (isStrandPortSide(whichStrand)) {
+//        assert p.x < ledWidth / 2 : " invalid x: " + p.x + " for portside strand " + (whichStrand + 1) + " ordinal " + ordinal;
+//      }
+//      else {
+//        assert (p.x > ledWidth / 2) || (p.x < ledWidth): " invalid x: " + p.x + " for starboard strand " + (whichStrand + 1) + " ordinal " + ordinal;
+//      }
+//    }
     assert(whichStrand < getNumStrands()) : "not this many strands";
     assert(ordinal < getStrandSize(whichStrand)) : "whichStrand exceeds number of leds per strand";
     int index = (whichStrand * maxPixelsPerStrand) + ordinal;
@@ -438,7 +445,6 @@ class LedMap {
     ledProgramCoordinate(whichStrand, ordinal, indexToCoordinate(TC_PIXEL_UNUSED));
   }
 
-
   boolean ledProgramCoordinateOffset(int whichStrand, int startOrdinal, Point delta) {
     int strandSize = getStrandSize(whichStrand);
     for (int i = startOrdinal; i < strandSize; i++) {
@@ -447,7 +453,8 @@ class LedMap {
       if (point.x >= 0) {
         point.translate(delta.x, delta.y);
         Point checker = convertDoubleSidedPoint(point, whichStrand);
-        if (checker.x < 0 || checker.x >= ledWidth / 2 || checker.y < 0 || checker.y >= ledHeight) {
+//        if (checker.x < 0 || checker.x >= ledWidth / 2 || checker.y < 0 || checker.y >= ledHeight) {
+        if (checker.x < 0 || checker.y < 0) {
           println("Cannot offset coordinate: " + i + " " + originalPoint + " -> " + point);
           // Need to unroll the action, because we cannot go off the edge
           for (int j = startOrdinal; j < i; j++) {
