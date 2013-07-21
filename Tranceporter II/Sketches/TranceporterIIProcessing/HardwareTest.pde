@@ -12,7 +12,8 @@ class HardwareTest extends Drawer {
   final int kModeLowPowerWithCursor = 4;
   final int kModeVerticalLineSweep = 5;
   final int kModeOverlap = 6;
-  final int kModeUnused = 7;
+  final int kModeCross = 7;
+  final int kModeNumDrawModes = 8;
   
   int drawMode = kModeLowPower;
   float lastTimeSwitched;
@@ -83,7 +84,7 @@ class HardwareTest extends Drawer {
     }
     settings.sendMessageToIPad("/progLed/labelStrand", "Strand " + (cursorStrand + 1));
     settings.sendMessageToIPad("/progLed/labelOrdinal", "LED " + cursorOrdinal);
-    for (int i = 0; i < 6; i++) {
+    for (int i = 0; i < kModeNumDrawModes; i++) {
       settings.sendMessageToIPad("/progLed/drawModeToggle/1/" + (i+1), (iPadActionsAllowed && drawMode == i)?1:0);
     }
     int whichButton = povOutside ? 0 : 1;
@@ -582,7 +583,37 @@ class HardwareTest extends Drawer {
       pg.rect(halfWidth, counter - halfWidth, halfWidth, 2);
     }
   }
-  
+
+  void drawCross() {
+    
+    pg.noStroke();
+    pg.fill(0);
+    pg.rect(0, 0, width, height);
+    
+    // Draw this Strand in blue
+    int numLeds = main.ledMap.getStrandSize(cursorStrand);
+    pg.stroke(0, 0, 255, 20);
+    for (int ordinal = 0; ordinal < numLeds; ordinal++) {
+      Point a = main.ledMap.ledGet(cursorStrand, ordinal);
+      if (a.x < 0)
+        continue;
+      pg.point(a.x, a.y);
+    }
+    
+    pg.noStroke();
+    pg.fill(255, 190, 0);
+    pg.rect(realCoordinate.x, 0, 1, realCoordinate.y);
+
+    pg.fill(134, 155, 210);
+    pg.rect(realCoordinate.x, realCoordinate.y, 1, height);
+
+    pg.fill(200, 50, 50);
+    pg.rect(0, realCoordinate.y, realCoordinate.x, 1);
+    
+    pg.fill(50, 200, 50);
+    pg.rect(realCoordinate.x, realCoordinate.y, width, 1);
+  }
+
   void drawTrainingMode() {
     // Erase background
     pg.noStroke();
@@ -627,40 +658,34 @@ class HardwareTest extends Drawer {
       lastTimeSwitched = millis();
     }
     
-    boolean useCursorFinder = false;
+    boolean useCursorFinder = true;
     int mode = drawMode;
-    if (mode == kModeCheckerboard) {
-      useCursorFinder = true;
-      drawCheckerboard();
-    }
-    else if (mode == kModeLowPower) {
+    if (mode == kModeLowPower) {
       // Draw solid low power color
       pg.background(lowPowerColor);
+      useCursorFinder = false;
+    }
+    else if (mode == kModeCheckerboard) {
+      drawCheckerboard();
     }
     else if (mode == kModeEachLedPanel) {
-      useCursorFinder = true;
       drawEachLedPanel();
     }
-    else if (mode == kModeOverlap) {
-      useCursorFinder = true;
-      drawOverlap();
-    }
-    else if (mode == kModeUnused) {
-      useCursorFinder = false;
+    else if (mode == kModeLowPowerWithCursor) {
+      // Draw solid low power color
       pg.background(lowPowerColor);
     }
     else if (mode == kModeVerticalLineSweep) {
-      useCursorFinder = true;
       drawLineSweep();
     }
-    else if (mode == kModeLowPowerWithCursor) {
-      useCursorFinder = true;
-      // Draw solid low power color
-      pg.background(lowPowerColor);
+    else if (mode == kModeOverlap) {
+      drawOverlap();
+    }
+    else if (mode == kModeCross) {
+      drawCross();
     }
     else {
       assert mode == kModeLedTraining : "unknown training mode " + mode;
-      useCursorFinder = true;
       drawTrainingMode();
     }
     
