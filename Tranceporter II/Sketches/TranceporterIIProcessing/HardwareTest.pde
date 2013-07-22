@@ -617,7 +617,7 @@ class HardwareTest extends Drawer {
   void drawTrainingMode() {
     // Erase background
     pg.noStroke();
-    pg.fill(0, 10);
+    pg.fill(0, 100);
     pg.rect(0, 0, width, height);
 
     // Draw this Strand in blue
