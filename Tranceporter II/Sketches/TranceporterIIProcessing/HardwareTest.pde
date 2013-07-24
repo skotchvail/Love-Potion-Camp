@@ -471,8 +471,7 @@ class HardwareTest extends Drawer {
     // Draw checkerboard pattern
     pg.background(color(0, 0, 0));
 
-    float slider = settings.getParam(settings.keyCustom1);
-    int unit = (int)map(slider, 0.0, 1.0, 10, 2);
+    int unit = (int)map(fader1Percent, 0.0, 1.0, 10, 2);
     int movementPixelSlow = movementPixelFast / 10;
     
     for (int x = 0; x < pg.width; x++) {
@@ -601,28 +600,38 @@ class HardwareTest extends Drawer {
     }
     
     pg.noStroke();
+    // Vertical above
     pg.fill(255, 190, 0);
     pg.rect(realCoordinate.x, 0, 1, realCoordinate.y);
 
+    // Vertical below
     pg.fill(134, 155, 210);
     pg.rect(realCoordinate.x, realCoordinate.y, 1, height);
 
+    // Vertical left
     pg.fill(200, 50, 50);
     pg.rect(0, realCoordinate.y, realCoordinate.x, 1);
     
+    // Vertical right
     pg.fill(50, 200, 50);
     pg.rect(realCoordinate.x, realCoordinate.y, width, 1);
+    
+    // Vertical on other side
+    int otherSideX = ledWidth - realCoordinate.x - 1;
+    pg.fill(100, 100, 100);
+    pg.rect(otherSideX, 0, 1, height / 2);
+
   }
 
   void drawTrainingMode() {
     // Erase background
     pg.noStroke();
-    pg.fill(0, 100);
+    pg.fill(0);
     pg.rect(0, 0, width, height);
 
     // Draw this Strand in blue
     int numLeds = main.ledMap.getStrandSize(cursorStrand);
-    pg.stroke(0, 0, 255, 20);
+    pg.stroke(0, 0, 255);
     for (int ordinal = 0; ordinal < numLeds; ordinal++) {
       Point a = main.ledMap.ledGet(cursorStrand, ordinal);
       if (a.x < 0)
