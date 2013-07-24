@@ -22,17 +22,19 @@ class EyeMotion extends Drawer {
   int translateX;
   int translateY;
   
-  //colors
-  color irisColor = color(3, 43, 62);
-  color pupilColor = color(4, 22, 35);
+  // Colors
+  float factorBlue = 1.5;
   
-  color eyeFillColor = color(8, 74, 119);
-  color backgroundColor = color(14, 37, 62);
-  color lidColor = color(20, 95, 141);
-  color lidColorDark = color(18, 53, 89);
-  color lidColor3 = color(11, 41, 66);
-  color glare1 = color(144, 187, 204, 95);
-  color glare2 = color(144, 187, 204, 50);
+  final color kIrisColor = color(3, 43, 62*factorBlue);
+  final color kPupilColor = color(4, 22, 35*factorBlue);
+  
+  final color kEyeFillColor = color(8*5, 74*1.5, 119*factorBlue);
+  final color kBackgroundColor = color(14, 37, 62);
+  final color kLidColor = color(20, 95, 141*factorBlue);
+  final color kLidColorDark = color(18, 53, 89*factorBlue);
+  final color kLidColor3 = color(11, 41, 66*factorBlue);
+  final color kGlare1 = color(144, 187, 204, 95*factorBlue);
+  final color kGlare2 = color(144, 187, 204, 50*factorBlue);
   
   EyeMotion(Pixels p, Settings s) {
     super(p, s, JAVA2D, DrawType.MirrorSides);
@@ -40,6 +42,7 @@ class EyeMotion extends Drawer {
 
   String getName() { return "Eye Motion"; }
   String getCustom1Label() { return "Trippy";}
+  String getCustom2Label() { return "Height";}
   
   void setup() {
     touchX = (int)(0.585 * width);
@@ -65,13 +68,11 @@ class EyeMotion extends Drawer {
     MAXY = (int)(235 * percent);
   }
   
-  
   void draw() {
     
     translateX = 60;
-    translateY = 40;
+    translateY = (int)map(settings.getParam(settings.keyCustom2), 0.0, 1.0, 80, -80);
 
-    
     trippy = settings.getParam(settings.keyCustom1);
     setEyeLimits(trippy);
     
@@ -86,7 +87,7 @@ class EyeMotion extends Drawer {
     pg.noStroke();
     pg.smooth();
     pg.translate(translateX, translateY);
-    pg.background(backgroundColor);
+    pg.background(kBackgroundColor);
     
     handleTouches(touchX, touchY);
     if (mx != lastmx || my != lastmy) {
@@ -104,27 +105,27 @@ class EyeMotion extends Drawer {
       lastLookChange = millis();
       touchX = (int)round(random(0, width));
       touchY = (int)round(random(0, height));
-      println("time before move:" + timeBeforeMoveEyes + " timeSinceLastMove:" + timeSinceLastMove);
+//      println("time before move:" + timeBeforeMoveEyes + " timeSinceLastMove:" + timeSinceLastMove);
     }
     
-    //eye fill
-    pg.fill(eyeFillColor);
+    // Eye fill
+    pg.fill(kEyeFillColor);
     pg.ellipse(313, 220, 285, 187);
     
-    //iris
+    // Iris
     color targetColor = getColor(getNumColors()/2);
-    irisColor = fadeColor(irisColor, targetColor, 0.2, 0.8);
+    color irisColor = fadeColor(kIrisColor, targetColor, 0.2, 0.8);
     pg.fill(irisColor);
     
     pg.ellipse(mx, my - 10, 192, 179);
     
-    //pupil
+    // Pupil
     targetColor = getColor(0);
-    pupilColor = fadeColor(pupilColor, targetColor, 0.6, 0.95);
+    color pupilColor = fadeColor(kPupilColor, targetColor, 0.6, 0.95);
     pg.fill(pupilColor);
     pg.ellipse(mx, my - 10, 130, 130);
     
-    pg.fill(backgroundColor); //color
+    pg.fill(kBackgroundColor); // Color
     pg.beginShape();
     pg.vertex(93, 258);
     pg.vertex(75, 116);
@@ -138,7 +139,7 @@ class EyeMotion extends Drawer {
     pg.vertex(165, 214);
     pg.endShape(CLOSE);
     
-    pg.fill(backgroundColor); //color
+    pg.fill(kBackgroundColor); // Color
     pg.beginShape();
     pg.vertex(164, 202);
     pg.vertex(173, 240);
@@ -157,8 +158,8 @@ class EyeMotion extends Drawer {
     pg.vertex(104, 214);
     pg.endShape(CLOSE);
     
-    //eyelid top light blue
-    pg.fill(lidColor); //color
+    // Eyelid top light blue
+    pg.fill(kLidColor); // Color
     pg.beginShape();
     pg.vertex(163, 228);
     pg.bezierVertex(163, 157, 224, 98, 308, 98);
@@ -167,8 +168,8 @@ class EyeMotion extends Drawer {
     pg.bezierVertex(238, 122, 162, 178, 163, 228);
     pg.endShape();
     
-    //bottom lid light blue
-    pg.fill(lidColor);
+    // Bottom lid light blue
+    pg.fill(kLidColor);
     pg.beginShape();
     pg.vertex(166, 226);
     pg.bezierVertex(185, 276, 248, 323, 318, 323);
@@ -184,7 +185,7 @@ class EyeMotion extends Drawer {
     if (settings.isBeat(1) && readyToBlink){
       readyToBlink = false;
       
-      pg.fill(lidColorDark);
+      pg.fill(kLidColorDark);
       pg.beginShape();
       pg.vertex(174, 235);
       pg.bezierVertex(180, 209, 177, 207, 202, 179);
@@ -196,8 +197,8 @@ class EyeMotion extends Drawer {
       
     }
     
-    //top eye lid dark blue
-    pg.fill(lidColorDark); //color
+    // Top eye lid dark blue
+    pg.fill(kLidColorDark); // Color
     pg.beginShape();
     pg.vertex(177, 250);
     pg.bezierVertex(163, 238, 159, 225, 159, 210);
@@ -209,8 +210,8 @@ class EyeMotion extends Drawer {
     pg.bezierVertex(237, 144, 176, 186, 176, 237);
     pg.endShape();
     
-    //lower lid
-    pg.fill(lidColorDark); //color
+    // Lower lid
+    pg.fill(kLidColorDark); // Color
     pg.beginShape();
     pg.vertex(169, 240);
     pg.bezierVertex(198, 265, 251, 282, 311, 282);
@@ -219,7 +220,7 @@ class EyeMotion extends Drawer {
     pg.bezierVertex(239, 329, 179, 290, 169, 240);
     pg.endShape();
     
-    pg.fill(lidColor3); //color
+    pg.fill(kLidColor3); // Color
     pg. beginShape();
     pg.vertex(169, 243);
     pg.bezierVertex(198, 269, 251, 307, 311, 307);
@@ -228,15 +229,15 @@ class EyeMotion extends Drawer {
     pg.bezierVertex(239, 333, 179, 294, 169, 243);
     pg.endShape();
     
-    //glare 1
-    pg.fill(glare1); //color
+    // Glare 1
+    pg.fill(kGlare1); // Color
     pg.ellipse(266, 175, 33, 30);
     
-    //glare 2
-    pg.fill(glare1); //color
+    // Glare 2
+    pg.fill(kGlare1); // Color
     pg.ellipse(253, 205, 13, 21);
 
-    pg.fill(glare2); //color
+    pg.fill(kGlare2); // Color
     pg.ellipse(253, 205, 13, 21);
     
 //    pg.stroke(0, 255, 0, 255);
