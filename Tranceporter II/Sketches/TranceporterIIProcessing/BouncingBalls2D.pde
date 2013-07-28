@@ -2,12 +2,11 @@
 // Custom1: # of balls
 
 import toxi.geom.*;
-int NUM_DIMS = 2;
 
 class BouncingBalls2D extends Drawer {
   ArrayList<ball> balls = new ArrayList();
-  float maxRadius = 2, minRadius = 0.5;
-  Bbox bbox;
+  float maxRadius = 2.1, minRadius = 0.76;
+  Vec2D bbox;
   float startMomentum = 0.5;
   float maxMass = maxRadius*maxRadius;
   Vec2D gravity = new Vec2D(0, 0.025);
@@ -25,9 +24,8 @@ class BouncingBalls2D extends Drawer {
     pg.colorMode(HSB, 1.0);
     pg.smooth();
     println("setting up bbox");
-    bbox = new Bbox(new Vec2D(width, height));
+    bbox = new Vec2D(width, height);
     reset();
-    assert(bbox != null);
   }
   
   void reset() {
@@ -42,11 +40,10 @@ class BouncingBalls2D extends Drawer {
     float mass = radius*radius;
     color col = color(mass/maxMass, 0.5, 1.0);
     
-    assert(bbox != null);
-    Vec2D pos = new Vec2D(random(0, bbox.getDims().x), random(0, bbox.getDims().y/2));
+    Vec2D pos = new Vec2D(random(0, bbox.x), random(0, bbox.y/2));
     Vec2D dpos = new Vec2D(random(-1, 1), random(-1, 1));
     dpos = dpos.normalizeTo(startMomentum/mass);
-    balls.add(new ball(bbox, pos, dpos, radius, col, mass));
+    balls.add(new ball(pos, dpos, radius, col, mass));
     settings.setParam(settings.keyCustom1, 0.3);
   }
   
@@ -56,8 +53,9 @@ class BouncingBalls2D extends Drawer {
     pg.colorMode(HSB, 1.0);
     pg.smooth();
     
-    int numBalls = (int) (settings.getParam(settings.keyCustom1) * 17) + 1;
-    numBalls *= numBalls;
+    float rawNumBalls = (settings.getParam(settings.keyCustom1) * 17) + 1;
+    rawNumBalls *= rawNumBalls;
+    int numBalls = (int)rawNumBalls;
     
     while (numBalls < balls.size()) {
       balls.remove(balls.size()-1);
@@ -72,8 +70,22 @@ class BouncingBalls2D extends Drawer {
     checkForCollisions();
 
     pg.background(0);
+    
+    if (false) {
+      // For debugging, show the bottle bounds
+      pg.stroke(255);
+      pg.fill(0, 1.0, 1.0);
+      for (int y = 0; y < ledHeight; y++) {
+        for (int x = 0; x < ledWidth; x++) {
+          if (p.bottleBounds[y * ledWidth + x]) {
+            pg.set(x, y, color(0.7,1.0,1.0));
+          }
+        }
+      }
+    }
+    
     pg.noStroke();    
-    for (int i=0; i<balls.size(); i++) {
+    for (int i = 0; i < balls.size(); i++) {
       balls.get(i).draw(pg);
     }
   }
@@ -88,12 +100,11 @@ class BouncingBalls2D extends Drawer {
   
   class ball {
     Vec2D pos, dpos;
-    Bbox bbox;
     color col;
     float radius, mass, startMomentum;
     int whichBeat;
     
-    ball(Bbox bbox, Vec2D pos, Vec2D dpos, float radius, color col, float mass) {
+    ball(Vec2D pos, Vec2D dpos, float radius, color col, float mass) {
       this.pos = pos;
       this.dpos = dpos;
       this.radius = radius;
@@ -101,7 +112,6 @@ class BouncingBalls2D extends Drawer {
       this.col = col;
       this.startMomentum = getMomentum();
       updateColor();
-      this.bbox = bbox;
       beatAssign++;
       whichBeat = beatAssign % 3;
     }
@@ -119,19 +129,28 @@ class BouncingBalls2D extends Drawer {
     
     void update(Vec2D gravity) {
       dpos.addSelf(gravity.scale(0.5));
-      for (int i=0; i<NUM_DIMS; i++) {
-        if(pos.getComponent(i) >= bbox.getDims().getComponent(i) - radius && dpos.getComponent(i) > 0) {
-          dpos.setComponent(i, -abs(dpos.getComponent(i)));
-          //if (i != 1) col = color((hue(col)+0.1)%1.0, 1.0, 1.0);
-          //bbox.changeWallColor(i, 1);
-          //pos.setComponent(i, bbox.getComponent(i)-1);
+      if (false) {
+        for (int i = 0; i < 2; i++) {
+          // If we hit the right or bottom, bounce back in the opposite direction
+          if(pos.getComponent(i) >= bbox.getComponent(i) - radius && dpos.getComponent(i) > 0) {
+            dpos.setComponent(i, -abs(dpos.getComponent(i)));
+          }
+          // If we hit the top or left, bounce back in the opposite direction
+          if(pos.getComponent(i) <= radius && dpos.getComponent(i) < 0) {
+            dpos.setComponent(i, abs(dpos.getComponent(i)));
+          }
         }
-        if(pos.getComponent(i) <= radius  && dpos.getComponent(i) < 0) {
-          dpos.setComponent(i, abs(dpos.getComponent(i)));
-          //col = color((hue(col)+0.1)%1.0, 1.0, 1.0);
-          //bbox.changeWallColor(i, 0);
-          //pos.setComponent(i, 0);
-        }
+      }
+
+      int offset = ((int)pos.y * ledWidth + (int)pos.x);
+
+      if (offset >= p.bottleBounds.length || offset < 0 || p.bottleBounds[offset]) {
+        float xDirection = bbox.x / 2 - pos.x;
+        float yDirection = bbox.y / 2 - pos.y;
+        float fullDirection = sqrt(xDirection * xDirection + yDirection * yDirection);
+        float delta = sqrt(dpos.x * dpos.x + dpos.y * dpos.y);
+        dpos.x = (delta * xDirection) / fullDirection;
+        dpos.y = (delta * yDirection) / fullDirection;
       }
       
       dpos.addSelf(gravity.scale(0.5));
@@ -149,9 +168,7 @@ class BouncingBalls2D extends Drawer {
         float ma = this.mass;
         float mb = b.mass;
         
-        //float acf = bci;
         float acf = (aci*(ma-mb) + 2*mb*bci) / (ma + mb);
-        //float bcf = aci;
         float bcf = (bci*(mb-ma) + 2*ma*aci) / (ma + mb);
         
         this.dpos.addSelf(norml.scale(acf-aci));
@@ -173,18 +190,5 @@ class BouncingBalls2D extends Drawer {
       //float beatRadius = radius * 2;
       pg.ellipse(pos.x, pos.y, beatRadius, beatRadius);
     }
-  }
-  
-  class Bbox {
-    Vec2D dims;
-    //color[][] wallColors;
-    
-    Bbox(Vec2D dims) {
-      colorMode(HSB, 1.0);
-      
-      this.dims = dims;
-    }
-    
-    Vec2D getDims() { return dims; }
   }
 }

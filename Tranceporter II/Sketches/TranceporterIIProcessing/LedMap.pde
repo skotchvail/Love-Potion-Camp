@@ -773,6 +773,9 @@ class LedMap {
   }
   
   void shutdown() {
+    if (!useTotalControlHardware) {
+      return;
+    }
     TotalControl.close();
     println("closed TotalControl driver");
   }

@@ -495,9 +495,17 @@ class MainClass {
   
   void mouseClicked() {
     Point p = new Point(mouseX, mouseY);
-//    if (display.getBox2D().contains(p)) {
-//      newEffect();
-//    }
+    Rectangle bounds = display.getBox2D();
+    if (bounds.contains(p)) {
+      Point convertedPoint = new Point(p);
+      convertedPoint.translate(-bounds.x, -bounds.y);
+      convertedPoint.x /= screenPixelSize;
+      convertedPoint.y /= screenPixelSize;
+      println("inside box: " + convertedPoint);
+    }
+    else {
+      println("outside box");
+    }
   }
   
   void debugPaletteType(String extra) {

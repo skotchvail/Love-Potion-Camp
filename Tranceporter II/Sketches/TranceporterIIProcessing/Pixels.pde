@@ -7,6 +7,7 @@ import java.awt.Rectangle;
 
 class Pixels {
   private color[] maskPixels;
+  private boolean[] bottleBounds; // For sketches that want to stay inside the bottle
   private OBJModel objModel;
   private PGraphics pg3D;
   
@@ -47,14 +48,44 @@ class Pixels {
                             ledRows * ledSide + (ledRows + 1) * ledBetween);
     boxEqualizer = new Rectangle(boxLEDs.x + boxLEDs.width + box2d.x, boxLEDs.y, boxLEDs.width, boxLEDs.height);
     pg3D = createGraphics(box3d.width, box3d.height, P3D);
+    updateMaskPixels();
   }
   
   void forceUpdateMaskPixels() {
     maskPixels = null;
   }
 
+  final color kWhite = color(255);
+
+  /*
+   In order to build up bottleBounds, we see which pixels are surrounded
+   by unmapped LEDs
+   */
+  boolean surroundingMaskIsWhite(int x, int y) {
+    int offset = y * ledWidth + x;
+
+    // Hardcoded special cases for the bottle, since not all LEDs are mapped around the curves
+    if (x >= 65 && x <= 70 && y == 7) {
+      return false;
+    }
+    
+    // Outside Rectange is always border
+    if (x == 0 || y == 0 || x >= ledWidth -1 || y >= ledHeight - 1) {
+      return true;
+    }
+
+    // Border is where there are no LEDs at all in an area
+    if (maskPixels[offset] != kWhite || maskPixels[offset - 1] != kWhite || maskPixels[offset + 1] != kWhite
+        || maskPixels[offset - ledWidth] != kWhite || maskPixels[offset - ledWidth - 1] != kWhite || maskPixels[offset - ledWidth + 1] != kWhite
+        || maskPixels[offset + ledWidth] != kWhite || maskPixels[offset + ledWidth - 1] != kWhite || maskPixels[offset + ledWidth + 1] != kWhite
+        ) {
+      return true;
+    }
+    
+    return false;
+  }
+  
   void updateMaskPixels() {
-    color white = color(255);
     if (maskPixels == null) {
       // Mask out any pixels that are not mapped
       maskPixels = new color[ledWidth * ledHeight];
@@ -64,13 +95,32 @@ class Pixels {
         for (Point point: main.ledMap.pointsForStrand(whichStrand)) {
           int offset = point.y * ledWidth + point.x;
           if (offset < length) {
-            maskPixels[offset] = white;
+            maskPixels[offset] = kWhite;
+          }
+        }
+      }
+      
+      // Define a new bottleBounds
+      bottleBounds = new boolean[ledWidth * ledHeight];
+      for (int x = 0; x < ledWidth; x++) {
+        for (int y = 0; y < ledHeight / 2; y++) {
+          int offset = y * ledWidth + x;
+          bottleBounds[offset] = true;
+          if (!surroundingMaskIsWhite(x, y)) {
+            break;
+          }
+        }
+        for (int y = ledHeight - 1; y >= ledHeight / 2 ; y--) {
+          int offset = y * ledWidth + x;
+          bottleBounds[offset] = true;
+          if (!surroundingMaskIsWhite(x, y)) {
+            break;
           }
         }
       }
     }
   }
-    
+  
   PGraphics drawFlat2DVersion() {
     boolean trainingMode = main.currentMode().isTrainingMode();
     updateMaskPixels();
