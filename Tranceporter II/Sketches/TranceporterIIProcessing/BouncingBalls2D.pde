@@ -2,14 +2,18 @@
 // Custom1: # of balls
 
 import toxi.geom.*;
+import java.text.DecimalFormat;
 
 class BouncingBalls2D extends Drawer {
   ArrayList<ball> balls = new ArrayList();
   float maxRadius = 2.1, minRadius = 0.76;
-  Vec2D bbox;
+  Vec2D bounds;
+  Vec2D centerOfBox;
   float startMomentum = 0.5;
   float maxMass = maxRadius*maxRadius;
-  Vec2D gravity = new Vec2D(0, 0.025);
+  final float kMaxGravity = 0.025;
+  final float kStickiness = 0.00;
+  Vec2D gravity = new Vec2D(0, kMaxGravity);
   int beatAssign;
   
   BouncingBalls2D(Pixels p, Settings s) {
@@ -18,13 +22,17 @@ class BouncingBalls2D extends Drawer {
   
   String getName() { return "BouncingBalls2D"; }
   String getCustom1Label() { return "# Balls";}
+  String getCustom2Label() { return "Acceleration";}
 
   void setup() {
     colorMode(HSB, 1.0);
     pg.colorMode(HSB, 1.0);
     pg.smooth();
-    println("setting up bbox");
-    bbox = new Vec2D(width, height);
+    bounds = new Vec2D(width, height);
+    centerOfBox = bounds.scale(0.5);
+    settings.setParam(settings.keyCustom2, 0.5); // start acceleration off at 50%
+    settings.setParam(settings.keyCustom1, 0.3);
+
     reset();
   }
   
@@ -40,11 +48,10 @@ class BouncingBalls2D extends Drawer {
     float mass = radius*radius;
     color col = color(mass/maxMass, 0.5, 1.0);
     
-    Vec2D pos = new Vec2D(random(0, bbox.x), random(0, bbox.y/2));
+    Vec2D pos = new Vec2D(random(0, bounds.x), random(0, centerOfBox.y));
     Vec2D dpos = new Vec2D(random(-1, 1), random(-1, 1));
     dpos = dpos.normalizeTo(startMomentum/mass);
     balls.add(new ball(pos, dpos, radius, col, mass));
-    settings.setParam(settings.keyCustom1, 0.3);
   }
   
   void draw() {
@@ -52,6 +59,9 @@ class BouncingBalls2D extends Drawer {
     colorMode(HSB, 1.0);
     pg.colorMode(HSB, 1.0);
     pg.smooth();
+    
+    gravity.x = (settings.getParam(settings.keyCustom2) - 0.5) * kMaxGravity;
+    gravity.y = sqrt(kMaxGravity * kMaxGravity - gravity.x * gravity.x);
     
     float rawNumBalls = (settings.getParam(settings.keyCustom1) * 17) + 1;
     rawNumBalls *= rawNumBalls;
@@ -64,9 +74,14 @@ class BouncingBalls2D extends Drawer {
       addBall();
     }
     
-    for(int i=0; i< balls.size();i++) {
-      balls.get(i).update(gravity);
+    int numBallInBoundary = 0;
+    for(ball ball: balls) {
+      ball.update(gravity);
+      if (ball.inBoundary) {
+        numBallInBoundary++;
+      }
     }
+//    println("numBalls in boundary: " + numBallInBoundary + " out of " + balls.size());
     checkForCollisions();
 
     pg.background(0);
@@ -103,6 +118,7 @@ class BouncingBalls2D extends Drawer {
     color col;
     float radius, mass, startMomentum;
     int whichBeat;
+    boolean inBoundary;
     
     ball(Vec2D pos, Vec2D dpos, float radius, color col, float mass) {
       this.pos = pos;
@@ -119,7 +135,7 @@ class BouncingBalls2D extends Drawer {
     void updateColor() {
       colorMode(HSB, 1.0);
       
-      float newHue = (hue(this.col) + 0.02) % 1.0;
+      float newHue = (hue(this.col) + 0.005) % 1.0;
       this.col = color(newHue, 1.0, 1.0);
     }
     
@@ -129,28 +145,19 @@ class BouncingBalls2D extends Drawer {
     
     void update(Vec2D gravity) {
       dpos.addSelf(gravity.scale(0.5));
-      if (false) {
-        for (int i = 0; i < 2; i++) {
-          // If we hit the right or bottom, bounce back in the opposite direction
-          if(pos.getComponent(i) >= bbox.getComponent(i) - radius && dpos.getComponent(i) > 0) {
-            dpos.setComponent(i, -abs(dpos.getComponent(i)));
-          }
-          // If we hit the top or left, bounce back in the opposite direction
-          if(pos.getComponent(i) <= radius && dpos.getComponent(i) < 0) {
-            dpos.setComponent(i, abs(dpos.getComponent(i)));
-          }
-        }
-      }
-
       int offset = ((int)pos.y * ledWidth + (int)pos.x);
 
+      inBoundary = false;
       if (offset >= p.bottleBounds.length || offset < 0 || p.bottleBounds[offset]) {
-        float xDirection = bbox.x / 2 - pos.x;
-        float yDirection = bbox.y / 2 - pos.y;
-        float fullDirection = sqrt(xDirection * xDirection + yDirection * yDirection);
-        float delta = sqrt(dpos.x * dpos.x + dpos.y * dpos.y);
-        dpos.x = (delta * xDirection) / fullDirection;
-        dpos.y = (delta * yDirection) / fullDirection;
+        inBoundary = true;
+        
+        Vec2D vector = centerOfBox.sub(pos).getNormalized();
+        float delta = dpos.magnitude();
+        dpos.x = delta * vector.x;
+        dpos.y = delta * vector.y;
+        
+        // Move towards getting out of the boundary, so we don't get stuck there
+        pos.addSelf(vector.scale(0.1));
       }
       
       dpos.addSelf(gravity.scale(0.5));
@@ -159,8 +166,9 @@ class BouncingBalls2D extends Drawer {
     
     void checkForCollision(ball b) {
       Vec2D diffPos = this.pos.sub(b.pos);
-      float d = diffPos.magnitude() - this.radius - b.radius;
-      if (d < 0) {
+      float properDistance = this.radius + b.radius;
+      float actualDistance = diffPos.magnitude();
+      if (actualDistance < properDistance) {
         //println("collision");
         Vec2D norml = diffPos.getNormalized();
         float aci = this.dpos.dot(norml);
@@ -170,12 +178,17 @@ class BouncingBalls2D extends Drawer {
         
         float acf = (aci*(ma-mb) + 2*mb*bci) / (ma + mb);
         float bcf = (bci*(mb-ma) + 2*ma*aci) / (ma + mb);
-        
+
         this.dpos.addSelf(norml.scale(acf-aci));
         b.dpos.addSelf(norml.scale(bcf-bci));
         
-        this.pos.addSelf(diffPos.scale(-d/2));
-        b.pos.addSelf(diffPos.scale(d/2));
+        this.dpos.scaleSelf(1.0 - kStickiness);
+        b.dpos.scaleSelf(1.0 - kStickiness);
+        
+        // Don't let two balls take up the same space
+        float d = actualDistance - properDistance;
+        this.pos.addSelf(diffPos.scale(-d * 0.1));
+        b.pos.addSelf(diffPos.scale(d * 0.1));
         
         // change color
         updateColor();
