@@ -137,10 +137,11 @@ class MainClass {
       },
       //column 1
       {
-        new AlienBlob(display, settings),         //1, 0
-        new BouncingBalls2D(display, settings),   //1, 1
-        new Smoke(display, settings),             //1, 2
-        new DroppingParticles(display, settings), //1, 3
+        new AlienBlob(display, settings),               //1, 0
+        new BouncingBalls2D(display, settings, false),  //1, 1
+        new Smoke(display, settings),                   //1, 2
+        new DroppingParticles(display, settings),       //1, 3
+        new BouncingBalls2D(display, settings, true),   //1, 4
       },
       //column 2
       {

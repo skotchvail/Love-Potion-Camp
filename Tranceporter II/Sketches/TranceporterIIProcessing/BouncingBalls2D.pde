@@ -15,14 +15,26 @@ class BouncingBalls2D extends Drawer {
   float kStickiness = 0.000;
   float kFriction   = 0.000;
   float kColorAlpha = 1.0;
+  float minHue = 0.0;
+  float maxHue = 1.0;
+  float baseRadius = 1.0;
   Vec2D gravity;
   int beatAssign;
+  boolean isSlosh;
   
-  BouncingBalls2D(Pixels p, Settings s) {
+  BouncingBalls2D(Pixels p, Settings s, boolean isSlosh) {
     super(p, s, JAVA2D, DrawType.MirrorSides);
+    this.isSlosh = isSlosh;
   }
   
-  String getName() { return "BouncingBalls2D"; }
+  String getName() {
+    if (isSlosh) {
+      return "Slosh";
+    }
+    else {
+      return "BouncingBalls2D";
+    }
+  }
   String getCustom1Label() { return "# Balls";}
   String getCustom2Label() { return "Acceleration";}
 
@@ -30,7 +42,7 @@ class BouncingBalls2D extends Drawer {
     
     float numBallsSlider = 0.3;
     
-    if (false) {
+    if (isSlosh) {
       numBallsSlider = 0.9;
       maxRadius = 2.1;
       minRadius = 2.1;
@@ -38,6 +50,9 @@ class BouncingBalls2D extends Drawer {
       kStickiness = 0.002;
       kFriction   = 0.080;
       kColorAlpha = 0.4;
+      minHue = 0.53;
+      maxHue = 0.76;
+      baseRadius = 2.0;
     }
     gravity = new Vec2D(0, kMaxGravity);
     
@@ -153,7 +168,9 @@ class BouncingBalls2D extends Drawer {
     void updateColor() {
       colorMode(HSB, 1.0);
       
-      float newHue = (hue(this.col) + settings.getParam(settings.keyColorCyclingSpeed) * 0.010) % 1.0;
+      float newHue = hue(this.col) - minHue;
+      newHue = (newHue + settings.getParam(settings.keyColorCyclingSpeed) * 0.005) % (maxHue - minHue);
+      newHue += minHue;
       this.col = color(newHue, 1.0, 1.0, kColorAlpha);
     }
     
@@ -236,7 +253,7 @@ class BouncingBalls2D extends Drawer {
     void draw(PGraphics pg) {
       pg.fill(col);
       pg.ellipseMode(CENTER);
-      float beatRadius = radius * (1.0 + (settings.isBeat(whichBeat)?1.0:0.0));
+      float beatRadius = radius * (baseRadius + (settings.isBeat(whichBeat)?1.0:0.0));
       //float beatRadius = radius * 2;
       pg.ellipse(pos.x, pos.y, beatRadius, beatRadius);
     }
