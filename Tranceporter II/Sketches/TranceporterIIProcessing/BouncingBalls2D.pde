@@ -6,14 +6,16 @@ import java.text.DecimalFormat;
 
 class BouncingBalls2D extends Drawer {
   ArrayList<ball> balls = new ArrayList();
-  float maxRadius = 2.1, minRadius = 0.76;
+  float maxRadius = 2.1, minRadius = 1.1;
   Vec2D bounds;
   Vec2D centerOfBox;
   float startMomentum = 0.5;
   float maxMass = maxRadius*maxRadius;
-  final float kMaxGravity = 0.025;
-  final float kStickiness = 0.00;
-  Vec2D gravity = new Vec2D(0, kMaxGravity);
+  float kMaxGravity = 0.025;
+  float kStickiness = 0.000;
+  float kFriction   = 0.000;
+  float kColorAlpha = 1.0;
+  Vec2D gravity;
   int beatAssign;
   
   BouncingBalls2D(Pixels p, Settings s) {
@@ -25,14 +27,27 @@ class BouncingBalls2D extends Drawer {
   String getCustom2Label() { return "Acceleration";}
 
   void setup() {
+    
+    float numBallsSlider = 0.3;
+    
+    if (false) {
+      numBallsSlider = 0.9;
+      maxRadius = 2.1;
+      minRadius = 2.1;
+      kMaxGravity = 0.20;
+      kStickiness = 0.002;
+      kFriction   = 0.080;
+      kColorAlpha = 0.4;
+    }
+    gravity = new Vec2D(0, kMaxGravity);
+    
     colorMode(HSB, 1.0);
     pg.colorMode(HSB, 1.0);
     pg.smooth();
     bounds = new Vec2D(width, height);
     centerOfBox = bounds.scale(0.5);
+    settings.setParam(settings.keyCustom1, numBallsSlider);
     settings.setParam(settings.keyCustom2, 0.5); // start acceleration off at 50%
-    settings.setParam(settings.keyCustom1, 0.3);
-
     reset();
   }
   
@@ -46,7 +61,7 @@ class BouncingBalls2D extends Drawer {
   void addBall() {
     float radius = random(minRadius, maxRadius);
     float mass = radius*radius;
-    color col = color(mass/maxMass, 0.5, 1.0);
+    color col = color(mass/maxMass, 0.5, 1.0, kColorAlpha);
     
     Vec2D pos = new Vec2D(random(0, bounds.x), random(0, centerOfBox.y));
     Vec2D dpos = new Vec2D(random(-1, 1), random(-1, 1));
@@ -60,10 +75,11 @@ class BouncingBalls2D extends Drawer {
     pg.colorMode(HSB, 1.0);
     pg.smooth();
     
-    gravity.x = (settings.getParam(settings.keyCustom2) - 0.5) * kMaxGravity;
+    gravity.x = (settings.getParam(settings.keyCustom2) - 0.5) * 2.0 * kMaxGravity;
     gravity.y = sqrt(kMaxGravity * kMaxGravity - gravity.x * gravity.x);
     
-    float rawNumBalls = (settings.getParam(settings.keyCustom1) * 17) + 1;
+    float rawNumBalls = (settings.getParam(settings.keyCustom1) * 20) + 1;
+  
     rawNumBalls *= rawNumBalls;
     int numBalls = (int)rawNumBalls;
     
@@ -81,7 +97,9 @@ class BouncingBalls2D extends Drawer {
         numBallInBoundary++;
       }
     }
-//    println("numBalls in boundary: " + numBallInBoundary + " out of " + balls.size());
+    if (false && frameCount % 30 == 0) {
+      println("numBalls in boundary: " + numBallInBoundary + " out of " + balls.size());
+    }
     checkForCollisions();
 
     pg.background(0);
@@ -93,7 +111,7 @@ class BouncingBalls2D extends Drawer {
       for (int y = 0; y < ledHeight; y++) {
         for (int x = 0; x < ledWidth; x++) {
           if (p.bottleBounds[y * ledWidth + x]) {
-            pg.set(x, y, color(0.7,1.0,1.0));
+            pg.set(x, y, color(0.7, 1.0, 1.0));
           }
         }
       }
@@ -135,8 +153,8 @@ class BouncingBalls2D extends Drawer {
     void updateColor() {
       colorMode(HSB, 1.0);
       
-      float newHue = (hue(this.col) + 0.005) % 1.0;
-      this.col = color(newHue, 1.0, 1.0);
+      float newHue = (hue(this.col) + settings.getParam(settings.keyColorCyclingSpeed) * 0.010) % 1.0;
+      this.col = color(newHue, 1.0, 1.0, kColorAlpha);
     }
     
     float getMomentum() {
@@ -144,20 +162,39 @@ class BouncingBalls2D extends Drawer {
     }
     
     void update(Vec2D gravity) {
+
+      dpos.scaleSelf(1.0 - kFriction);
       dpos.addSelf(gravity.scale(0.5));
       int offset = ((int)pos.y * ledWidth + (int)pos.x);
 
+      // If we hit a boundary, we need to bounce off
       inBoundary = false;
       if (offset >= p.bottleBounds.length || offset < 0 || p.bottleBounds[offset]) {
         inBoundary = true;
         
-        Vec2D vector = centerOfBox.sub(pos).getNormalized();
+        // Figure out the normal vector that the ball should bounce of off
+        Vec2D center = new Vec2D(50, 30);
+        
+        if (pos.x > 77 && pos.y > 31) {
+          center.set(-1000, 40);
+        }
+        else if (pos.x > 57 && pos.y > 32) {
+          center.set(65, 13);
+        }
+        else if (pos.x > 20 && pos.y > 32) {
+          center.set(62, 7);
+        }
+        
+        Vec2D vector = center.sub(pos).getNormalized();
         float delta = dpos.magnitude();
         dpos.x = delta * vector.x;
         dpos.y = delta * vector.y;
         
         // Move towards getting out of the boundary, so we don't get stuck there
-        pos.addSelf(vector.scale(0.1));
+        while (offset >= p.bottleBounds.length || offset < 0 || p.bottleBounds[offset]) {
+          pos.addSelf(vector.scale(0.4));
+          offset = ((int)pos.y * ledWidth + (int)pos.x);
+        }
       }
       
       dpos.addSelf(gravity.scale(0.5));
