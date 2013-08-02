@@ -20,10 +20,12 @@ class BouncingBalls2D extends Drawer {
   float baseRadius = 1.0;
   Vec2D gravity;
   int beatAssign;
+  PImage imageLove;
   boolean isSlosh;
+  float logoY = 10;
   
   BouncingBalls2D(Pixels p, Settings s, boolean isSlosh) {
-    super(p, s, JAVA2D, DrawType.MirrorSides);
+    super(p, s, P2D, DrawType.MirrorSides);
     this.isSlosh = isSlosh;
   }
   
@@ -53,7 +55,11 @@ class BouncingBalls2D extends Drawer {
       minHue = 0.53;
       maxHue = 0.76;
       baseRadius = 2.0;
+      
+      imageLove = loadImage("Logo Love Potion.png");
+      imageLove.resize(round(imageLove.width * 0.062), 0);
     }
+    
     gravity = new Vec2D(0, kMaxGravity);
     
     colorMode(HSB, 1.0);
@@ -62,11 +68,11 @@ class BouncingBalls2D extends Drawer {
     bounds = new Vec2D(width, height);
     centerOfBox = bounds.scale(0.5);
     settings.setParam(settings.keyCustom1, numBallsSlider);
-    settings.setParam(settings.keyCustom2, 0.5); // start acceleration off at 50%
     reset();
   }
   
   void reset() {
+    settings.setParam(settings.keyCustom2, 0.5); // start acceleration off at 50%
     balls.clear();
     for(int i=0; i<balls.size();i++) {
       addBall();
@@ -118,6 +124,41 @@ class BouncingBalls2D extends Drawer {
     checkForCollisions();
 
     pg.background(0);
+    
+    if (isSlosh) {
+      
+      final float kLevel1 = 0.05;
+      final float kLevel2 = 0.10;
+      final float kLevel3 = 0.25;
+      final float kLevel4 = 0.29;
+      float speed = settings.getParam(settings.keySpeed);
+      
+      if (speed > kLevel4) {
+        float deltaY = map(speed * speed, kLevel4 * kLevel4, 1, 0, 2.5);
+        logoY -= deltaY;
+        if (logoY < -imageLove.height) {
+          logoY = height + imageLove.height / 2;
+        }
+      }
+      
+      if (speed > kLevel2) {
+        float x = 48 - imageLove.width/2;
+        // pg.image doesn't draw on fractional boundaries, so I am using textures instead
+        // to get smooth movement
+        // pg.image(imageLove, x, y);
+        
+        pg.beginShape();
+        pg.tint(1.0, map(speed, kLevel2, kLevel3, 0, 1));
+        pg.texture(imageLove);
+        pg.vertex(x, logoY, 0, 0);
+        pg.vertex(x + imageLove.width, logoY, imageLove.width, 0);
+        pg.vertex(x + imageLove.width, logoY + imageLove.height, imageLove.width, imageLove.height);
+        pg.vertex(x, logoY + imageLove.height, 0, imageLove.height);
+        pg.endShape();
+        pg.noTint();
+      }
+
+    }
     
     if (false) {
       // For debugging, show the bottle bounds
