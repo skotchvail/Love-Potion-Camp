@@ -25,7 +25,7 @@ class BouncingBalls2D extends Drawer {
   float logoY = 10;
   
   BouncingBalls2D(Pixels p, Settings s, boolean isSlosh) {
-    super(p, s, P2D, DrawType.MirrorSides);
+    super(p, s, P2D, DrawType.TwoSides);
     this.isSlosh = isSlosh;
   }
   
@@ -57,7 +57,7 @@ class BouncingBalls2D extends Drawer {
       baseRadius = 2.0;
       
       imageLove = loadImage("Logo Love Potion.png");
-      imageLove.resize(round(imageLove.width * 0.062), 0);
+      imageLove.resize(round(imageLove.width * 0.045), 0);
     }
     
     gravity = new Vec2D(0, kMaxGravity);
@@ -147,14 +147,25 @@ class BouncingBalls2D extends Drawer {
         // to get smooth movement
         // pg.image(imageLove, x, y);
         
-        pg.beginShape();
         pg.tint(1.0, map(speed, kLevel2, kLevel3, 0, 1));
+
+        pg.beginShape();
         pg.texture(imageLove);
         pg.vertex(x, logoY, 0, 0);
         pg.vertex(x + imageLove.width, logoY, imageLove.width, 0);
         pg.vertex(x + imageLove.width, logoY + imageLove.height, imageLove.width, imageLove.height);
         pg.vertex(x, logoY + imageLove.height, 0, imageLove.height);
         pg.endShape();
+        
+        x += ledWidth / 2;
+        pg.beginShape();
+        pg.texture(imageLove);
+        pg.vertex(x, logoY, 0, 0);
+        pg.vertex(x + imageLove.width, logoY, imageLove.width, 0);
+        pg.vertex(x + imageLove.width, logoY + imageLove.height, imageLove.width, imageLove.height);
+        pg.vertex(x, logoY + imageLove.height, 0, imageLove.height);
+        pg.endShape();
+        
         pg.noTint();
       }
 
@@ -296,7 +307,8 @@ class BouncingBalls2D extends Drawer {
       pg.ellipseMode(CENTER);
       float beatRadius = radius * (baseRadius + (settings.isBeat(whichBeat)?1.0:0.0));
       //float beatRadius = radius * 2;
-      pg.ellipse(pos.x, pos.y, beatRadius, beatRadius);
+      pg.ellipse(pos.x, pos.y, beatRadius, beatRadius); // port side
+      pg.ellipse(ledWidth - pos.x, pos.y, beatRadius, beatRadius); // startboard side
     }
   }
 }
