@@ -109,9 +109,9 @@ class Smoke extends Drawer {
     
     if(randomGust <= 0) {
 
-      boolean beat0 = settings.isBeat(0) && settings.beatPosSimple(0) == 0;
-      boolean beat1 = settings.isBeat(1) && settings.beatPosSimple(1) == 0;
-      boolean beat2 = settings.isBeat(2) && settings.beatPosSimple(2) == 0;
+      boolean beat0 = settings.isBeat(0);
+      boolean beat1 = settings.isBeat(1);
+      boolean beat2 = settings.isBeat(2);
       
       if(beat0 || beat1 || beat2) {
         randomGustMax = (int)random(5, 12);

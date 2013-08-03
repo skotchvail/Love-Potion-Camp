@@ -43,18 +43,20 @@ class DroppingParticles extends Drawer {
     float lower = 2.23 * numParticlesScale; //sqrt 5
     lower *= lower;
     lower += 1;
-    float upper = 17.32 * numParticlesScale; //sqrt 300
+    float upper = 7.07 * numParticlesScale; //sqrt 50
     upper *= upper;
-    upper +=2;
+    upper += 1;
     
-    if (settings.isBeat(0)) {
-      psystems.add(new ParticleSystem(int(random((int)lower, (int)upper)), new PVector(30, 10)));
+//    println("lower = " + lower + " upper = " + upper);
+    
+    if (true && settings.isBeat(0)) {
+      psystems.add(new ParticleSystem(int(random((int)lower, (int)upper)), new PVector(29/scale, 17/scale)));
     }
-    if (settings.isBeat(1)) {
-      psystems.add(new ParticleSystem(int(random((int)lower, (int)upper)), new PVector(45, 20)));
+    if (true && settings.isBeat(1)) {
+      psystems.add(new ParticleSystem(int(random((int)lower, (int)upper)), new PVector(49/scale, 13/scale)));
     }
-    if (settings.isBeat(2)) {
-      psystems.add(new ParticleSystem(int(random((int)lower, (int)upper)), new PVector(90, 40)));
+    if (true && settings.isBeat(2)) {
+      psystems.add(new ParticleSystem(int(random((int)lower, (int)upper)), new PVector(65/scale, 18/scale)));
     }
   
     // Cycle through all particle systems, run them and delete old ones
@@ -106,7 +108,6 @@ class DroppingParticles extends Drawer {
       timer = 100.0;
       strokeColor = pickColor();
     }
-    
     
     void run() {
       update();

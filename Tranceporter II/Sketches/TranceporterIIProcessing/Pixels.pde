@@ -322,15 +322,19 @@ class Pixels {
     }
     
     if (true) {
-//      rect(boxEqualizer.x, boxEqualizer.y, boxEqualizer.width, boxEqualizer.height);
-      
-
       int gap = 3;
       int width = (boxEqualizer.width - gap * (main.NUM_BANDS - 1)) / main.NUM_BANDS;
       int height = (boxEqualizer.height - gap) / 2;
       for (int band = 0; band < main.NUM_BANDS; band++) {
-        fill(255, 255, 0);
-        float pos1 = main.beatDetect.beatPos("spectralFlux", band) * height;
+        if (main.settings.isBeat(band)) {
+          fill(255, 255);
+        }
+        else {
+          fill(255, 255, 0, 100);
+        }
+        float rawBand =  main.beatDetect.beatPos("spectralFlux", band);
+//        println("rawBand: " + rawBand);
+        float pos1 = rawBand * height;
         rect(boxEqualizer.x + band * (width + gap), boxEqualizer.y + height - pos1, width, pos1);
       }
 

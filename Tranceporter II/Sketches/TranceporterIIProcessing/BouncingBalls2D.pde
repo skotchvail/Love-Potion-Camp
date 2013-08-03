@@ -22,7 +22,7 @@ class BouncingBalls2D extends Drawer {
   int beatAssign;
   PImage imageLove;
   boolean isSlosh;
-  float logoY = 10;
+  float logoY = height * 0.45;
   
   BouncingBalls2D(Pixels p, Settings s, boolean isSlosh) {
     super(p, s, P2D, DrawType.TwoSides);
@@ -57,7 +57,7 @@ class BouncingBalls2D extends Drawer {
       baseRadius = 2.0;
       
       imageLove = loadImage("Logo Love Potion.png");
-      imageLove.resize(round(imageLove.width * 0.045), 0);
+      imageLove.resize(round(imageLove.width * 0.047), 0);
     }
     
     gravity = new Vec2D(0, kMaxGravity);

@@ -20,16 +20,18 @@ class Equalizer3d extends Drawer
   }
   
   String getCustom1Label() { return "distinct colors";}
+  String getCustom2Label() { return "size";}
 
 
   void setup() {
     settings.setParam(settings.keyAudioSensitivity1, 0.5);
     settings.setParam(settings.keyAudioSensitivity2, 0.5);
     settings.setParam(settings.keyAudioSensitivity3, 0.7);
-    settings.setParam(settings.keyBeatLength, 0.25);
+    settings.setParam(settings.keyCustom1, 0.75);
+    settings.setParam(settings.keyCustom2, 0.40);
+    settings.setParam(settings.keySpeed, 0.60);
   }
   
-  float factor = 0.18;
 
   void draw() {
     colorMode(RGB, 255);
@@ -44,10 +46,13 @@ class Equalizer3d extends Drawer
         }
       }
     }
-    
-    pg.fill(0, 10);
+
+    float factor =  map(settings.getParam(settings.keyCustom2), 0, 1, 0.10, 0.35);
+
+    pg.fill(0, 50);
     pg.rect(0, 0, width, height);
-    pg.translate(25, 0);
+    pg.translate(0.73 / factor, 0.8 / factor);
+//    pg.translate(0.40 / factor, 0.25 / factor);
     pg.rotateY(rad);
     pg.rotateX(rad);
 
@@ -109,7 +114,7 @@ class Equalizer3d extends Drawer
     }
     if(rad>PI/2 || rad<-PI/3)
       f=-f;
-    rad+=f * settings.getParam(settings.keySpeed) * 16;
+    rad += f * settings.getParam(settings.keySpeed) * 16;
   }
 }
 

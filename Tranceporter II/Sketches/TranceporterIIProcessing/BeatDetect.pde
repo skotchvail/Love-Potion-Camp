@@ -463,8 +463,10 @@ class BeatDetect {
   /**
    * Is the given type and band currently in a beat
    */
-  boolean isBeat(String type, int band) { 
-    return (millis() - lastOnsetTimes[band]) < beatLength[band]; 
+  boolean isBeat(String type, int band) {
+    
+    return (beatPos("spectralFlux", band) > 0.88);
+//    return (millis() - lastOnsetTimes[band]) < beatLength[band]; 
   }
 
   /**

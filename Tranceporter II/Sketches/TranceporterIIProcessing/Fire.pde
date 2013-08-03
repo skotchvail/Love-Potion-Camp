@@ -103,9 +103,9 @@ class Fire extends Drawer {
         }
       }
     }
-    for (int y = height2; y < height; y++) {
+    for (int y = height2 - 1; y < height - 4; y++) {
       for(int x = 0; x < width; x++) {
-        pg.pixels[y * width + x] = color(255, 128, 0);
+        pg.pixels[y * width + x] = color(255, 200, 0);
       }
     }
     pg.updatePixels();    
