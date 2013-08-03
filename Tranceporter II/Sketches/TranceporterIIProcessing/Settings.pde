@@ -2,7 +2,6 @@ import java.lang.reflect.*;
 
 class Settings {
   
-  private ArrayList oscMessages = new ArrayList();;
   private boolean[][] whichModes = new boolean[3][5];
   private color[] palette;
   private boolean[] isBeat;
@@ -302,15 +301,16 @@ class Settings {
   void initOSC() {
     oscP5 = new OscP5(this, 8000);
     oscReceiver = new NetAddress(iPadIP, 9000);
-}
+  }
 
   private void enableControl(String controlKey, boolean enabled) {
     sendMessageToIPad(controlKey + "/visible", enabled?"1":"0");
   }
   
-  /* this comes in on a different thread than 
+  private ArrayList<OscMessage> oscMessages = new ArrayList<OscMessage>();
+  /* this comes in on a different thread than
    the draw routines, so we need to add to a queue
-   and then process the events during the heartbeat
+   and then process the events during handleQueuedOSCEvents
    which is called from the main draw
    */
   void oscEvent(OscMessage msg) {
@@ -320,20 +320,17 @@ class Settings {
     }
   }
 
-  //call once per draw to process events
-  void heartBeat() {
-//TODO: Not sure how much synchronized slows down our framerate. 
-//    if (oscMessages.size() == 0)
-//      return;
-    synchronized(oscMessages)
-    {
-      for (Object obj : oscMessages) {
-        OscMessage msg = (OscMessage)obj;
-        handleOscEvent(msg);
-      }
+  // Call once per draw to process events
+  void handleQueuedOSCEvents() {
+    ArrayList<OscMessage> messages;
+    synchronized(oscMessages) {
+      messages = (ArrayList<OscMessage>)oscMessages.clone();
       oscMessages.clear();
     }
     
+    for (OscMessage msg : messages) {
+      handleOscEvent(msg);
+    }
   }
 
   /* unplugged OSC messages */

@@ -247,7 +247,7 @@ class MainClass {
     if (pauseAnimations)
       return;
     
-    settings.heartBeat();
+    settings.handleQueuedOSCEvents();
     
     beatDetect.update(audioIn.mix);
 
