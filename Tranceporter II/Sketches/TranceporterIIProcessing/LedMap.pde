@@ -25,7 +25,7 @@
 class LedMap {
   
   // TCL settings
-  final boolean runConcurrent = false;
+  final boolean runConcurrent = true;
   final boolean kUseBitBang = true;
 
   // array of data representing the current color for each given pixel in our flat array
@@ -773,11 +773,13 @@ class LedMap {
   }
   
   void shutdown() {
-    if (!useTotalControlHardware) {
-      return;
+    
+    if (totalControlConcurrent != null) {
+      totalControlConcurrent.close();
     }
-    TotalControl.close();
-    println("closed TotalControl driver");
+    else if (totalControlConsumer != null) {
+      totalControlConsumer.close();
+    }
   }
   
 }

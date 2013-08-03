@@ -112,8 +112,13 @@ class TotalControlConsumer {
   
   int lastError;
   int lastStat;
+  private Thread correctThread;
   
-  int setupTotalControl(int numStrands, int pixelsPerStrand, boolean useBitBang) {
+  synchronized int setupTotalControl(int numStrands, int pixelsPerStrand, boolean useBitBang) {
+    
+    assert correctThread == null : "Thread must not yet be set";
+    correctThread = Thread.currentThread();
+    assert correctThread != null: "unable to get the current thread";
     
     assert(numStrands <= 8);
     if (useBitBang && numStrands < 8) {
@@ -150,10 +155,12 @@ class TotalControlConsumer {
     return error;
   }
   
-  int writeOneFrame(color[] pixelData, int[] strandMap) {
+  synchronized int writeOneFrame(color[] pixelData, int[] strandMap) {
+    
+    assert correctThread == Thread.currentThread() : "No longer talking to TotalControl on the correct thread";
     //    println("pixelData:" + pixelData.length + " strandMap:" + strandMap.length);
     
-    int status = TotalControl.refresh(pixelData, strandMap);
+    int status = TotalControl.refresh(pixelData, strandMap); // TODO: might be faster if we don't have to send the strandMap each time, but only when it changes
     if(status != lastError) {
       lastError = status;
       TotalControl.printError(status);
@@ -165,6 +172,13 @@ class TotalControlConsumer {
       }
     }
     return status;
+  }
+  
+  synchronized void close() {
+    // In general, this won't be called on the correctThread, but synchronized should make this okay
+    correctThread = null;
+    TotalControl.close();
+    println("closed TotalControl driver");
   }
   
 }
@@ -197,7 +211,9 @@ class TotalControlConcurrent implements Runnable {
     q.put(pixelData, strandMap);
   }
   
-  int[] lastStrandMap;
+  void close() {
+    q.close();
+  }
   
   public void run() {
     totalControlConsumer = new TotalControlConsumer();
@@ -205,20 +221,14 @@ class TotalControlConcurrent implements Runnable {
     
     while(true) {
       PixelDataAndMap dm = q.get();
-      assert(dm != null) : "no data to write to TotalControl";
-      
-      if (dm.strandMap != lastStrandMap) {
-        lastStrandMap = dm.strandMap;
-        println("New strandMap. dm.pixelData: " + dm.pixelData.length + " dm.strandMap: " + dm.strandMap.length
-                + "\n   [0]=" + dm.strandMap[0]
-                + "\n   [1]=" + dm.strandMap[1]
-                + "\n   [2]=" + dm.strandMap[2]
-                + "\n   [3]=" + dm.strandMap[3]
-                );
+      if (dm == null) {
+        totalControlConsumer.close();
+        break;
       }
       
       totalControlConsumer.writeOneFrame(dm.pixelData, dm.strandMap);
     }
+    println("exiting Total Control run thread");
   }
   
   class PixelDataAndMap {
@@ -230,6 +240,7 @@ class TotalControlConcurrent implements Runnable {
     
     PixelDataAndMap n;
     boolean valueSet = false;
+    boolean needToClose = false;
     
     synchronized PixelDataAndMap get() {
       if(!valueSet) {
@@ -239,6 +250,11 @@ class TotalControlConcurrent implements Runnable {
           System.out.println("InterruptedException caught");
         }
       }
+      if (needToClose) {
+        notify();
+        return null;
+      }
+      
       PixelDataAndMap result = n;
       assert(result != null) : "get() has nothing to get";
       n = null;
@@ -249,8 +265,9 @@ class TotalControlConcurrent implements Runnable {
     
     synchronized void put(color[] pixelData, int[] strandMap) {
       PixelDataAndMap newDM = new PixelDataAndMap();
-      newDM.pixelData = pixelData.clone(); //pixelData changes each frame
-      newDM.strandMap = strandMap; //strandMap should point to static data
+      newDM.pixelData = pixelData.clone(); // pixelData changes each frame
+      newDM.strandMap = strandMap.clone(); // strandMap can change when we are programming the strand.
+      // TODO: pass in a param that tells us if it has changed
       if(valueSet)
         try {
           wait();
@@ -259,6 +276,19 @@ class TotalControlConcurrent implements Runnable {
         }
       assert (this.n == null) : "pixel data should always be null before writing";
       this.n = newDM;
+      valueSet = true;
+      notify();
+    }
+    
+    synchronized void close() {
+      if(valueSet)
+        try {
+          wait();
+        } catch(InterruptedException e) {
+          System.out.println("InterruptedException caught");
+        }
+      assert (this.n == null) : "pixel data should always be null before writing";
+      needToClose = true;
       valueSet = true;
       notify();
     }
