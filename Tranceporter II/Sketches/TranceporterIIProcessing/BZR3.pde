@@ -83,10 +83,13 @@ class Bzr3 extends Drawer {
       }
     }
     pg.updatePixels();
-    int[] xy = new int[2];
-    for (int i=0; i<MAX_TOUCHES; i++) {
-      if (isTouching(i, xy, 100)) {
-        highDots(constrain(xy[0]-PRESS_RADIUS, 0, w), constrain(xy[1]-PRESS_RADIUS, 0, h), constrain(xy[0]+PRESS_RADIUS, 0, w), constrain(xy[1]+PRESS_RADIUS, 0, h));
+    for (int i = 0; i < MAX_FINGERS; i++) {
+      while (true) {
+        Vec2D touch = getTouchFor(i, 100);
+        if (touch == null) {
+          break;
+        }
+        highDots(constrain(touch.x - PRESS_RADIUS, 0, w), constrain(touch.y - PRESS_RADIUS, 0, h), constrain(touch.x + PRESS_RADIUS, 0, w), constrain(touch.y + PRESS_RADIUS, 0, h));
       }
     }
     state++;

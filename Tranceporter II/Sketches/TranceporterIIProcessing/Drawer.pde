@@ -1,6 +1,8 @@
 // Base class for drawing programs to be displayed on the LED wall. Subclasses must inherit
-// draw(), setup(), getName(), reset() and a constructor. They then get access to height, width, mousePressed
+// draw(), setup(), getName(), reset() and a constructor. They then get access to height, width
 // configured for the LEDwall dimensions and can use any PGraphics method like loadPixels, set, beginShape etc.
+
+import java.util.Iterator;
 
 class Drawer {
   
@@ -9,20 +11,18 @@ class Drawer {
   boolean pressed;
   int pressX, pressY;
   PGraphics pg; //flat 2D version
-  boolean mousePressed;
   int width, height;
-  int mouseX, mouseY;
   int touchX, touchY;
-  int lastMouseX = -1, lastMouseY = -1;
   Gradient g;
-  float[] xTouches, yTouches;
-  int MAX_TOUCHES = 5;
-  long[] lastTouchTimes;
-  short[][] rgbGamma; 
+  ArrayList<TouchInfo> touches;
+  int MAX_FINGERS = 5;
+  short[][] rgbGamma;
   Settings settings;
   private Object settingsBackup;
   int MIN_SATURATION = 245;
   int MAX_AUDIO_COLOR_OFFSET = 300;
+  final color whiteColor = color(255);
+  final color blackColor = color(0);
   
   Drawer(Pixels px, Settings s, String renderer, DrawType pixelDrawType) {
     p = px;
@@ -31,9 +31,7 @@ class Drawer {
     width = (drawType == DrawType.TwoSides) ? ledWidth : ledWidth/2;
     height = ledHeight;
     pg = createGraphics(width, height, renderer);
-    xTouches = new float[MAX_TOUCHES];
-    yTouches = new float[MAX_TOUCHES];
-    lastTouchTimes = new long[MAX_TOUCHES];
+    touches = new ArrayList<TouchInfo>();
     rgbGamma = new short[256][3];
     setGamma(main.DEFAULT_GAMMA);
     settings = s;
@@ -93,17 +91,6 @@ class Drawer {
   boolean isTrainingMode() {
     return false;
   }
-  
-  void setMousePressed(boolean mp) {
-    mousePressed = mp; 
-  }
-  
-  void setMouseCoords(int mx, int my) {
-    mouseX = mx/screenPixelSize;
-    mouseY = my/screenPixelSize;
-    lastMouseX = mx; 
-    lastMouseY = my;
-  }
 
   void justEnteredSketch() {
     println("just entered: " + getName());
@@ -131,23 +118,22 @@ class Drawer {
     return main.getKeymapLines();
   }
 
-  int getLastMouseX() { return lastMouseX; }
-  int getLastMouseY() { return lastMouseY; }
-  
   void setTouch(int touchNum, float x, float y) {
-    lastTouchTimes[touchNum] = millis();
     if (touchNum == 1) {
-      touchX = mouseX = round(x * width);
-      touchY = mouseY = round(y * height);
+      touchX = round(x * width);
+      touchY = round(y * height);
     }
     
-    xTouches[touchNum] = x;
-    yTouches[touchNum] = y;    
+    TouchInfo t = new TouchInfo();
+    t.x = x;
+    t.y = y;
+    t.whichFinger = touchNum;
+    t.time = millis();
+    touches.add(t);
+    if (touches.size() > 100) {
+      touches.remove(0);
+    }
   }
-  
-  //void setColorPalette(color[] palette) {
-  //  this.palette = palette;
-  //}
   
   int getNumColors() { return settings.palette.length; }
   
@@ -218,13 +204,22 @@ class Drawer {
     return y / scale;
   }
 
-  boolean isTouching(int touchNum, int[] xy, long touchCutoffTime) {
-    if (xy != null) {
-      xy[0] = int(xTouches[touchNum] * (width-1) + 0.5);
-      xy[1] = int(yTouches[touchNum] * (height-1) + 0.5);
-    }
+  Vec2D getTouchFor(int touchNum, long touchCutoffTime) {
     
-    return millis() - lastTouchTimes[touchNum] <= touchCutoffTime;
+    Iterator<TouchInfo> it = touches.iterator();
+    while (it.hasNext()) {
+      TouchInfo t = it.next();
+      if (t.whichFinger == touchNum) {
+        it.remove();
+        boolean youngEnough = millis() - t.time <= touchCutoffTime;
+        if (youngEnough) {
+          Vec2D result = new Vec2D(t.x, t.y);
+          result.scaleSelf(width, height);
+          return result;
+        }
+      }
+    }
+    return null;
   }
   
   // adapted from https://github.com/adafruit/Adavision/blob/master/Processing/WS2801/src/WS2801.java
@@ -261,4 +256,17 @@ class Drawer {
     return settingsBackup;
   }
   
+}
+
+class TouchInfo
+{
+  int whichFinger;
+  float x;
+  float y;
+  long time;
+  
+  String toString()
+  {
+    return "touch " + x + ", " + y + " on finger: " + whichFinger;
+  }
 }

@@ -1,7 +1,6 @@
 /**
  * Based on Smoke by Glen Murphy.
  * 
- * Drag the mouse across the image to move the particles.
  * Code has not been optimised and will run fairly slowly.
  */
  

@@ -261,12 +261,6 @@ class MainClass {
       return;
     }
     
-    d.setMousePressed(mousePressed);
-    
-    if (d.getLastMouseX() != mouseX || d.getLastMouseY() != mouseY) {
-      d.setMouseCoords(mouseX, mouseY);
-    }
-    
     d.update();
     display.drawToScreen();
     ledMap.drawToLeds();
@@ -403,10 +397,6 @@ class MainClass {
     pm.setPaletteType(settings.paletteType, NUM_COLORS, settings.palette);
     Drawer mode = currentMode();
     mode.setup();
-    mouseX = mode.mouseX; // Let the mode set the mouseX, Y in their setup and honor that.
-    mouseY = mode.mouseY;
-    
-    println("Initial mouseX:" + mouseX + " mouseY: " + mouseY);
   }
   
   ColumnRow findNextMode() {
@@ -490,7 +480,9 @@ class MainClass {
   }
   
   void touchXY(int touchNum, float x, float y) {
-    if (frameCount % 10 == 0) println("Touch" + touchNum + " at " + nf(x, 1, 2) + " " + nf(y, 1, 2));
+    if (frameCount % 10 == 0) {
+      println("Touch" + touchNum + " at " + nf(x, 1, 2) + " " + nf(y, 1, 2));
+    }
     currentMode().setTouch(touchNum, x, y);
   }
   

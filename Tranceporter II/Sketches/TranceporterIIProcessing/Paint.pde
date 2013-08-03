@@ -10,9 +10,9 @@ class Paint extends Drawer {
   Paint(Pixels p, Settings s) {
     super(p, s, JAVA2D, DrawType.RepeatingSides);
     canvas = new int[width][height];
-    tailX = new int[MAX_TAIL_LENGTH][MAX_TOUCHES];
-    tailY = new int[MAX_TAIL_LENGTH][MAX_TOUCHES];
-    for (int i=0; i<MAX_TOUCHES; i++) {
+    tailX = new int[MAX_TAIL_LENGTH][MAX_FINGERS];
+    tailY = new int[MAX_TAIL_LENGTH][MAX_FINGERS];
+    for (int i=0; i<MAX_FINGERS; i++) {
       for (int j=0; j<MAX_TAIL_LENGTH; j++) {
         tailX[j][i] = tailY[j][i] = -1;
       }
@@ -34,23 +34,27 @@ class Paint extends Drawer {
   }  
   
   void draw() { 
-    //if (int(getParam(2) + 0.5) == 1) clear();
-    
     pg.background(0);
     int tailLength = round(settings.getParam(settings.keyCustom1)*MAX_TAIL_LENGTH);
     
-    for (int i=0; i<MAX_TOUCHES; i++) {
+    for (int i=0; i< MAX_FINGERS; i++) {
       tailX[tailInd][i] = -1;
       tailY[tailInd][i] = -1;
 
-      int[] xy = new int[2];
-      if (isTouching(i, xy, 100)) {
+      while (true) {
+        Vec2D touch = getTouchFor(i, 100);
+        if (touch == null) {
+          break;
+        }
+        int x = (int)touch.x;
+        int y = (int)touch.y;
+        
         if (tailLength == 0) {
-          canvas[xy[0]][xy[1]] = (frameCount + i * getNumColors() / MAX_TOUCHES) % (getNumColors() - 1) + 1;
+          int index = (frameCount + i * getNumColors() / MAX_FINGERS) % (getNumColors() - 1) + 1;
+          canvas[x][y] = index;
         } else {
-          tailX[tailInd][i] = xy[0];
-          tailY[tailInd][i] = xy[1];
-        //println(xy[0] + " " + xy[1] + " " + canvas[xy[0]][xy[1]]);
+          tailX[tailInd][i] = x;
+          tailY[tailInd][i] = y;
         }
       }
     }
@@ -62,13 +66,13 @@ class Paint extends Drawer {
         }
       }
     } else {
-      for (int i=0; i<MAX_TOUCHES; i++) {
+      for (int i=0; i< MAX_FINGERS; i++) {
         for (int j=0; j<tailLength; j++) {
           int ind = (tailInd - j + MAX_TAIL_LENGTH) % MAX_TAIL_LENGTH;
           int x = tailX[ind][i];
           int y = tailY[ind][i];
           if (x != -1 && y != -1) {
-            pg.set(x, y, getColor((frameCount + i * getNumColors() / MAX_TOUCHES) % (getNumColors() - 1) + 1));
+            pg.set(x, y, getColor((frameCount + i * getNumColors() / MAX_FINGERS) % (getNumColors() - 1) + 1));
           }
         }
       }
@@ -85,10 +89,11 @@ class Paint extends Drawer {
   }
   
   color getColor(int index) {
-    if (index == 0)
-      return color(0, 0, 0);
-    else
+    if (index == 0) {
+      return blackColor;
+    }
+    else {
       return super.getColor(index);
+    }
   }
-
 }
