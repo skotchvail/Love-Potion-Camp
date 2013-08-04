@@ -353,12 +353,7 @@ class Settings {
               float param = (lastButtonState) ? 0.0f : 1.0f;
               lastButtonState = !lastButtonState;
 
-              OscMessage msg = new OscMessage("/pageControl/newEffect", new Object[] { param }) {
-                {
-                  inetAddress = localhost;
-                }
-              };
-              oscEvent(msg);
+              oscEvent("/pageControl/newEffect", new Object[] { param });
             }
           }
 
@@ -377,12 +372,8 @@ class Settings {
             } else if (1.0f < x) {
               x = 1.0f;
             }
-            OscMessage msg = new OscMessage(keyCustom2, new Object[] { x }) {
-              {
-                  inetAddress = localhost;
-              }
-            };
-            oscEvent(msg);
+
+            oscEvent(keyCustom2, new Object[] { x });
 
             lastTime = time;
           }
@@ -408,6 +399,21 @@ class Settings {
 
   private void enableControl(String controlKey, boolean enabled) {
     sendMessageToIPad(controlKey + "/visible", enabled?"1":"0");
+  }
+
+  /**
+   * Use this form because of the requirement of OscMessage objects to have network addresses.
+   *
+   * @param address the OSC message address
+   * @param args the arguments, can't be {@code null}
+   */
+  void oscEvent(String address, Object[] args) {
+    OscMessage msg = new OscMessage(address, args) {
+      {
+        inetAddress = localhost;
+      }
+    };
+    oscEvent(msg);
   }
 
   /* this comes in on a different thread than
