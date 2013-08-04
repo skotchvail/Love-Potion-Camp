@@ -336,62 +336,64 @@ class Settings {
 
       List<HIDDeviceInfo> wiis = Wiimote.findWiimotes(hid);
       if (wiis.size() == 0) {
-        System.out.println("No Wiis found!");
-      } else {
-        wiiDevice = wiis.get(0).open();
-        System.out.println("Monitoring Wii controller: " + wiis.get(0));
-        WiimoteListener listener = new WiimoteListener() {
-          @Override
-          public void status(WiimoteStatus status) {
-          }
-
-          private boolean lastButtonState;
-          @Override
-          public void buttons(int buttons) {
-            if (((buttons & Wiimote.BUTTON_RIGHT) != 0) != lastButtonState) {
-              // Only watch for a button change
-              float param = (lastButtonState) ? 0.0f : 1.0f;
-              lastButtonState = !lastButtonState;
-
-              oscEvent("/pageControl/newEffect", new Object[] { param });
-            }
-          }
-
-          private long lastTime;
-
-          @Override
-          public void accelerometer(float x, float y, float z) {
-            long time = System.currentTimeMillis();
-
-            if (time - lastTime < 200L) return;
-
-            x /= WiiMath.rho(x, y, z);
-            x = (x + 1.0f)*0.5f;
-            if (x < 0.0f) {
-              x = 0.0f;
-            } else if (1.0f < x) {
-              x = 1.0f;
-            }
-
-            oscEvent(keyCustom2, new Object[] { x });
-
-            lastTime = time;
-          }
-
-          @Override
-          public void memory(int error, int offset, byte[] data, int dataOff, int dataLen) {
-          }
-
-          @Override
-          public void ack(int report, int error) {
-          }
-        };
-
-        wii = new Wiimote(wiiDevice);
-        wiiExecutor = Executors.newSingleThreadExecutor();
-        wiiExecutor.submit(wii.getEventLoop(listener));
-        wii.requestData(Wiimote.REPORT_BUTTONS_AND_ACCEL, false);
+        System.out.println("No Wii controllers found!");
+        hid.release();
+        return;
       }
+
+      wiiDevice = wiis.get(0).open();
+      System.out.println("Monitoring Wii controller: " + wiis.get(0));
+      WiimoteListener listener = new WiimoteListener() {
+        @Override
+        public void status(WiimoteStatus status) {
+        }
+
+        private boolean lastButtonState;
+        @Override
+        public void buttons(int buttons) {
+          if (((buttons & Wiimote.BUTTON_RIGHT) != 0) != lastButtonState) {
+            // Only watch for a button change
+            float param = (lastButtonState) ? 0.0f : 1.0f;
+            lastButtonState = !lastButtonState;
+
+            oscEvent("/pageControl/newEffect", new Object[] { param });
+          }
+        }
+
+        private long lastTime;
+
+        @Override
+        public void accelerometer(float x, float y, float z) {
+          long time = System.currentTimeMillis();
+
+          if (time - lastTime < 200L) return;
+
+          x /= WiiMath.rho(x, y, z);
+          x = (x + 1.0f)*0.5f;
+          if (x < 0.0f) {
+            x = 0.0f;
+          } else if (1.0f < x) {
+            x = 1.0f;
+          }
+
+          oscEvent(keyCustom2, new Object[] { x });
+
+          lastTime = time;
+        }
+
+        @Override
+        public void memory(int error, int offset, byte[] data, int dataOff, int dataLen) {
+        }
+
+        @Override
+        public void ack(int report, int error) {
+        }
+      };
+
+      wii = new Wiimote(wiiDevice);
+      wiiExecutor = Executors.newSingleThreadExecutor();
+      wiiExecutor.submit(wii.getEventLoop(listener));
+      wii.requestData(Wiimote.REPORT_BUTTONS_AND_ACCEL, false);
     } catch (Exception ex) {
       ex.printStackTrace();
     }
