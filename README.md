@@ -52,12 +52,25 @@ Using the hardware depends on an interface library that in turn depends
 on the D2XX library. If you are not going to be driving the hardware,
 but just want to use the simulation, then you don't need to do this. 
 
-Download the [D2XX library](http://www.ftdichip.com/Drivers/D2XX.htm) Virtual COM Port (VCP) drivers.
+Download the latest [D2XX library](http://www.ftdichip.com/Drivers/D2XX.htm) drivers.
 
-1. Copy the i386 version of the library into `/usr/local/lib`.  
-2. Symlink the base .dylib name to the versioned path. 
-   e.g.  `ln -s /usr/local/lib/libftd2xx.1.2.2.dylib /usr/local/lib/libftd2xx.dylib`  
-3. Copy the *.h files into `/usr/local/include`
+Use the following steps to install on your OS X (these assume you have copied the D2XX directory to your desktop):
+
+1. Open a Terminal window (Finder->Go->Utilities->Terminal).
+2. If the `/usr/local/lib` directory does not exist, create it <br/>
+   `sudo mkdir /usr/local/lib`
+3. if the `/usr/local/include` directory does not exist, create it <br/>
+    `sudo mkdir /usr/local/include`
+4. Copy the dylib file to `/usr/local/lib` <br/>
+    `sudo cp ~/Desktop/D2XX/bin/10.5-10.7/libftd2xx.1.2.2.dylib /usr/local/lib/`
+5. Make a symbolic link <br/>
+    `sudo ln -sf /usr/local/lib/libftd2xx.1.2.2.dylib /usr/local/lib/libftd2xx.dylib`
+6. Copy the D2XX include file <br/>
+    `sudo cp ~/Desktop/D2XX/Samples/ftd2xx.h /usr/local/include/`
+7. Copy the WinTypes include file <br/>
+    `sudo cp ~/Desktop/D2XX/Samples/WinTypes.h /usr/local/include/`
+8. You have now successfully installed the D2XX library.
+
 
 
 Make the PaintYourDragon stuff: 
@@ -73,13 +86,31 @@ If that doesn't fix things, you might want to try the older instructions tried t
 In any event, you need to run both Makefiles from the command line. 
 
     $ cd p9813
-    $ make
-    $ cd processing ; make && make install
+    $ sudo cp p9813.h /usr/local/include/
+    $ make clean && make
+    $ cd processing ; make clean && make && make install
+
+An unfortunate artifact of the Mac and Linux versions of the FTDI driver
+is that the "Virtual COM Port" kernel extension must be disabled before
+the p9813 library can be used.  Applications such as
+Arduino depend on the serial port for programming and communication, so
+these cannot be used at the same time.  
+
+Be sure to run
+
+    $ make unload
+
+in the p9813 directory before running our app if you have the FTDIUSBSerialDriver installed. When you are done, don't forget to run `make load` or
+your other other serial communication such as Arduino
+programming will not work.
+
 
 ## Test and Run
 
 That should be enough to get the simulation to run on your computer. You should be able to load and
 run `TranceporterIIProcessing.pde`. You will see an image of the bottle and some animations. 
+
+If you get a `UnsatisfiedLinkError`, try running processing in 32 bit mode to see if it works.
 
 ## Adding Sketches
 
