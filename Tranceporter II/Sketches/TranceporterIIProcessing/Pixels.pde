@@ -288,7 +288,7 @@ class Pixels {
       drawInstructions();
     }
     
-    boolean programStrandSimulation = true;
+    boolean programStrandSimulation = false; // TODO: get rid of this completely once all strands are programmed
     if (programStrandSimulation) {
       color[] pixelData = main.ledMap.pixelData;
       
