@@ -214,7 +214,7 @@ class Drawer {
         boolean youngEnough = millis() - t.time <= touchCutoffTime;
         if (youngEnough) {
           Vec2D result = new Vec2D(t.x, t.y);
-          result.scaleSelf(width, height);
+          result.scaleSelf(width - 1, height - 1);
           return result;
         }
       }
