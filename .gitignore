@@ -10,3 +10,9 @@ Tranceporter II/Tranceporter II.xcodeproj/project.xcworkspace/xcuserdata
 Tranceporter II/Tranceporter II.xcodeproj/xcuserdata
 tranceporter.txt
 Tranceporter II.xccheckout
+
+# IntelliJ IDEA Files #
+*.iml
+*.ipr
+*.iws
+.idea/

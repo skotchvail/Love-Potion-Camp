@@ -6,6 +6,7 @@ import ddf.minim.*;
 import java.util.Arrays;
 import java.util.List;
 import java.util.prefs.Preferences;
+import com.codeminders.hidapi.ClassPathLibraryLoader;
 
 
 //ADJUSTABLE PARAMS
@@ -38,7 +39,11 @@ Point location;
 
 interface VoidFunction { void function(); }
 interface FunctionFloatFloat { void function(float x, float y); }
-  
+
+static {
+  ClassPathLibraryLoader.loadNativeHIDLibrary();
+}
+
 void setup() {
   size(screenWidth, screenHeight, P2D);
 
@@ -80,14 +85,14 @@ private void prepareExitHandler() {
 }
 
 class MainClass {
-  
+
   Pixels display;
   LedMap ledMap;
   Console console;
 
   int NUM_COLORS = 512;
   float DEFAULT_GAMMA = 2.5;
-  
+
   // Audio
   BeatDetect beatDetect;
   int HISTORY_SIZE = 50;
@@ -100,17 +105,17 @@ class MainClass {
   Minim minim;
   int MAX_BEAT_LENGTH = 750; // , MAX_AUDIO_SENSITIVITY = 12;
   HardwareTest hardwareTestEffect;
-  
+
   Drawer[][] modes;
   ColumnRow whichEffect = new ColumnRow();
   float lastModeChangeTimeStamp;
   Point screenLocation = new Point();
-  
+
   PaletteManager pm = new PaletteManager();
   Settings settings = new Settings(NUM_BANDS);
 
   void setup(PApplet applet) {
-    
+
     if (true) {
       // redirect stdout/err
       try {
@@ -119,12 +124,12 @@ class MainClass {
         println("Error redirecting stdout/stderr: " + e);
       }
     }
-    
+
     ledMap = new LedMap();
     display = new Pixels(applet);
     display.setup();
-    
-    hardwareTestEffect =  new HardwareTest(display, settings);    
+
+    hardwareTestEffect =  new HardwareTest(display, settings);
 
     modes = new Drawer[][] {
       //column 0
@@ -154,29 +159,30 @@ class MainClass {
       {
         hardwareTestEffect,      //3, 0
       },
-      
+
     };
 
     settings.initOSC();
+    settings.initWiimote();
     pm.init(applet);
-    
+
     whichEffect.column = prefs.getInt("whichEffect.column", 1);
     whichEffect.row = prefs.getInt("whichEffect.row", 3);
-      
+
     if (whichEffect.column >= modes.length || whichEffect.row >= modes[whichEffect.column].length) {
         whichEffect = new ColumnRow(0, 0);
     }
     //settings.setSketchOn(2, 2, true);
-    
+
     // Audio features
     minim = new Minim(applet);
     audioIn = minim.getLineIn(Minim.STEREO, SAMPLE_SIZE, SAMPLE_RATE);
-    
+
     // create a new Fast Fourier Transform object
     fft = new FFT(SAMPLE_SIZE, SAMPLE_RATE);
 
     // Sets the number of averages used when computing
-    // the spectrum based on the minimum bandwidth for an octave           
+    // the spectrum based on the minimum bandwidth for an octave
     // and the number of bands per octave.
     fft.logAverages(FFT_BASE_FREQ, FFT_BAND_PER_OCT);
     System.out.println("Sound Control: FFT on " + fft.avgSize()
@@ -187,29 +193,29 @@ class MainClass {
     // pause for 100 milliseconds - presumably to give the hardware time to catch up
     delay(100);
 
-    // Sets the window to use on the samples 
+    // Sets the window to use on the samples
     // before taking the forward transform.
     // The result of using a window is to reduce the noise in the spectrum somewhat.
     fft.window(FFT.HAMMING);
 
     // create our new beat detect object (passing it the FFT as an argument)
     beatDetect = new BeatDetect(fft, NUM_BANDS, HISTORY_SIZE);
-  
+
     // define which bands we are analyzing
     for (int i=0; i<NUM_BANDS; i++) {
       beatDetect.analyzeBand(i, analyzeBands[i]);
     }
 
-    // // Sets the window to use on the samples 
+    // // Sets the window to use on the samples
     // // before taking the forward transform.
-    // @REVIEW now done above when we call fft.window(); 
+    // @REVIEW now done above when we call fft.window();
     // Because why not do it here where we're initializing the object already?
     // beatDetect.setFFTWindow();
-        
+
     newEffectFirstTime();
-    
+
     frameRate(FRAME_RATE);
-    
+
     settings.sendEntireGUIToIPad();
     currentMode().justEnteredSketch();
 
@@ -219,9 +225,9 @@ class MainClass {
   void shutdown() {
     ledMap.shutdown();
   }
-  
+
   void draw() {
-    
+
     if (needToFlushPrefs) {
       needToFlushPrefs = false;
       try {
@@ -230,7 +236,7 @@ class MainClass {
         println("main flushing prefs: " + e);
       }
     }
-    
+
     if (frameCount == 2) {
       screenLocation.x = prefs.getInt("screenLocationX", 0);
       screenLocation.y = prefs.getInt("screenLocationY", 0);
@@ -243,7 +249,7 @@ class MainClass {
         prefs.putInt("screenLocationY", screenLocation.y);
       }
     }
-    
+
     if (pauseAnimations)
       return;
     
@@ -254,22 +260,22 @@ class MainClass {
     for (int i=0; i<NUM_BANDS; i++)
       settings.setIsBeat(i, beatDetect.isBeat("spectralFlux", i));
     Drawer d = currentMode();
-    
+
     if (settings.palette == null) {
       assert(settings.palette != null);
       // println("can't draw, palett is null");
       return;
     }
-    
+
     d.update();
     display.drawToScreen();
     ledMap.drawToLeds();
-    
+
     if (settings.millisBetweenAutoChanges() < millis() - lastModeChangeTimeStamp) {
       newEffect();
     }
   }
-  
+
   ArrayList<String> getKeymapLines() {
 
     ArrayList<String> myStrings = new ArrayList();
@@ -288,7 +294,7 @@ class MainClass {
   }
 
   void keyPressed() {
-    
+
     if (key == ' ') {
       pauseAnimations = !pauseAnimations;
     }
@@ -371,15 +377,15 @@ class MainClass {
     else {
       println("pressed " + int(key) + " " + keyCode);
     }
-    
+
     currentMode().keyPressed();
   }
-  
-  
+
+
   Drawer getMode(ColumnRow coord) {
     return modes[coord.column][coord.row];
   }
-  
+
   Drawer currentMode() {
     return getMode(whichEffect);
   }
@@ -389,74 +395,74 @@ class MainClass {
     pm.getNewPalette(NUM_COLORS, settings.palette);
     settings.paletteType = pm.getPaletteType();
   }
-  
+
   void newPaletteType() {
     pm.nextPaletteType();
     newPalette();
     settings.sendMessageToIPad(settings.keyPaletteName, pm.getPaletteDisplayName());
   }
-  
+
   void newEffectFirstTime() {
     settings.palette = new color[NUM_COLORS];
     pm.setPaletteType(settings.paletteType, NUM_COLORS, settings.palette);
     Drawer mode = currentMode();
     mode.setup();
   }
-  
+
   ColumnRow findNextMode() {
-    
+
     // Scan from the current position to the end of the table
     for (int col = whichEffect.column; col < modes.length - 1; col++) {
       for (int row = 0; row < modes[col].length; row++) {
         if (col == whichEffect.column && row <= whichEffect.row)
           continue;
-        
+
         if (settings.isSketchOn(col, row)) {
           return new ColumnRow(col, row);
         }
       }
     }
-    
+
     // Scan from the start of the table to the current position
     for (int col = 0; col <= whichEffect.column && col < modes.length - 1; col++) {
       for (int row = 0; row < modes[col].length; row++) {
         if (col == whichEffect.column && row >= whichEffect.row)
           break;
-        
+
         if (settings.isSketchOn(col, row)) {
           return new ColumnRow(col, row);
         }
       }
     }
-    
+
     return whichEffect.clone();
   }
 
   void newEffect() {
-    lastModeChangeTimeStamp = millis();    
+    lastModeChangeTimeStamp = millis();
     ColumnRow coord = findNextMode();
     switchToNewEffect(coord);
   }
-  
+
   void switchToNewEffect(ColumnRow newEffect) {
     prefs.putInt("whichEffect.column", newEffect.column);
     prefs.putInt("whichEffect.row", newEffect.row);
     needToFlushPrefs = true;
-    
+
     println("newEffect " + currentMode().getName() + " -> "+ getMode(newEffect).getName());
-    
+
     if (newEffect.column == whichEffect.column && newEffect.row == whichEffect.row) {
       return;
     }
-    
+
     ColumnRow oldEffect = whichEffect;
     whichEffect = newEffect;
-    
+
     // Each mode tracks its own settings
     Object newSettings = currentMode().getSettingsBackup();
     Object oldSettings = settings.switchSettings(newSettings);
     getMode(oldEffect).setSettingsBackup(oldSettings);
-    
+
     if (newSettings == null) {
       newEffectFirstTime();
     }
@@ -469,7 +475,7 @@ class MainClass {
     getMode(oldEffect).justExitedSketch();
     currentMode().justEnteredSketch();
   }
-  
+
   void switchToDrawer(Drawer whichDrawer) {
     for (int col = 0; col < modes.length; col++) {
       for (int row = 0; row < modes[col].length; row++) {
@@ -482,14 +488,14 @@ class MainClass {
     }
     assert false : "cannot find Drawer to switch to: " + whichDrawer.getName();
   }
-  
+
   void touchXY(int touchNum, float x, float y) {
     if (frameCount % 10 == 0) {
       println("Touch" + touchNum + " at " + nf(x, 1, 2) + " " + nf(y, 1, 2));
     }
     currentMode().setTouch(touchNum, x, y);
   }
-  
+
   void mouseClicked() {
     Point p = new Point(mouseX, mouseY);
     Rectangle bounds = display.getBox2D();
@@ -504,7 +510,7 @@ class MainClass {
       println("outside box");
     }
   }
-  
+
   void debugPaletteType(String extra) {
     println(extra + " paletteType = " + settings.paletteType + " " + pm.getPaletteDisplayName() + (settings.palette == null?" (null)":" (not null)"));
   }
@@ -513,17 +519,17 @@ class MainClass {
 class ColumnRow implements Cloneable {
   int column;
   int row;
-  
+
   ColumnRow() {
     column = 0;
     row = 0;
   }
-  
+
   ColumnRow(int theColumn, int theRow) {
     column = theColumn;
     row = theRow;
   }
-  
+
   ColumnRow clone() {
     return new ColumnRow(column, row);
   }
@@ -537,7 +543,7 @@ class Utility {
     }
     return intList;
   }
-  
+
   public int[] toIntArray(List<Integer> integerList) {
     int[] intArray = new int[integerList.size()];
     for (int i = 0; i < integerList.size(); i++) {
@@ -545,7 +551,7 @@ class Utility {
     }
     return intArray;
   }
-  
+
   public ArrayList<Boolean> toBooleanList(boolean[] booleanArray) {
     ArrayList<Boolean> booleanList = new ArrayList<Boolean>();
     for (int index = 0; index < booleanArray.length; index++) {
@@ -553,7 +559,7 @@ class Utility {
     }
     return booleanList;
   }
-  
+
   public boolean[] toBooleanArray(List<Boolean> booleanList) {
     boolean[] boolArray = new boolean[booleanList.size()];
     for (int i = 0; i < booleanList.size(); i++) {
