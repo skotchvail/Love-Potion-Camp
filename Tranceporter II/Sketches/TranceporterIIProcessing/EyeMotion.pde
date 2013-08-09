@@ -28,7 +28,7 @@ class EyeMotion extends Drawer {
   final color kIrisColor = color(3, 43, 62*factorBlue);
   final color kPupilColor = color(4, 22, 35*factorBlue);
   
-  final color kEyeFillColor = color(8*5, 74*1.5, 119*factorBlue);
+  final color kEyeFillColor = color(180, 180, 255);
   final color kBackgroundColor = color(14, 37, 62);
   final color kLidColor = color(20, 95, 141*factorBlue);
   final color kLidColorDark = color(18, 53, 89*factorBlue);
