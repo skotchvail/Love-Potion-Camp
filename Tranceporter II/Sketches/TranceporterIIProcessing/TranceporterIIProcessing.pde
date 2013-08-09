@@ -1,13 +1,29 @@
 // The main sketch
 
-import oscP5.*;
-import netP5.*;
-import ddf.minim.*;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
+import java.net.SocketAddress;
+import java.net.SocketException;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.prefs.Preferences;
-import com.codeminders.hidapi.ClassPathLibraryLoader;
 
+import com.qindesign.hid.HidDevice;
+import com.qindesign.hid.HidDeviceInfo;
+import com.qindesign.hid.HidManager;
+import com.qindesign.osc.OscBundle;
+import com.qindesign.osc.OscDatagramClient;
+import com.qindesign.osc.OscDatagramServer;
+import com.qindesign.osc.OscMessage;
+import com.qindesign.osc.OscPacket;
+import com.qindesign.osc.OscPacketReceiver;
+import com.qindesign.wii.Wiimote;
+import com.qindesign.wii.WiimoteListener;
+import com.qindesign.wii.WiimoteStatus;
+import com.qindesign.wii.WiiMath;
+import ddf.minim.*;
 
 //ADJUSTABLE PARAMS
 String iPadIP = "10.0.1.8";
@@ -39,10 +55,6 @@ Point location;
 
 interface VoidFunction { void function(); }
 interface FunctionFloatFloat { void function(float x, float y); }
-
-static {
-  ClassPathLibraryLoader.loadNativeHIDLibrary();
-}
 
 void setup() {
   size(screenWidth, screenHeight, P2D);
@@ -252,9 +264,9 @@ class MainClass {
 
     if (pauseAnimations)
       return;
-    
+
     settings.handleQueuedOSCEvents();
-    
+
     beatDetect.update(audioIn.mix);
 
     for (int i=0; i<NUM_BANDS; i++)

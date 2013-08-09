@@ -1,41 +1,31 @@
 import java.lang.reflect.*;
 
-import java.net.InetAddress;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-
-import com.codeminders.hidapi.HIDDevice;
-import com.codeminders.hidapi.HIDDeviceInfo;
-import com.codeminders.hidapi.HIDManager;
-import com.qindesign.wii.Wiimote;
-import com.qindesign.wii.WiimoteListener;
-import com.qindesign.wii.WiimoteStatus;
-import com.qindesign.wii.WiiMath;
-
-class Settings {
+class Settings implements OscPacketReceiver {
   private java.net.InetAddress localhost;
   {
     try {
       localhost = InetAddress.getLocalHost();
     } catch (java.net.UnknownHostException ex) {
-      // Shouldn't happen; ignore
+      // Shouldn't happen
+      throw new RuntimeException(ex);
     }
   }
 
   private boolean[][] whichModes = new boolean[3][5];
   private color[] palette;
   private boolean[] isBeat;
-  private HashMap paramMap; // Values of controls specific to any Sketch
-  private HashMap paramGlobalMap; // Values of controls that control all Sketches
+  private HashMap<String, Float> paramMap; // Values of controls specific to any Sketch
+  private HashMap<String, Float> paramGlobalMap; // Values of controls that control all Sketches
   private HashMap actions;
   private int numBands;
-  private OscP5 oscP5;
-  private NetAddress oscReceiver;
+  private OscDatagramClient oscClient;
+  private OscDatagramServer oscServer;
+  private InetSocketAddress oscReceiverAddress;
   private int paletteType;
   List<String> keyNames;
   List<String> keyGlobalNames;
 
-  private HIDDevice wiiDevice;
+  private HidDevice wiiDevice;
   private Wiimote wii;
   private ExecutorService wiiExecutor;
 
@@ -151,7 +141,7 @@ class Settings {
         }});
 
 
-    paramGlobalMap = new HashMap();
+    paramGlobalMap = new HashMap<String, Float>();
     setParam(keyGlobalAutoChangeSpeed, 1.0);
     updateSketchesFromPrefs();
 
@@ -194,7 +184,7 @@ class Settings {
   }
 
   float getParam(String paramName) {
-    Object result = null;
+    Float result = null;
     if (keyNames.contains(paramName)) {
       result = paramMap.get(paramName);
     }
@@ -205,12 +195,12 @@ class Settings {
       assert false : "paraName not found:" + paramName;
     }
     assert result != null : "getParam does not have " + paramName + "\nresult = " + result + "\nparamMap = " + paramMap;
-    return (Float) result;
+    return result;
   }
 
   void setDefaultSettings() {
     isBeat = new boolean[numBands];
-    paramMap = new HashMap();
+    paramMap = new HashMap<String, Float>();
     palette = null;
     paletteType = 0;
 
@@ -249,7 +239,7 @@ class Settings {
     }
     else {
       HashMap setter = (HashMap)newSettings;
-      paramMap = (HashMap)setter.get("1");
+      paramMap = (HashMap<String, Float>)setter.get("1");
       palette = utility.toIntArray((ArrayList<Integer>)setter.get("2"));
       isBeat = utility.toBooleanArray((ArrayList<Boolean>)setter.get("3"));
       paletteType = (Integer)setter.get("4");
@@ -323,25 +313,38 @@ class Settings {
 ////////////////////////////////////////////////////////////////////
 //OSC 5 stuff
   void initOSC() {
-    oscP5 = new OscP5(this, 8000);
-    oscReceiver = new NetAddress(iPadIP, 9000);
+    try {
+      oscServer = new OscDatagramServer(8000, this, null);
+      oscClient = new OscDatagramClient();
+    } catch (SocketException ex) {
+      System.err.println("Could not start OSC server or client: " + ex);
+    }
+    oscReceiverAddress = new InetSocketAddress(iPadIP, 9000);
   }
 
   void initWiimote() {
     // Wii stuff
 
     try {
-      HIDManager hid = HIDManager.getInstance();
+      HidManager hid = HidManager.getInstance();
 
-      List<HIDDeviceInfo> wiis = Wiimote.findWiimotes(hid);
-      if (wiis.size() == 0) {
+      List<HidDeviceInfo> wiimotes = Wiimote.findWiimotes(hid);
+      if (wiimotes.size() == 0) {
         System.out.println("No Wii controllers found!");
-        hid.release();
         return;
       }
 
-      wiiDevice = wiis.get(0).open();
-      System.out.println("Monitoring Wii controller: " + wiis.get(0));
+      for (HidDeviceInfo device : wiimotes) {
+        wiiDevice = hid.open(wiimotes.get(0));
+        if (wiiDevice != null) {
+          break;
+        }
+      }
+      if (wiiDevice == null) {
+        System.out.println("Could not open any of the found Wii controllers!");
+      }
+
+      System.out.println("Monitoring Wii controller: " + wiiDevice);
       WiimoteListener listener = new WiimoteListener() {
         @Override
         public void status(WiimoteStatus status) {
@@ -355,7 +358,7 @@ class Settings {
             float param = (lastButtonState) ? 0.0f : 1.0f;
             lastButtonState = !lastButtonState;
 
-            oscEvent("/pageControl/newEffect", new Object[] { param });
+            oscMessage(new OscMessage("/pageControl/newEffect", new Object[] { param }));
           }
         }
 
@@ -367,15 +370,11 @@ class Settings {
 
           if (time - lastTime < 200L) return;
 
-          x /= WiiMath.rho(x, y, z);
-          x = (x + 1.0f)*0.5f;
-          if (x < 0.0f) {
-            x = 0.0f;
-          } else if (1.0f < x) {
-            x = 1.0f;
-          }
+          double roll = 1.0 - Math.abs(WiiMath.roll(x, y, z))/Math.PI;
+          double pitch = 1.0 - WiiMath.pitch(x, y, z)/Math.PI;
 
-          oscEvent(keyCustom2, new Object[] { x });
+          oscMessage(new OscMessage(keyCustom2, new Object[] { (float) roll }));
+          oscMessage(new OscMessage(keyCustom1, new Object[] { (float) pitch }));
 
           lastTime = time;
         }
@@ -402,33 +401,47 @@ class Settings {
     sendMessageToIPad(controlKey + "/visible", enabled?"1":"0");
   }
 
-  /**
-   * Use this form because of the requirement of OscMessage objects to have network addresses.
-   *
-   * @param address the OSC message address
-   * @param args the arguments, can't be {@code null}
-   */
-  void oscEvent(String address, Object[] args) {
-    OscMessage msg = new OscMessage(address, args) {
-      {
-        inetAddress = localhost;
-      }
-    };
-    oscEvent(msg);
-  }
-
-  private ArrayList<OscMessage> oscMessages = new ArrayList<OscMessage>();
-  
-  /* this comes in on a different thread than
+  /* These come in on a different thread than
    the draw routines, so we need to add to a queue
    and then process the events during handleQueuedOSCEvents
    which is called from the main draw
    */
-  void oscEvent(OscMessage msg) {
-    synchronized(oscMessages)
-    {
-      oscMessages.add(msg);
+  private ArrayList<OscMessage> oscMessages = new ArrayList<OscMessage>();
+
+  /**
+   * Receive an OSC message.
+   *
+   * @param message the message.
+   */
+  public void oscMessage(OscMessage message) {
+    synchronized (oscMessages) {
+      oscMessages.add(message);
     }
+  }
+
+  /**
+   * Receive an OSC bundle.
+   *
+   * @param message the bundle.
+   */
+  public void oscBundle(OscBundle bundle) {
+    for (OscPacket packet : bundle.elements()) {
+      if (packet instanceof OscMessage) {
+        oscMessage((OscMessage) packet);
+      } else if (packet instanceof OscBundle) {
+        oscBundle((OscBundle) packet);
+      }
+    }
+  }
+
+  /**
+   * An OSC parsing error occurred.
+   *
+   * @param data the data
+   * @param off the data offset
+   * @param len the data length
+   */
+  public void oscParseError(byte[] data, int off, int len) {
   }
 
   // Call once per draw to process events
@@ -438,7 +451,7 @@ class Settings {
       messages = (ArrayList<OscMessage>)oscMessages.clone();
       oscMessages.clear();
     }
-    
+
     for (OscMessage msg : messages) {
       handleOscEvent(msg);
     }
@@ -446,44 +459,66 @@ class Settings {
 
   /* unplugged OSC messages */
   void handleOscEvent(OscMessage msg) {
-    String addr = msg.addrPattern();
+    String addr = msg.getAddress();
     try {
-      if (!msg.netAddress().inetaddress().isLoopbackAddress()) {
-        String ipAddress = msg.netAddress().address();
-        if (ipAddress != null && ipAddress.length() > 0 && !ipAddress.equals(iPadIP)) {
-          detectedNewIPadAddress(ipAddress);
+      // Only detect a new remote address (eg. iPad) if it's not a loopback address
+
+      SocketAddress remoteAddress = msg.getRemoteAddress();
+      if (remoteAddress instanceof InetSocketAddress) {
+        InetAddress inetAddress = ((InetSocketAddress) remoteAddress).getAddress();
+        if (!inetAddress.isLoopbackAddress()) {
+          String ipAddress = inetAddress.getHostAddress();
+          if (ipAddress != null && ipAddress.length() > 0 && !ipAddress.equals(iPadIP)) {
+            detectedNewIPadAddress(ipAddress);
+          }
         }
       }
+
+      Object[] args = msg.getArgs();
+      Float arg0 = (args.length >= 1 && args[0] instanceof Number)
+          ? ((Number) args[0]).floatValue()
+          : null;
+      Float arg1 = (args.length >= 2 && args[1] instanceof Number)
+          ? ((Number) args[1]).floatValue()
+          : null;
 
       Object func = actions.get(addr);
       if (func != null) {
         println("\naction = " + addr);
-        if (addr.indexOf("/multixy") >= 0) {
-          ((FunctionFloatFloat)func).function(msg.get(0).floatValue(), msg.get(1).floatValue());
-        }
-        else {
-          if (msg.get(0).floatValue() != 1.0) {
-            ((VoidFunction)func).function();
+        if (arg0 != null) {
+          if (addr.indexOf("/multixy") >= 0) {
+            if (arg1 != null) {
+              ((FunctionFloatFloat)func).function(arg0, arg1);
+            }
+          }
+          else {
+            if (arg0.equals(1.0f)) {
+              ((VoidFunction)func).function();
+            }
           }
         }
       }
       else if (keyNames.contains(addr)) {
-        float value = msg.get(0).floatValue();
-        paramMap.put(addr, value);
-        println("Set " + addr + " to " + value);
+        if (arg0 != null) {
+          paramMap.put(addr, arg0);
+          println("Set " + addr + " to " + arg0);
+        }
       }
       else if (keyGlobalNames.contains(addr)) {
-        float value = msg.get(0).floatValue();
-        paramGlobalMap.put(addr, value);
-        println("Set global " + addr + " to " + value);
+        if (arg0 != null) {
+          paramGlobalMap.put(addr, arg0);
+          println("Set global " + addr + " to " + arg0);
 
-        if (addr.equals(keyGlobalAutoChangeSpeed)) {
-          assert(getParam(keyGlobalAutoChangeSpeed) == value);
-          updateLabelForAutoChanger();
+          if (addr.equals(keyGlobalAutoChangeSpeed)) {
+            assert(new Float(getParam(keyGlobalAutoChangeSpeed)).equals(arg0));
+            updateLabelForAutoChanger();
+          }
         }
       }
       else if (addr.startsWith("/sketches/col")) {
-        handleSketchToggles(addr, msg.get(0).floatValue());
+        if (arg0 != null) {
+          handleSketchToggles(addr, arg0);
+        }
       }
       else if (addr.equals("/pageControl") || addr.equals("/pageAudio") || addr.equals("/sketches") || addr.equals("/writer") || addr.equals("/progLed")) {
         // Just a page change, ignore
@@ -492,12 +527,7 @@ class Settings {
         main.hardwareTestEffect.handleOscEvent(msg);
       }
       else {
-        print("### Received an unhandled osc message: " + msg.addrPattern() + " " + msg.typetag() + " ");
-        Object[] args = msg.arguments();
-        for (int i=0; i<args.length; i++) {
-          print(args[i].toString() + " ");
-        }
-        println();
+        println("### Received an unhandled osc message: " + msg);
       }
     } catch (Exception e) {
       // Print out the exception that occurred
@@ -509,20 +539,26 @@ class Settings {
   private void detectedNewIPadAddress(String ipAddress) {
     println("detected new iPad address: " + iPadIP + " -> " + ipAddress);
     iPadIP = ipAddress; // Once the iPad contacts us, we can contact them, if the hardcoded IP address is wrong
-    oscReceiver = new NetAddress(iPadIP, 9000);
+    oscReceiverAddress = new InetSocketAddress(iPadIP, 9000);
     sendEntireGUIToIPad();
   }
 
   void sendMessageToIPad(String key, String value) {
-    OscMessage myMessage = new OscMessage(key);
-    myMessage.add(value);
-    oscP5.send(myMessage, oscReceiver);
+    OscMessage myMessage = new OscMessage(key, new Object[] { value });
+    try {
+      oscClient.send(myMessage, oscReceiverAddress);
+    } catch (IOException ex) {
+      System.err.println("Error sending message: " + ex);
+    }
   }
 
   void sendMessageToIPad(String key, float value) {
-    OscMessage myMessage = new OscMessage(key);
-    myMessage.add(value);
-    oscP5.send(myMessage, oscReceiver);
+    OscMessage myMessage = new OscMessage(key, new Object[] { value });
+    try {
+      oscClient.send(myMessage, oscReceiverAddress);
+    } catch (IOException ex) {
+      System.err.println("Error sending message: " + ex);
+    }
   }
 
   /*
@@ -532,8 +568,8 @@ class Settings {
    */
   void sendControlValuesForThisSketchToIPad() {
     // TODO: these methods may need to go on another thread to speed things up
-    for (Object controlName : paramMap.keySet()) {
-      float value = (Float)paramMap.get(controlName);
+    for (String controlName : paramMap.keySet()) {
+      float value = paramMap.get(controlName);
       sendMessageToIPad((String)controlName, value);
     }
 
