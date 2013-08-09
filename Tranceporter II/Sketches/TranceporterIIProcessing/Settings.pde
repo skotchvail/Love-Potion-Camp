@@ -1,5 +1,17 @@
 import java.lang.reflect.*;
 
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
+import java.net.SocketAddress;
+import java.net.SocketException;
+
+import com.qindesign.osc.OscBundle;
+import com.qindesign.osc.OscDatagramClient;
+import com.qindesign.osc.OscDatagramServer;
+import com.qindesign.osc.OscMessage;
+import com.qindesign.osc.OscPacket;
+import com.qindesign.osc.OscPacketReceiver;
+
 class Settings implements OscPacketReceiver {
   private java.net.InetAddress localhost;
   {
@@ -25,37 +37,39 @@ class Settings implements OscPacketReceiver {
   List<String> keyNames;
   List<String> keyGlobalNames;
 
-  private HidDevice wiiDevice;
-  private Wiimote wii;
-  private ExecutorService wiiExecutor;
+  static final String keySpeed = "/pageControl/speed";
+  static final String keyColorCyclingSpeed = "/pageControl/cycling";
+  static final String keyCustom1 = "/pageControl/custom1";
+  static final String keyCustom2 = "/pageControl/custom2";
+  static final String keyBrightness="/pageControl/brightness";
+  static final String keyAudioSpeedChange1 = "/pageAudio/speedChange/1";
+  static final String keyAudioSpeedChange2 = "/pageAudio/speedChange/2";
+  static final String keyAudioSpeedChange3 = "/pageAudio/speedChange/3";
+  static final String keyAudioColorChange1 = "/pageAudio/colorChange/1";
+  static final String keyAudioColorChange2 = "/pageAudio/colorChange/2";
+  static final String keyAudioColorChange3 = "/pageAudio/colorChange/3";
+  static final String keyAudioBrightnessChange1 = "/pageAudio/brightnessChange/1";
+  static final String keyAudioBrightnessChange2 = "/pageAudio/brightnessChange/2";
+  static final String keyAudioBrightnessChange3 = "/pageAudio/brightnessChange/3";
+  static final String keyAudioSensitivity1 = "/pageAudio/sensitivity/1";
+  static final String keyAudioSensitivity2 = "/pageAudio/sensitivity/2";
+  static final String keyAudioSensitivity3 = "/pageAudio/sensitivity/3";
+  static final String keyBeatLength = "/pageAudio/beatLength";
+  static final String keyCustom1Label = "/pageControl/custom1_label";
+  static final String keyCustom2Label = "/pageControl/custom2_label";
+  static final String keyFlash = "/pageAudio/flashToggle";
 
-  final String keySpeed = "/pageControl/speed";
-  final String keyColorCyclingSpeed = "/pageControl/cycling";
-  final String keyCustom1 = "/pageControl/custom1";
-  final String keyCustom2 = "/pageControl/custom2";
-  final String keyBrightness="/pageControl/brightness";
-  final String keyAudioSpeedChange1 = "/pageAudio/speedChange/1";
-  final String keyAudioSpeedChange2 = "/pageAudio/speedChange/2";
-  final String keyAudioSpeedChange3 = "/pageAudio/speedChange/3";
-  final String keyAudioColorChange1 = "/pageAudio/colorChange/1";
-  final String keyAudioColorChange2 = "/pageAudio/colorChange/2";
-  final String keyAudioColorChange3 = "/pageAudio/colorChange/3";
-  final String keyAudioBrightnessChange1 = "/pageAudio/brightnessChange/1";
-  final String keyAudioBrightnessChange2 = "/pageAudio/brightnessChange/2";
-  final String keyAudioBrightnessChange3 = "/pageAudio/brightnessChange/3";
-  final String keyAudioSensitivity1 = "/pageAudio/sensitivity/1";
-  final String keyAudioSensitivity2 = "/pageAudio/sensitivity/2";
-  final String keyAudioSensitivity3 = "/pageAudio/sensitivity/3";
-  final String keyBeatLength = "/pageAudio/beatLength";
-  final String keyCustom1Label = "/pageControl/custom1_label";
-  final String keyCustom2Label = "/pageControl/custom2_label";
-  final String keyFlash = "/pageAudio/flashToggle";
+  static final String keyModeName = "/pageControl/mode";
+  static final String keyPaletteName = "/pageControl/palette";
 
-  final String keyModeName = "/pageControl/mode";
-  final String keyPaletteName = "/pageControl/palette";
+  static final String keyGlobalAutoChangeSpeed = "/sketches/autoChange";
+  static final String keyGlobalAutoChangeSpeedLabel = "/sketches/autoChange_label";
 
-  final String keyGlobalAutoChangeSpeed = "/sketches/autoChange";
-  final String keyGlobalAutoChangeSpeedLabel = "/sketches/autoChange_label";
+  /** Arguments (all floats): accelX, accelY, accelZ, pitch, roll, tilt */
+  static final String keyWiimoteAccel   = "/wiimoteControl/accel";
+
+  /** Arguments: buttons (int). */
+  static final String keyWiimoteButtons = "/wiimoteControl/buttons";
 
   Settings(int numBands) {
 
@@ -140,6 +154,18 @@ class Settings implements OscPacketReceiver {
           main.currentMode().manualFlash = true;
         }});
 
+    actions.put(keyWiimoteAccel, new FunctionArgs() {
+      public void function(Object[] args) {
+        double x = 1.0 - Math.abs((Float) args[4])/Math.PI;
+        double y = ((Float) args[3])/Math.PI;
+
+        main.touchXY(1, (float) x, (float) y);
+      }
+    });
+    actions.put(keyWiimoteButtons, new FunctionArgs() {
+      public void function(Object[] args) {
+      }
+    });
 
     paramGlobalMap = new HashMap<String, Float>();
     setParam(keyGlobalAutoChangeSpeed, 1.0);
@@ -322,81 +348,6 @@ class Settings implements OscPacketReceiver {
     oscReceiverAddress = new InetSocketAddress(iPadIP, 9000);
   }
 
-  void initWiimote() {
-    // Wii stuff
-
-    try {
-      HidManager hid = HidManager.getInstance();
-
-      List<HidDeviceInfo> wiimotes = Wiimote.findWiimotes(hid);
-      if (wiimotes.size() == 0) {
-        System.out.println("No Wii controllers found!");
-        return;
-      }
-
-      for (HidDeviceInfo device : wiimotes) {
-        wiiDevice = hid.open(wiimotes.get(0));
-        if (wiiDevice != null) {
-          break;
-        }
-      }
-      if (wiiDevice == null) {
-        System.out.println("Could not open any of the found Wii controllers!");
-      }
-
-      System.out.println("Monitoring Wii controller: " + wiiDevice);
-      WiimoteListener listener = new WiimoteListener() {
-        @Override
-        public void status(WiimoteStatus status) {
-        }
-
-        private boolean lastButtonState;
-        @Override
-        public void buttons(int buttons) {
-          if (((buttons & Wiimote.BUTTON_RIGHT) != 0) != lastButtonState) {
-            // Only watch for a button change
-            float param = (lastButtonState) ? 0.0f : 1.0f;
-            lastButtonState = !lastButtonState;
-
-            oscMessage(new OscMessage("/pageControl/newEffect", new Object[] { param }));
-          }
-        }
-
-        private long lastTime;
-
-        @Override
-        public void accelerometer(float x, float y, float z) {
-          long time = System.currentTimeMillis();
-
-          if (time - lastTime < 200L) return;
-
-          double roll = 1.0 - Math.abs(WiiMath.roll(x, y, z))/Math.PI;
-          double pitch = 1.0 - WiiMath.pitch(x, y, z)/Math.PI;
-
-          oscMessage(new OscMessage(keyCustom2, new Object[] { (float) roll }));
-          oscMessage(new OscMessage(keyCustom1, new Object[] { (float) pitch }));
-
-          lastTime = time;
-        }
-
-        @Override
-        public void memory(int error, int offset, byte[] data, int dataOff, int dataLen) {
-        }
-
-        @Override
-        public void ack(int report, int error) {
-        }
-      };
-
-      wii = new Wiimote(wiiDevice);
-      wiiExecutor = Executors.newSingleThreadExecutor();
-      wiiExecutor.submit(wii.getEventLoop(listener));
-      wii.requestData(Wiimote.REPORT_BUTTONS_AND_ACCEL, false);
-    } catch (Exception ex) {
-      ex.printStackTrace();
-    }
-  }
-
   private void enableControl(String controlKey, boolean enabled) {
     sendMessageToIPad(controlKey + "/visible", enabled?"1":"0");
   }
@@ -484,16 +435,20 @@ class Settings implements OscPacketReceiver {
 
       Object func = actions.get(addr);
       if (func != null) {
-        println("\naction = " + addr);
-        if (arg0 != null) {
-          if (addr.indexOf("/multixy") >= 0) {
-            if (arg1 != null) {
-              ((FunctionFloatFloat)func).function(arg0, arg1);
+        if (func instanceof FunctionArgs) {
+          ((FunctionArgs) func).function(args);
+        } else {
+          println("\naction = " + addr);
+          if (arg0 != null) {
+            if (addr.indexOf("/multixy") >= 0) {
+              if (arg1 != null) {
+                ((FunctionFloatFloat)func).function(arg0, arg1);
+              }
             }
-          }
-          else {
-            if (arg0.equals(1.0f)) {
-              ((VoidFunction)func).function();
+            else {
+              if (arg0.equals(1.0f)) {
+                ((VoidFunction)func).function();
+              }
             }
           }
         }
