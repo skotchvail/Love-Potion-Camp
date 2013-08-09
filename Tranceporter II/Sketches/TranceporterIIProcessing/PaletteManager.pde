@@ -1,20 +1,25 @@
 // Class to keep track of the current palette mode and current palette gradient colors.
 
-import colorLib.*;
-import toxi.color.*;
-import toxi.color.theory.*;
+import colorLib.Palette;
+import colorLib.Gradient;
+import toxi.color.ColorList;
+import toxi.color.ColorGradient;
+import toxi.color.ColorRange;
+import toxi.color.TColor;
+import toxi.color.theory.ColorTheoryRegistry;
+import toxi.color.theory.ColorTheoryStrategy;
 
 class PaletteManager {
   private Palette[] kPs;
   private int kPalInd = 0;
   private int PT_KULER = 0;
   private int paletteType = PT_KULER;
-  private ArrayList ptStrategies = ColorTheoryRegistry.getRegisteredStrategies();
+  private List<ColorTheoryStrategy> ptStrategies = ColorTheoryRegistry.getRegisteredStrategies();
   private int NUM_PT = 1 + ptStrategies.size();
   private int basePaletteColors = -1;
-  
+
   void init(PApplet pa) {
-  
+
     color[][] kulerColors = {
       // Colors hand copied from https://kuler.adobe.com/explore/
       {#8AC6FF, #1F5080, #3EA0FF, #456380, #3280CC},
@@ -34,7 +39,7 @@ class PaletteManager {
       {#FF6B6B, #556270, #C7F464, #4ECDC4, #EDC8BB},
       {#3E454C, #2185C5, #7ECEFD, #FFF6E5, #FF7F66},
     };
-    
+
     kPs = new Palette[kulerColors.length + 1];
 
     // the first palette should be the basic full saturation/brightness HSB colors
@@ -43,54 +48,54 @@ class PaletteManager {
     for (int i=0; i<256; i++) {
       hsbWheel[i] = color(i, 255, 255);
     }
-    
+
     kPs[0] = new Palette(pa, hsbWheel);
-    
+
     for (int i = 1; i <= kulerColors.length; i++) {
       kPs[i] = new Palette(pa, kulerColors[i-1]);
       kPs[i].addColor(kPs[i].getColor(0));
     }
   }
-  
+
   void setupPalette(int numColors, color[] colors) {
     color[] c;
     assert colors != null: "setupPalette colors cannot be null!";
 
     assert(numColors != 0);
     assert(colors.length > 0);
-    
+
     colorMode(RGB, 255);
-    
+
     if (paletteType == PT_KULER) {
       Palette p = kPs[kPalInd];
       assert p != null : "Palette is nil";
-      basePaletteColors = p.totalSwatches();      
-      
+      basePaletteColors = p.totalSwatches();
+
       Gradient g = new Gradient(p, numColors, false);
       for (int i=0; i<g.totalSwatches(); i++) {
         colors[i] = g.getColor(i);
       }
     } else {
-      ColorTheoryStrategy s = (ColorTheoryStrategy) ptStrategies.get(paletteType-1);
+      ColorTheoryStrategy s = ptStrategies.get(paletteType-1);
       assert s != null : "ColorTheoryStrategy is nil";
       TColor col = ColorRange.BRIGHT.getColor();
       ColorList colList = ColorList.createUsingStrategy(s, col);
       assert colList != null : "colList is nil";
       basePaletteColors = colList.size();
-      
+
       ColorGradient grad = new ColorGradient();
       for (int i=0; i<colList.size(); i++) {
         grad.addColorAt(float(i)*numColors/colList.size(), colList.get(i));
       }
       grad.addColorAt(numColors-1, colList.get(0));
       ColorList colList2 = grad.calcGradient(0, numColors);
-      
+
       for (int i=0; i<colList2.size(); i++) {
         colors[i] = colList2.get(i).toARGB();
       }
     }
   }
-  
+
   void getNewPalette(int numColors, color[] colors) {
     if (paletteType == PT_KULER) {
       kPalInd = (kPalInd + 1) % kPs.length;
@@ -98,28 +103,28 @@ class PaletteManager {
     setupPalette(numColors, colors);
     println("NewPalette: " + kPalInd + " colors " + colors.length + " color[0]=" + hex(colors[0]));
   }
-  
+
   int basePaletteColors() {
     return this.basePaletteColors;
   }
-  
+
   void nextPaletteType() {
     paletteType = (paletteType + 1) % NUM_PT;
-  } 
-  
+  }
+
   String getPaletteDisplayName() {
     if (paletteType == PT_KULER) {
       return "Kuler";
     } else {
-      ColorTheoryStrategy s = (ColorTheoryStrategy) ptStrategies.get(paletteType-1);
+      ColorTheoryStrategy s = ptStrategies.get(paletteType-1);
       return s.getName();
     }
   }
-  
+
   int getPaletteType() {
     return paletteType;
   }
-  
+
   void setPaletteType(int whichPalette, int numColors, color[] colors) {
     assert(whichPalette <  NUM_PT);
     paletteType = whichPalette;
