@@ -538,6 +538,34 @@ class MainClass {
     currentMode().setTouch(touchNum, x, y);
   }
 
+  /**
+   * A Wiimote just sent accelerometer data.  The angular values are computed from the X,Y,Z parameters.
+   *
+   * @param x acceleration in X, in the range -1.0f&ndash;1.0f
+   * @param y acceleration in Y, in the range -1.0f&ndash;1.0f
+   * @param z acceleration in Z, in the range -1.0f&ndash;1.0f
+   * @param pitch the pitch, in the range [0 (pointing up), &pi; (pointing down)]
+   * @param roll the roll, in the range [&pi; (top pointing left), 0 (top pointing right)] for the top pointing up,
+   *             and [-&pi; (top pointing left), 0 (top pointing right)] for the top pointing down
+   * @param tilt the tilt, in the range [-&pi;/2 (pointing down), &pi;/2 (pointing up)], where zero is flat; this
+   *        assumes the roll is at &pi/2;, i.e. "flat" and just tilting around the X-axis
+   * @see WiimoteMath
+   */
+  void wiimoteAccel(float x, float y, float z, float pitch, float roll, float tilt) {
+    currentMode().wiimoteAccel(x, y, z, pitch, roll, tilt);
+  }
+
+  /**
+   * Buttons have changed on a Wiimote.  This is only called when there is a change in state.  Individual buttons
+   * can be examined by using the button masks in {@link Wiimote}.
+   *
+   * @param buttons the buttons state
+   * @see Wiimote
+   */
+  void wiimoteButtons(int buttons) {
+    currentMode().wiimoteButtons(buttons);
+  }
+
   void mouseClicked() {
     Point p = new Point(mouseX, mouseY);
     Rectangle bounds = display.getBox2D();
