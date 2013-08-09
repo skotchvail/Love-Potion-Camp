@@ -1,11 +1,11 @@
-//import TotalControl.*;  // If you don't have the hardware driver, comment out this line
+import TotalControl.*;  // If you don't have the hardware driver, comment out this line
 
 import java.lang.InterruptedException;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
-static class TotalControl { // If you don't have the hardware driver, rename this class to TotalControl
+static class TotalControlFake { // If you don't have the hardware driver, rename this class to TotalControl
   static int open(int nStrands,int pixelsPerStrand)
 	{
     return TC_OK;
