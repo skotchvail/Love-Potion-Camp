@@ -1,9 +1,11 @@
-import java.lang.reflect.*;
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.net.SocketException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import com.qindesign.osc.OscBundle;
@@ -353,7 +355,7 @@ class Settings implements OscPacketReceiver {
    and then process the events during handleQueuedOSCEvents
    which is called from the main draw
    */
-  private ArrayList<OscMessage> oscMessages = new ArrayList<OscMessage>();
+  private List<OscMessage> oscMessages = new ArrayList<OscMessage>();
 
   /**
    * Receive an OSC message.
@@ -393,14 +395,14 @@ class Settings implements OscPacketReceiver {
 
   // Call once per draw to process events
   void handleQueuedOSCEvents() {
-    List<OscMessage> messages;
-    synchronized(oscMessages) {
-      messages = (List<OscMessage>) oscMessages.clone();
+    OscMessage[] messages;
+    synchronized (oscMessages) {
+      messages = oscMessages.toArray(new OscMessage[oscMessages.size()]);
       oscMessages.clear();
     }
 
-    for (OscMessage msg : messages) {
-      handleOscEvent(msg);
+    for (OscMessage message : messages) {
+      handleOscEvent(message);
     }
   }
 

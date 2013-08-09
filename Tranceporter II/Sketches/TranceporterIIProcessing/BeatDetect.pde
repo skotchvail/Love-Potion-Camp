@@ -1,14 +1,12 @@
 // Class to detect beats
-// Original Implementation by Greg Friedland in 2012 based on methods described by Simon Dixon in 
+// Original Implementation by Greg Friedland in 2012 based on methods described by Simon Dixon in
 // "ONSET DETECTION REVISITED" Proc. of the 9th Int. Conference on Digital Audio Effects (DAFx-06), Montreal, Canada, September 18-20, 2006
 // ( http://www.dafx.ca/proceedings/papers/p_133.pdf )
 
 // re-engineed using logic from Henri David
 // http://motscousus.com/stuff/2008-02_Processing.org_patterns/test_beat.pde
 
-
-import java.util.HashMap;
-import ddf.minim.analysis.*;
+import ddf.minim.analysis.FFT;
 
 class BeatDetect {
 
@@ -18,8 +16,8 @@ class BeatDetect {
   // float[] threshSensitivity;   // @REVIEW may be unused
   long[] lastOnsetTimes;
   int[] beatLength;
- 
-  // number of bands we're using 
+
+  // number of bands we're using
   int numBands;
 
   int[] zoneToBand;
@@ -92,12 +90,12 @@ class BeatDetect {
    * @arg FFT fft Fast Forier Transform object
    * @arg int numBands number of bands we'll be reading
    * @arg int historySize number of historical data points we keep in memory
-   * 
+   *
    */
   // @REVIEW historySize may be unused
   BeatDetect(FFT fft, int numBands, int historySize) {
 
-    output = createWriter("tranceporter.txt"); 
+    output = createWriter("tranceporter.txt");
 
     // assign arguments to class members
     this.fft          = fft;
@@ -110,8 +108,8 @@ class BeatDetect {
 
     // beatLength tells us how long a beat may last until we call it a new beat
     beatLength        = new int[numBands];
-    // analyzeBands is an array that tells us whether we care about a given band. 
-    // For now they're all set to 'true'    
+    // analyzeBands is an array that tells us whether we care about a given band.
+    // For now they're all set to 'true'
     analyzeBands = new boolean[numBands];
     for (int i=0; i<numBands; i++) {
       // turn all bands on
@@ -125,7 +123,7 @@ class BeatDetect {
     isBandOnset = new boolean[numBands];
 
     // the last time this band had an onset (in milliseconds)
-    lastOnsetTimes = new long[numBands];    
+    lastOnsetTimes = new long[numBands];
 
     // what the threshhold is for each band
     beatSenses     = new float[numBands];
@@ -138,7 +136,7 @@ class BeatDetect {
     zoneEnergyShortTerm     = new float[numZones][];
     zoneScore               = new float[numZones][];
     zoneEnabled             = new boolean[numZones];
-    
+
     // loop through all our zones
     // create data structures to hold sound data for our bands/sub-zones
     for (int i = 0; i < numZones; i++) {
@@ -157,11 +155,11 @@ class BeatDetect {
     zoneToBand = new int[numZones];
 
     for (int i = 0; i < numZones; i++) {
-    
+
       float myFreq = fft.indexToFreq(i);
 
       // lowest audible
-      if(myFreq < 16) {  
+      if(myFreq < 16) {
         // no-op
       }
 
@@ -212,7 +210,7 @@ class BeatDetect {
   // void setFFTWindow() {
   //   fft.window(FFT.HAMMING);
   // }
-  
+
   /**
    * The workhorse method
    * This examines incoming audiobuffer data and decideds whether we are entering or leaving a beat
@@ -221,10 +219,10 @@ class BeatDetect {
   void update(AudioBuffer data) {
 
     fft.forward(data);
-    
-    // update our round-robin heads - 
+
+    // update our round-robin heads -
     // these track where in our history arrays structures we currently are
-    // the counter wraps to zero at the end of our history length 
+    // the counter wraps to zero at the end of our history length
     // the "2" values represent the current value
     // the non-2 values represent the previous iteration
     int playhead2          = (playhead + 1) % historySize;
@@ -247,9 +245,9 @@ class BeatDetect {
       // if the current energy value is inside some random range...
       // compute a per-zone/sub-band score
       if (zoneEnergy[i][playhead2] > 0.3 && average(zoneEnergy[i]) > 0.1) {
-        zoneScore[i][playhead2] = 
+        zoneScore[i][playhead2] =
             (zoneEnergy[i][playhead2] / average(zoneEnergy[i]) )
-            * 
+            *
             (zoneEnergyShortTerm[i][playheadShortTerm2] / average(zoneEnergyShortTerm[i]) );
       }
       // otherwise zero the score
@@ -295,7 +293,7 @@ class BeatDetect {
     //     maxEnergy = zoneEnergy[i][playhead2];
     //   }
     // }
-    // 
+    //
     // if (maxEnergyZone != lastBand) {
     //
     //   if (lastBandCount > thres) {
@@ -353,12 +351,12 @@ class BeatDetect {
     for(int i=0;i<numBands;i++) {
 
         if (scores[i][playhead2] > beatSenses[i]) {
-          if(isBandOnset[i]) { 
+          if(isBandOnset[i]) {
             isBandOnset[i]    = false;
             } else {
             isBandOnset[i]    = true;
             int myMillis      = millis();
-            lastOnsetTimes[i] = myMillis;  
+            lastOnsetTimes[i] = myMillis;
           }
         }
         else {
@@ -391,7 +389,7 @@ class BeatDetect {
 
     }
 
-    // we're all done - update our round-robin playheads to match each other 
+    // we're all done - update our round-robin playheads to match each other
     playhead          = playhead2;
     playheadShortTerm = playheadShortTerm2;
     playheadLongTerm  = playheadLongTerm2;
@@ -422,36 +420,36 @@ class BeatDetect {
     //   }
     // }
   }
-  
+
   /**
    * Set the "analyzeBands" flag for the given band
    * @arg int band the band to set the value for
    * @arg boolean the value to set
    */
-  void analyzeBand(int band, boolean on) { 
-    analyzeBands[band] = on; 
+  void analyzeBand(int band, boolean on) {
+    analyzeBands[band] = on;
   }
-  
+
   // unused
   // double getMetric(String type, int band, int index) {
   //   return getArray("metric", type, band).get(index);
   // }
-  
+
   // unused
   // double getMetricMean(String type, int band, int index) {
   //   return getArrayAvgs("metric", type, band).getEMA1(index);
   // }
-  
+
   // unused
   // double getThreshold(String type, int band, int index) {
   //   return getArray("threshold", type, band).get(index);
   // }
-  
+
   // unused
   // double getMetricMax(String type, int band) {
   //   return getArray("metric", type, band).maxVal();
   // }
-  
+
   /**
    * Get the onset history value for the type, band and index
    */
@@ -459,14 +457,14 @@ class BeatDetect {
     // return getArray("onsetHist", type, band).get(index) == 1;
     return isBandOnset[band];
   }
-    
+
   /**
    * Is the given type and band currently in a beat
    */
   boolean isBeat(String type, int band) {
-    
+
     return (beatPos("spectralFlux", band) > 0.88);
-//    return (millis() - lastOnsetTimes[band]) < beatLength[band]; 
+//    return (millis() - lastOnsetTimes[band]) < beatLength[band];
   }
 
   /**
@@ -475,7 +473,7 @@ class BeatDetect {
    */
   float beatPos(String type, int band) {
     float diff = (millis() - lastOnsetTimes[band]) / float(beatLength[band]);
-    if (diff <= 1) { 
+    if (diff <= 1) {
       // println("Band " + band + " Got diff  " + diff + " from millis " + millis() + " lOT: " + lastOnsetTimes[band] + " bl: " + beatLength[band]);
       float val = sin(diff*PI/2);
       //float val = 1 - abs(diff-0.5) * 2; //exp(-pow(diff - 0.5, 2.0)*25);
@@ -486,7 +484,7 @@ class BeatDetect {
       return 0;
     }
   }
-  
+
   /**
    * Where in the beat are we? How long as this beat been going on?
    * Will be a value between 0 and 1. The raw value is returned without any math performed
