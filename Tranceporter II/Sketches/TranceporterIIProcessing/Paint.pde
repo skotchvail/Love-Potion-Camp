@@ -2,11 +2,12 @@
 // Custom1: zero is the basic drawing mode; values greater than zero specify a disappearing tail
 
 class Paint extends Drawer {
-  int MAX_TAIL_LENGTH = 100;
+  static final int MAX_TAIL_LENGTH = 100;
+
   int[][] canvas;
   int[][] tailX, tailY;
   int tailInd;
-  
+
   Paint(Pixels p, Settings s) {
     super(p, s, JAVA2D, DrawType.RepeatingSides);
     canvas = new int[width][height];
@@ -19,24 +20,24 @@ class Paint extends Drawer {
     }
     tailInd = 0;
   }
-  
+
   String getName() { return "Paint"; }
   String getCustom1Label() { return "Tail Length";}
-    
+
   void setup() {
-     settings.setParam(settings.keyBrightness, 0.8); // set brightness to 80%    
+     settings.setParam(settings.keyBrightness, 0.8); // set brightness to 80%
      settings.setParam(settings.keyCustom1, 0);
   }
 
   void reset() {
     println("Paint clear()");
     clear();
-  }  
-  
-  void draw() { 
+  }
+
+  void draw() {
     pg.background(0);
     int tailLength = round(settings.getParam(settings.keyCustom1)*MAX_TAIL_LENGTH);
-    
+
     for (int i=0; i< MAX_FINGERS; i++) {
       tailX[tailInd][i] = -1;
       tailY[tailInd][i] = -1;
@@ -48,7 +49,7 @@ class Paint extends Drawer {
         }
         int x = (int)touch.x;
         int y = (int)touch.y;
-        
+
         if (tailLength == 0) {
           int index = (frameCount + i * getNumColors() / MAX_FINGERS) % (getNumColors() - 1) + 1;
           canvas[x][y] = index;
@@ -58,7 +59,7 @@ class Paint extends Drawer {
         }
       }
     }
-     
+
     if (tailLength == 0) {
       for (int x=0; x<width; x++) {
         for (int y=0; y<height; y++) {
@@ -87,10 +88,10 @@ class Paint extends Drawer {
       }
     }
   }
-  
+
   color getColor(int index) {
     if (index == 0) {
-      return blackColor;
+      return BLACK;
     }
     else {
       return super.getColor(index);
