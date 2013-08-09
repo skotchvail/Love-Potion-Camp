@@ -1,28 +1,9 @@
 // The main sketch
 
-import java.net.InetAddress;
-import java.net.InetSocketAddress;
-import java.net.SocketAddress;
-import java.net.SocketException;
 import java.util.Arrays;
 import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.prefs.Preferences;
 
-import com.qindesign.hid.HidDevice;
-import com.qindesign.hid.HidDeviceInfo;
-import com.qindesign.hid.HidManager;
-import com.qindesign.osc.OscBundle;
-import com.qindesign.osc.OscDatagramClient;
-import com.qindesign.osc.OscDatagramServer;
-import com.qindesign.osc.OscMessage;
-import com.qindesign.osc.OscPacket;
-import com.qindesign.osc.OscPacketReceiver;
-import com.qindesign.wii.Wiimote;
-import com.qindesign.wii.WiimoteListener;
-import com.qindesign.wii.WiimoteStatus;
-import com.qindesign.wii.WiiMath;
 import ddf.minim.*;
 
 //ADJUSTABLE PARAMS
@@ -55,6 +36,7 @@ Point location;
 
 interface VoidFunction { void function(); }
 interface FunctionFloatFloat { void function(float x, float y); }
+interface FunctionArgs { void function(Object[] args); }
 
 void setup() {
   size(screenWidth, screenHeight, P2D);
@@ -125,6 +107,7 @@ class MainClass {
 
   PaletteManager pm = new PaletteManager();
   Settings settings = new Settings(NUM_BANDS);
+  WiimoteManager wiimoteManager = new WiimoteManager(settings);
 
   void setup(PApplet applet) {
 
@@ -175,7 +158,7 @@ class MainClass {
     };
 
     settings.initOSC();
-    settings.initWiimote();
+    wiimoteManager.setup();
     pm.init(applet);
 
     whichEffect.column = prefs.getInt("whichEffect.column", 1);
@@ -580,5 +563,3 @@ class Utility {
     return boolArray;
   }
 }
-
-
