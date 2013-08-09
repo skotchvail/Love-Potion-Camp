@@ -4,6 +4,8 @@
 
 import java.util.Iterator;
 
+import toxi.geom.Vec2D;
+
 class Drawer {
 
   static final int MAX_FINGERS = 5;
