@@ -149,13 +149,20 @@ class Settings implements OscPacketReceiver {
 
     actions.put(keyWiimoteAccel, new Function() {
       public void function(Object[] args) {
+        if (args.length < 6) return;
+
         double x = 1.0 - Math.abs((Float) args[4])/Math.PI;
         double y = ((Float) args[3])/Math.PI;
 
-        main.touchXY(1, (float) x, (float) y);
+        main.wiimoteAccel(
+            (Float) args[0], (Float) args[1], (Float) args[2],
+            (Float) args[3], (Float) args[4], (Float) args[5]);
       }});
     actions.put(keyWiimoteButtons, new Function() {
       public void function(Object[] args) {
+        if (args.length >= 1 && args[0] instanceof Integer) {
+          main.wiimoteButtons((Integer) args[0]);
+        }
       }});
 
     paramGlobalMap = new HashMap<String, Float>();

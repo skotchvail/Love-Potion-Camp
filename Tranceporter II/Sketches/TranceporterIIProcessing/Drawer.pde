@@ -137,6 +137,24 @@ class Drawer {
     }
   }
 
+  /**
+   * Receives Wiimote acceleration readings.  By default, this translates roll and pitch into X and Y coordinates
+   * and calls {@link #setTouch(int, float, float)} with the finger number set to 1.
+   *
+   * @see MainClass#wiimoteAccel
+   */
+  void wiimoteAccel(float x, float y, float z, float pitch, float roll, float tilt) {
+    double touchX = 1.0 - Math.abs(roll)/Math.PI;
+    double touchY = pitch / Math.PI;
+    setTouch(1, (float) touchX, (float) touchY);
+  }
+
+  /**
+   * @see MainClass#wiimoteButtons
+   */
+  void wiimoteButtons(int buttons) {
+  }
+
   int getNumColors() { return settings.palette.length; }
 
   color getColor(int index) {
