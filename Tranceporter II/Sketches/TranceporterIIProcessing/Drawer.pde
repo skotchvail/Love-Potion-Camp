@@ -5,7 +5,14 @@
 import java.util.Iterator;
 
 class Drawer {
-  
+
+  static final int MAX_FINGERS = 5;
+  static final int MIN_SATURATION = 245;
+  static final int MAX_AUDIO_COLOR_OFFSET = 300;
+
+  final color WHITE = color(255);
+  final color BLACK = color(0);
+
   Pixels p; //flat 2D version
   DrawType drawType;
   boolean pressed;
@@ -15,15 +22,10 @@ class Drawer {
   int touchX, touchY;
   Gradient g;
   ArrayList<TouchInfo> touches;
-  int MAX_FINGERS = 5;
   short[][] rgbGamma;
   Settings settings;
-  private Object settingsBackup;
-  int MIN_SATURATION = 245;
-  int MAX_AUDIO_COLOR_OFFSET = 300;
-  final color whiteColor = color(255);
-  final color blackColor = color(0);
-  
+  private Map<String, Object> settingsBackup;
+
   Drawer(Pixels px, Settings s, String renderer, DrawType pixelDrawType) {
     p = px;
     pressed = false;
@@ -36,39 +38,39 @@ class Drawer {
     setGamma(main.DEFAULT_GAMMA);
     settings = s;
   }
-  
+
   String getName() { return "None"; }
   String getCustom1Label() { return "Disabled";}
   String getCustom2Label() { return "Disabled";}
-    
+
   void setup() {
   }
-  
+
   void draw() {
   }
-  
+
   void reset() {
   }
-  
+
   boolean onsetOn1 = false;
   boolean onsetOn2 = false;
   boolean onsetOn3 = false;
   boolean onsetOn4 = false;
-  
+
   boolean manualFlash = false;
-  
+
   void update() {
 
     pg.beginDraw();
     int band = 0;
-    
+
     boolean flash1 = main.beatDetect.isOnset("spectrum", band, 0);
     boolean flash2 = main.beatDetect.isOnset("spectrum", band, 1);
     boolean flash3 = main.beatDetect.isOnset("spectralFlux", band, 0);
     boolean flash4 = main.beatDetect.isOnset("spectralFlux", band, 1);
-    
+
     boolean flash = (flash1 && !onsetOn1) || (flash2 && !onsetOn2) || (flash3 && !onsetOn3) || (flash4 && !onsetOn4);
-    
+
     if (manualFlash || (flash && settings.getParam(settings.keyFlash) == 1.0)) {
       manualFlash = false;
       colorMode(RGB);
@@ -78,16 +80,16 @@ class Drawer {
       draw();
     }
     pg.endDraw();
-     
+
     onsetOn1 = flash1;
     onsetOn2 = flash2;
     onsetOn3 = flash3;
     onsetOn4 = flash4;
-    
+
     pg.loadPixels();
     main.ledMap.copyPixels(pg.pixels, drawType);
   }
-  
+
   boolean isTrainingMode() {
     return false;
   }
@@ -103,17 +105,17 @@ class Drawer {
   void sendToIPad() {
     // Send any GUI to iPad
   }
-  
+
   void handleOscEvent(OscMessage msg) {
   }
-  
+
   void keyPressed() {
   }
-  
+
   String[] getTextLines() {
     return null;
   }
-  
+
   ArrayList<String> getKeymapLines() {
     return main.getKeymapLines();
   }
@@ -123,7 +125,7 @@ class Drawer {
       touchX = round(x * width);
       touchY = round(y * height);
     }
-    
+
     TouchInfo t = new TouchInfo();
     t.x = x;
     t.y = y;
@@ -134,14 +136,14 @@ class Drawer {
       touches.remove(0);
     }
   }
-  
+
   int getNumColors() { return settings.palette.length; }
-  
+
   color getColor(int index) {
     int numColors = settings.palette.length;
     int cyclingOffset = int(settings.getParam(settings.keyColorCyclingSpeed)*numColors/40)*frameCount;
     index = (index + cyclingOffset) % numColors;
-    
+
     // calculate brightness and index offsets for audio beats
     float brightTotal = 0;
     float brightBeat = 0;
@@ -156,24 +158,24 @@ class Drawer {
       audioOffset += smooth * int(settings.beatPos(i) * MAX_AUDIO_COLOR_OFFSET * settings.getParam(settings.getKeyAudioColorChange(i)));
       //}
     }
-    
+
     //println(audioOffset);
     int ind = (index + audioOffset + numColors) % numColors;
     color col = settings.palette[ind];
-    
+
     colorMode(RGB);
     short r = rgbGamma[(int)red(col)][0];
     short g = rgbGamma[(int)green(col)][1];
     short b = rgbGamma[(int)blue(col)][2];
     col = color(r, g, b);
-    
+
     // adjust saturation
     colorMode(HSB);
     col = color(hue(col), constrain(saturation(col), MIN_SATURATION, 255), brightness(col));
 
     // cap max brightness on each RGB channel
     colorMode(RGB);
-    
+
     float percentMainBrightnessControl = 1 - brightTotal/3;
     if (percentMainBrightnessControl < 0.5) {
       percentMainBrightnessControl = 0.5; //main control always affects at least min level of brightness
@@ -187,7 +189,7 @@ class Drawer {
     totalBright *= 255;
  //   println("_totalBright:" + totalBright);
     col = color(constrain(red(col), 0, totalBright), constrain(green(col), 0, totalBright), constrain(blue(col), 0, totalBright));
-    
+
     return col;
   }
 
@@ -195,7 +197,7 @@ class Drawer {
     colorMode(RGB);
     return color(red(c), green(c), blue(c), newAlpha);
   }
-  
+
   float randomYForBottle(float x, float scale) {
     float percent = (x * scale) / width;
     float start = percent * height / 2.0;
@@ -205,7 +207,7 @@ class Drawer {
   }
 
   Vec2D getTouchFor(int touchNum, long touchCutoffTime) {
-    
+
     Iterator<TouchInfo> it = touches.iterator();
     while (it.hasNext()) {
       TouchInfo t = it.next();
@@ -221,7 +223,7 @@ class Drawer {
     }
     return null;
   }
-  
+
   // adapted from https://github.com/adafruit/Adavision/blob/master/Processing/WS2801/src/WS2801.java
   // Fancy gamma correction; separate RGB ranges and exponents:
   double lastGamma = 0;
@@ -247,15 +249,15 @@ class Drawer {
       rgbGamma[i][2] = (short)(bMin + (int)Math.floor(bRange * Math.pow(d, bGamma) + 0.5));
     }
   }
-  
-  void setSettingsBackup(Object backup) {
+
+  void setSettingsBackup(Map<String, Object> backup) {
     settingsBackup = backup;
   }
-  
-  Object getSettingsBackup() {
+
+  Map<String, Object> getSettingsBackup() {
     return settingsBackup;
   }
-  
+
 }
 
 class TouchInfo
@@ -264,7 +266,7 @@ class TouchInfo
   float x;
   float y;
   long time;
-  
+
   String toString()
   {
     return "touch " + x + ", " + y + " on finger: " + whichFinger;

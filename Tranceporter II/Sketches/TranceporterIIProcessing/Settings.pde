@@ -1,9 +1,10 @@
 import java.lang.reflect.*;
-
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.net.SocketException;
+import java.util.HashMap;
+import java.util.Map;
 
 import com.qindesign.osc.OscBundle;
 import com.qindesign.osc.OscDatagramClient;
@@ -26,16 +27,16 @@ class Settings implements OscPacketReceiver {
   private boolean[][] whichModes = new boolean[3][5];
   private color[] palette;
   private boolean[] isBeat;
-  private HashMap<String, Float> paramMap; // Values of controls specific to any Sketch
-  private HashMap<String, Float> paramGlobalMap; // Values of controls that control all Sketches
-  private HashMap actions;
+  private Map<String, Float> paramMap; // Values of controls specific to any Sketch
+  private Map<String, Float> paramGlobalMap; // Values of controls that control all Sketches
+  private Map<String, Function> actions;
   private int numBands;
   private OscDatagramClient oscClient;
   private OscDatagramServer oscServer;
   private InetSocketAddress oscReceiverAddress;
   private int paletteType;
-  List<String> keyNames;
-  List<String> keyGlobalNames;
+  private List<String> keyNames;
+  private List<String> keyGlobalNames;
 
   static final String keySpeed = "/pageControl/speed";
   static final String keyColorCyclingSpeed = "/pageControl/cycling";
@@ -71,106 +72,95 @@ class Settings implements OscPacketReceiver {
   /** Arguments: buttons (int). */
   static final String keyWiimoteButtons = "/wiimoteControl/buttons";
 
-  Settings(int numBands) {
+  Settings(int numBands) throws IllegalAccessException {
 
     //get the list of key constants
-    ArrayList localModeList =  new ArrayList();
-    ArrayList globalList =  new ArrayList();
+    List<String> keyNames = new ArrayList<String>();
+    List<String> keyGlobalNames    = new ArrayList<String>();
 
-    Class cls = this.getClass();
-
-    try {
-      Field fieldlist[] = cls.getDeclaredFields();
-      for (int i = 0; i < fieldlist.length; i++) {
-        Field fld = fieldlist[i];
-        if (fld.getType() != String.class || !Modifier.isFinal(fld.getModifiers())) {
-          continue;
-        }
-
-        String name = fld.getName();
-        if (name.startsWith("keyGlobal")){
-          fld.setAccessible(true);
-          String value = (String)fld.get(this);
-          globalList.add(value);
-        }
-        else if (name.startsWith("key")){
-          fld.setAccessible(true);
-          String value = (String)fld.get(this);
-          localModeList.add(value);
-        }
+    for (Field field : getClass().getDeclaredFields()) {
+      if (!String.class.isAssignableFrom(field.getType()) || !Modifier.isFinal(field.getModifiers())) {
+        continue;
       }
-      keyNames = localModeList;
-      keyGlobalNames = globalList;
 
+      String name = field.getName();
+      List<String> list = null;
+      if (name.startsWith("keyGlobal")){
+        list = keyGlobalNames;
+      } else if (name.startsWith("key")){
+        list = keyNames;
+      }
+      if (list != null) {
+        list.add((String) field.get(this));
+      }
     }
-    catch (Exception e){
-      assert false : "got exception: " + e;
-    }
+
+    this.keyNames       = keyNames;
+    this.keyGlobalNames = keyGlobalNames;
 
     this.numBands = numBands;
     setDefaultSettings();
 
-    actions = new HashMap();
-    actions.put("/pageControl/multixy1/1",    new FunctionFloatFloat() {
+    // Construct actions
+
+    actions = new HashMap<String, Function>();
+    actions.put("/pageControl/multixy1/1",    new FloatFloatFunction() {
         public void function(float x, float y) {
           main.touchXY(1, x, y);
         }});
-    actions.put("/pageControl/multixy1/2",    new FunctionFloatFloat() {
+    actions.put("/pageControl/multixy1/2",    new FloatFloatFunction() {
         public void function(float x, float y) {
           main.touchXY(2, x, y);
         }});
-    actions.put("/pageControl/multixy1/3",    new FunctionFloatFloat() {
+    actions.put("/pageControl/multixy1/3",    new FloatFloatFunction() {
         public void function(float x, float y) {
           main.touchXY(3, x, y);
         }});
-    actions.put("/pageControl/multixy1/4",    new FunctionFloatFloat() {
+    actions.put("/pageControl/multixy1/4",    new FloatFloatFunction() {
         public void function(float x, float y) {
           main.touchXY(4, x, y);
         }});
-    actions.put("/pageControl/multixy1/5",    new FunctionFloatFloat() {
+    actions.put("/pageControl/multixy1/5",    new FloatFloatFunction() {
         public void function(float x, float y) {
           main.touchXY(5, x, y);
         }});
 
-    actions.put("/pageControl/newEffect",     new VoidFunction() {
+    actions.put("/pageControl/newEffect",     new ArgIsOneFunction() {
         public void function() {
           main.newEffect();
         }});
-    actions.put("/pageControl/paletteType",   new VoidFunction() {
+    actions.put("/pageControl/paletteType",   new ArgIsOneFunction() {
         public void function() {
           main.newPaletteType();
         }});
-    actions.put("/pageControl/newPalette",    new VoidFunction() {
+    actions.put("/pageControl/newPalette",    new ArgIsOneFunction() {
         public void function() {
           main.newPalette();
         }});
-    actions.put("/pageControl/reset",         new VoidFunction() {
+    actions.put("/pageControl/reset",         new ArgIsOneFunction() {
         public void function() {
           main.currentMode().reset();
           sendControlValuesForThisSketchToIPad();
         }});
-    actions.put("/pageAudio/instaFlash",      new VoidFunction() {
+    actions.put("/pageAudio/instaFlash",      new ArgIsOneFunction() {
         public void function() {
           main.currentMode().manualFlash = true;
         }});
 
-    actions.put(keyWiimoteAccel, new FunctionArgs() {
+    actions.put(keyWiimoteAccel, new Function() {
       public void function(Object[] args) {
         double x = 1.0 - Math.abs((Float) args[4])/Math.PI;
         double y = ((Float) args[3])/Math.PI;
 
         main.touchXY(1, (float) x, (float) y);
-      }
-    });
-    actions.put(keyWiimoteButtons, new FunctionArgs() {
+      }});
+    actions.put(keyWiimoteButtons, new Function() {
       public void function(Object[] args) {
-      }
-    });
+      }});
 
     paramGlobalMap = new HashMap<String, Float>();
     setParam(keyGlobalAutoChangeSpeed, 1.0);
     updateSketchesFromPrefs();
-
    }
 
   int numBands() {
@@ -230,33 +220,33 @@ class Settings implements OscPacketReceiver {
     palette = null;
     paletteType = 0;
 
-    setParam(keySpeed, 0.3);
-    setParam(keyColorCyclingSpeed, 0.3);
-    setParam(keyCustom1, 0.3);
-    setParam(keyCustom2, 0.3);
-    setParam(keyBrightness, 0.75);
-    setParam(keyAudioSpeedChange1, 0.3);
-    setParam(keyAudioSpeedChange2, 0.3);
-    setParam(keyAudioSpeedChange3, 0.3);
-    setParam(keyAudioColorChange1, 0.3);
-    setParam(keyAudioColorChange2, 0.3);
-    setParam(keyAudioColorChange3, 0.3);
-    setParam(keyAudioBrightnessChange1, 0.0);
-    setParam(keyAudioBrightnessChange2, 0.0);
-    setParam(keyAudioBrightnessChange3, 0.0);
-    setParam(keyAudioSensitivity1, 0.8);
-    setParam(keyAudioSensitivity2, 0.3);
-    setParam(keyAudioSensitivity3, 0.3);
-    setParam(keyBeatLength, 0.5);
-    setParam(keyFlash, 0.0);
+    setParam(keySpeed, 0.3f);
+    setParam(keyColorCyclingSpeed, 0.3f);
+    setParam(keyCustom1, 0.3f);
+    setParam(keyCustom2, 0.3f);
+    setParam(keyBrightness, 0.75f);
+    setParam(keyAudioSpeedChange1, 0.3f);
+    setParam(keyAudioSpeedChange2, 0.3f);
+    setParam(keyAudioSpeedChange3, 0.3f);
+    setParam(keyAudioColorChange1, 0.3f);
+    setParam(keyAudioColorChange2, 0.3f);
+    setParam(keyAudioColorChange3, 0.3f);
+    setParam(keyAudioBrightnessChange1, 0.0f);
+    setParam(keyAudioBrightnessChange2, 0.0f);
+    setParam(keyAudioBrightnessChange3, 0.0f);
+    setParam(keyAudioSensitivity1, 0.8f);
+    setParam(keyAudioSensitivity2, 0.3f);
+    setParam(keyAudioSensitivity3, 0.3f);
+    setParam(keyBeatLength, 0.5f);
+    setParam(keyFlash, 0.0f);
 
   }
 
-  public Object switchSettings(Object newSettings) {
-    HashMap saver = new HashMap();
+  public Map<String, Object> switchSettings(Map<String, Object> newSettings) {
+    Map<String, Object> saver = new HashMap<String, Object>();
     saver.put("1", paramMap);
-    saver.put("2", utility.toIntegerList(palette));
-    saver.put("3", utility.toBooleanList(isBeat));
+    saver.put("2", Utility.toIntegerList(palette));
+    saver.put("3", Utility.toBooleanList(isBeat));
     saver.put("4", paletteType);
 
     if (newSettings == null) {
@@ -264,11 +254,10 @@ class Settings implements OscPacketReceiver {
       setDefaultSettings();
     }
     else {
-      HashMap setter = (HashMap)newSettings;
-      paramMap = (HashMap<String, Float>)setter.get("1");
-      palette = utility.toIntArray((ArrayList<Integer>)setter.get("2"));
-      isBeat = utility.toBooleanArray((ArrayList<Boolean>)setter.get("3"));
-      paletteType = (Integer)setter.get("4");
+      paramMap = (Map<String, Float>)newSettings.get("1");
+      palette = Utility.toIntArray((List<Integer>)newSettings.get("2"));
+      isBeat = Utility.toBooleanArray((List<Boolean>)newSettings.get("3"));
+      paletteType = (Integer)newSettings.get("4");
       assert(palette != null);
     }
     return saver;
@@ -397,9 +386,9 @@ class Settings implements OscPacketReceiver {
 
   // Call once per draw to process events
   void handleQueuedOSCEvents() {
-    ArrayList<OscMessage> messages;
+    List<OscMessage> messages;
     synchronized(oscMessages) {
-      messages = (ArrayList<OscMessage>)oscMessages.clone();
+      messages = (List<OscMessage>) oscMessages.clone();
       oscMessages.clear();
     }
 
@@ -411,83 +400,62 @@ class Settings implements OscPacketReceiver {
   /* unplugged OSC messages */
   void handleOscEvent(OscMessage msg) {
     String addr = msg.getAddress();
-    try {
-      // Only detect a new remote address (eg. iPad) if it's not a loopback address
 
-      SocketAddress remoteAddress = msg.getRemoteAddress();
-      if (remoteAddress instanceof InetSocketAddress) {
-        InetAddress inetAddress = ((InetSocketAddress) remoteAddress).getAddress();
-        if (!inetAddress.isLoopbackAddress()) {
-          String ipAddress = inetAddress.getHostAddress();
-          if (ipAddress != null && ipAddress.length() > 0 && !ipAddress.equals(iPadIP)) {
-            detectedNewIPadAddress(ipAddress);
-          }
-        }
-      }
+    // Only detect a new remote address (eg. iPad) if it's not a loopback address
 
-      Object[] args = msg.getArgs();
-      Float arg0 = (args.length >= 1 && args[0] instanceof Number)
-          ? ((Number) args[0]).floatValue()
-          : null;
-      Float arg1 = (args.length >= 2 && args[1] instanceof Number)
-          ? ((Number) args[1]).floatValue()
-          : null;
+    SocketAddress remoteAddress = msg.getRemoteAddress();
+    if (remoteAddress instanceof InetSocketAddress) {
+      InetAddress inetAddress = ((InetSocketAddress) remoteAddress).getAddress();
+      if (!inetAddress.isLoopbackAddress()) {
+        String ipAddress = inetAddress.getHostAddress();
+        if (ipAddress != null && ipAddress.length() > 0 && !ipAddress.equals(iPadIP)) {
+          detectedNewIPadAddress(ipAddress);
+        }
+      }
+    }
 
-      Object func = actions.get(addr);
-      if (func != null) {
-        if (func instanceof FunctionArgs) {
-          ((FunctionArgs) func).function(args);
-        } else {
-          println("\naction = " + addr);
-          if (arg0 != null) {
-            if (addr.indexOf("/multixy") >= 0) {
-              if (arg1 != null) {
-                ((FunctionFloatFloat)func).function(arg0, arg1);
-              }
-            }
-            else {
-              if (arg0.equals(1.0f)) {
-                ((VoidFunction)func).function();
-              }
-            }
-          }
-        }
-      }
-      else if (keyNames.contains(addr)) {
-        if (arg0 != null) {
-          paramMap.put(addr, arg0);
-          println("Set " + addr + " to " + arg0);
-        }
-      }
-      else if (keyGlobalNames.contains(addr)) {
-        if (arg0 != null) {
-          paramGlobalMap.put(addr, arg0);
-          println("Set global " + addr + " to " + arg0);
+    Object[] args = msg.getArgs();
 
-          if (addr.equals(keyGlobalAutoChangeSpeed)) {
-            assert(new Float(getParam(keyGlobalAutoChangeSpeed)).equals(arg0));
-            updateLabelForAutoChanger();
-          }
+    Function func = actions.get(addr);
+    if (func != null) {
+      println("\naction = " + addr);
+      func.function(args);
+      return;
+    }
+
+    if (keyNames.contains(addr)) {
+      Float f = Utility.getFloatFromArgs(args, 0);
+      if (f != null) {
+        paramMap.put(addr, f);
+        println("Set " + addr + " to " + f);
+      }
+    }
+    else if (keyGlobalNames.contains(addr)) {
+      Float f = Utility.getFloatFromArgs(args, 0);
+      if (f != null) {
+        paramGlobalMap.put(addr, f);
+        println("Set global " + addr + " to " + f);
+
+        if (addr.equals(keyGlobalAutoChangeSpeed)) {
+          assert(new Float(getParam(keyGlobalAutoChangeSpeed)).equals(f));
+          updateLabelForAutoChanger();
         }
       }
-      else if (addr.startsWith("/sketches/col")) {
-        if (arg0 != null) {
-          handleSketchToggles(addr, arg0);
-        }
+    }
+    else if (addr.startsWith("/sketches/col")) {
+      Float f = Utility.getFloatFromArgs(args, 0);
+      if (f != null) {
+        handleSketchToggles(addr, f);
       }
-      else if (addr.equals("/pageControl") || addr.equals("/pageAudio") || addr.equals("/sketches") || addr.equals("/writer") || addr.equals("/progLed")) {
-        // Just a page change, ignore
-      }
-      else if (addr.startsWith("/progLed/")) {
-        main.hardwareTestEffect.handleOscEvent(msg);
-      }
-      else {
-        println("### Received an unhandled osc message: " + msg);
-      }
-    } catch (Exception e) {
-      // Print out the exception that occurred
-      System.out.println("Action Exception " + addr + ": " + e.getMessage());
-      e.printStackTrace();
+    }
+    else if (addr.equals("/pageControl") || addr.equals("/pageAudio") || addr.equals("/sketches") || addr.equals("/writer") || addr.equals("/progLed")) {
+      // Just a page change, ignore
+    }
+    else if (addr.startsWith("/progLed/")) {
+      main.hardwareTestEffect.handleOscEvent(msg);
+    }
+    else {
+      println("### Received an unhandled osc message: " + msg);
     }
   }
 
@@ -498,16 +466,7 @@ class Settings implements OscPacketReceiver {
     sendEntireGUIToIPad();
   }
 
-  void sendMessageToIPad(String key, String value) {
-    OscMessage myMessage = new OscMessage(key, new Object[] { value });
-    try {
-      oscClient.send(myMessage, oscReceiverAddress);
-    } catch (IOException ex) {
-      System.err.println("Error sending message: " + ex);
-    }
-  }
-
-  void sendMessageToIPad(String key, float value) {
+  void sendMessageToIPad(String key, Object value) {
     OscMessage myMessage = new OscMessage(key, new Object[] { value });
     try {
       oscClient.send(myMessage, oscReceiverAddress);
@@ -632,9 +591,9 @@ class Settings implements OscPacketReceiver {
 
   float speedWithAudioSpeed() {
     float speed = getParam(keySpeed);
-    for (int i=0; i < main.NUM_BANDS; i++) {
+    for (int i = 0; i < main.NUM_BANDS; i++) {
       if (isBeat(i)) {
-        speed += beatPos(i)*(Float)getParam(getKeyAudioSpeedChange(i));
+        speed += beatPos(i) * getParam(getKeyAudioSpeedChange(i));
       }
     }
     return constrain(speed, 0, 1);
@@ -672,7 +631,7 @@ class Settings implements OscPacketReceiver {
     int milliseconds = millisBetweenAutoChanges();
 
     int seconds = round(milliseconds/1000.0);
-    String label = "AutoChange " + seconds + "s";
+    String label;
 
     if (milliseconds == Integer.MAX_VALUE) {
       label = "AutoChange Never";
@@ -680,6 +639,10 @@ class Settings implements OscPacketReceiver {
     else if (seconds >= 60) {
       label = "AutoChange " + (seconds/60) + "m " + (seconds % 60) +  "s";
     }
+    else {
+      label = "AutoChange " + seconds + "s";
+    }
+
     sendMessageToIPad(keyGlobalAutoChangeSpeedLabel, label);
     sendMessageToIPad(keyGlobalAutoChangeSpeed, getParam(keyGlobalAutoChangeSpeed));
   }

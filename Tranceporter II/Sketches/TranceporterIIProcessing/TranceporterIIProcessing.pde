@@ -1,25 +1,32 @@
 // The main sketch
 
+import java.lang.Object;
+import java.lang.Override;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.prefs.Preferences;
 
-import ddf.minim.*;
+import ddf.minim.AudioBuffer;
+import ddf.minim.AudioInput;
+import ddf.minim.AudioOutput;
+import ddf.minim.Minim;
+import ddf.minim.analysis.FFT;
 
 //ADJUSTABLE PARAMS
 String iPadIP = "10.0.1.8";
-final int ledWidth = 92 * 2; // Both sides
-final int ledHeight = 58;
-final int screenPixelSize = 3;
-final int screenWidth = 950;
-final int screenHeight = 400;
+static final int ledWidth = 92 * 2; // Both sides
+static final int ledHeight = 58;
+static final int screenPixelSize = 3;
+static final int screenWidth = 950;
+static final int screenHeight = 400;
 
-final int SAMPLE_RATE = 44100;
-final int SAMPLE_SIZE = 512;
-final int FRAME_RATE = 24;
+static final int SAMPLE_RATE = 44100;
+static final int SAMPLE_SIZE = 512;
+static final int FRAME_RATE = 24;
 
-int FFT_BAND_PER_OCT  = 12;
-int FFT_BASE_FREQ     = 55;
+static final int FFT_BAND_PER_OCT  = 12;
+static final int FFT_BASE_FREQ     = 55;
 
 boolean draw2dGrid;
 boolean draw3dSimulation;
@@ -30,19 +37,47 @@ float rotationSpeed;
 float factorLowU = 0.2, factorHighU = 0.02, factorLowV = 0.02, factorHighV = 0.13;
 
 MainClass main;
-Utility utility;
 Preferences prefs;
 Point location;
 
-interface VoidFunction { void function(); }
-interface FunctionFloatFloat { void function(float x, float y); }
-interface FunctionArgs { void function(Object[] args); }
+interface Function { void function(Object[] args); }
+
+/**
+ * Converts arguments to two floats.  The function is not executed if the argument length is &lt; 2 or if
+ * the first two arguments are not instances of {@link Number}.
+ */
+abstract class FloatFloatFunction implements Function {
+  @Override
+  public void function(Object[] args) {
+    if ((args.length >= 2) && (args[0] instanceof Number) && (args[1] instanceof Number)) {
+      float a = ((Number) args[0]).floatValue();
+      float b = ((Number) args[1]).floatValue();
+      function(a, b);
+    }
+  }
+  public abstract void function(float a, float b);
+}
+
+/**
+ * Executes the function if the first arg is 'true', i.e. it equals 1.0f.
+ */
+abstract class ArgIsOneFunction implements Function {
+  @Override
+  public void function(Object[] args) {
+    if ((args.length >= 1) && (args[0] instanceof Number)) {
+      float a = ((Number) args[0]).floatValue();
+      if (a == 1.0f) {
+        function();
+      }
+    }
+  }
+  public abstract void function();
+}
 
 void setup() {
   size(screenWidth, screenHeight, P2D);
 
   println("target FRAME_RATE:" + FRAME_RATE);
-  utility = new Utility();
   prefs = Preferences.userNodeForPackage(this.getClass());
 //  try {
 //    prefs.clear();
@@ -52,8 +87,14 @@ void setup() {
   useTotalControlHardware = prefs.getBoolean("useTotalControlHardware", false);
   draw3dSimulation = prefs.getBoolean("draw3dSimulation", true);
   rotationSpeed = prefs.getFloat("rotationSpeed", 1.0 / (FRAME_RATE * 30)); // default once every 30 seconds
-  main = new MainClass();
-  main.setup(this);
+
+  try {
+    main = new MainClass();
+    main.setup(this);
+  } catch (Exception ex) {
+    throw new RuntimeException(ex);
+  }
+
   prepareExitHandler();
 }
 
@@ -84,13 +125,13 @@ class MainClass {
   LedMap ledMap;
   Console console;
 
-  int NUM_COLORS = 512;
-  float DEFAULT_GAMMA = 2.5;
+  static final int NUM_COLORS = 512;
+  static final float DEFAULT_GAMMA = 2.5f;
 
   // Audio
   BeatDetect beatDetect;
-  int HISTORY_SIZE = 50;
-  int NUM_BANDS = 3;
+  static final int HISTORY_SIZE = 50;
+  static final int NUM_BANDS = 3;
   boolean[] analyzeBands = {true, true, true };
   //AudioSocket signal;
   AudioInput audioIn;
@@ -105,9 +146,15 @@ class MainClass {
   float lastModeChangeTimeStamp;
   Point screenLocation = new Point();
 
-  PaletteManager pm = new PaletteManager();
-  Settings settings = new Settings(NUM_BANDS);
-  WiimoteManager wiimoteManager = new WiimoteManager(settings);
+  PaletteManager pm;
+  Settings settings;
+  WiimoteManager wiimoteManager;
+
+  MainClass() throws Exception {
+    pm = new PaletteManager();
+    settings = new Settings(NUM_BANDS);
+    wiimoteManager = new WiimoteManager(settings);
+  }
 
   void setup(PApplet applet) {
 
@@ -454,8 +501,8 @@ class MainClass {
     whichEffect = newEffect;
 
     // Each mode tracks its own settings
-    Object newSettings = currentMode().getSettingsBackup();
-    Object oldSettings = settings.switchSettings(newSettings);
+    Map<String, Object> newSettings = currentMode().getSettingsBackup();
+    Map<String, Object> oldSettings = settings.switchSettings(newSettings);
     getMode(oldEffect).setSettingsBackup(oldSettings);
 
     if (newSettings == null) {
@@ -530,36 +577,63 @@ class ColumnRow implements Cloneable {
   }
 }
 
-class Utility {
-  public ArrayList<Integer> toIntegerList(int[] intArray) {
-    ArrayList<Integer> intList = new ArrayList<Integer>();
-    for (int index = 0; index < intArray.length; index++) {
-      intList.add(intArray[index]);
+static class Utility {
+  static List<Integer> toIntegerList(int[] intArray) {
+    List<Integer> intList = new ArrayList<Integer>(intArray.length);
+    for (int i : intArray) {
+      intList.add(i);
     }
     return intList;
   }
 
-  public int[] toIntArray(List<Integer> integerList) {
+  static int[] toIntArray(List<Integer> integerList) {
     int[] intArray = new int[integerList.size()];
-    for (int i = 0; i < integerList.size(); i++) {
-      intArray[i] = integerList.get(i);
+    int offset = 0;
+    for (int i : integerList) {
+      intArray[offset++] = i;
     }
     return intArray;
   }
 
-  public ArrayList<Boolean> toBooleanList(boolean[] booleanArray) {
-    ArrayList<Boolean> booleanList = new ArrayList<Boolean>();
-    for (int index = 0; index < booleanArray.length; index++) {
-      booleanList.add(booleanArray[index]);
+  static List<Boolean> toBooleanList(boolean[] booleanArray) {
+    List<Boolean> booleanList = new ArrayList<Boolean>(booleanArray.length);
+    for (boolean b : booleanArray) {
+      booleanList.add(b);
     }
     return booleanList;
   }
 
-  public boolean[] toBooleanArray(List<Boolean> booleanList) {
+  static boolean[] toBooleanArray(List<Boolean> booleanList) {
     boolean[] boolArray = new boolean[booleanList.size()];
-    for (int i = 0; i < booleanList.size(); i++) {
-      boolArray[i] = booleanList.get(i);
+    int offset = 0;
+    for (boolean b : booleanList) {
+      boolArray[offset++] = b;
     }
     return boolArray;
+  }
+
+  /**
+   * Gets a {@code Float} value from the given arguments at the specified index.  This returns
+   * {@code null} if the value does not exist or if it's not a {@link Number}.
+   *
+   * @param args the arguments
+   * @param index the specific argument number
+   * @return a float value, or {@code null} if the value was not found or is not a float.
+   */
+  static Float getFloatFromArgs(Object[] args, int index) {
+    try {
+      if (args[index] instanceof Float) {
+        return (Float) args[index];
+      } else if (args[index] instanceof Number) {
+        return ((Number) args[index]).floatValue();
+      } else {
+        return null;
+      }
+    } catch (IndexOutOfBoundsException ex) {
+      // If the array length is correct most of the time, then we don't have to incur the cost of a length check,
+      // as successful try/catch blocks are free
+    }
+
+    return null;
   }
 }
