@@ -1,6 +1,8 @@
 /* OpenProcessing Tweak of *@*http://www.openprocessing.org/sketch/9037*@* */
 /* !do not delete the line above, required for linking your tweak if you re-upload */
 
+import com.qindesign.wii.Wiimote;
+
 class EyeMotion extends Drawer {
 
 
@@ -70,7 +72,14 @@ class EyeMotion extends Drawer {
   void wiimoteAccel(float x, float y, float z, float pitch, float roll, float tilt) {
     float height = (float) (1.0 - pitch/Math.PI);
     settings.setParam(settings.keyCustom2, height);
-    setTouch(1, (float) (1.0 - Math.abs(roll)/Math.PI), height);
+    setTouch(1, (float) (1.0 - Math.abs(roll) / Math.PI), height);
+    settings.setParam(settings.keySpeed, 0.80f);
+  }
+
+  void wiimoteButtons(int buttons) {
+    if ((buttons & Wiimote.BUTTON_B) != 0) {
+      readyToBlink = true;
+    }
   }
 
   void draw() {
