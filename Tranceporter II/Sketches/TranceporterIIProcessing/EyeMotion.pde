@@ -1,9 +1,11 @@
 /* OpenProcessing Tweak of *@*http://www.openprocessing.org/sketch/9037*@* */
 /* !do not delete the line above, required for linking your tweak if you re-upload */
 
+import com.qindesign.wii.Wiimote;
+
 class EyeMotion extends Drawer {
-  
-  
+
+
   float mx;
   float my;
   float easing;
@@ -21,13 +23,13 @@ class EyeMotion extends Drawer {
   float dX, dY;
   int translateX;
   int translateY;
-  
+
   // Colors
   float factorBlue = 1.5;
-  
+
   final color kIrisColor = color(3, 43, 62*factorBlue);
   final color kPupilColor = color(4, 22, 35*factorBlue);
-  
+
   final color kEyeFillColor = color(180, 180, 255);
   final color kBackgroundColor = color(14, 37, 62);
   final color kLidColor = color(20, 95, 141*factorBlue);
@@ -35,7 +37,7 @@ class EyeMotion extends Drawer {
   final color kLidColor3 = color(11, 41, 66*factorBlue);
   final color kGlare1 = color(144, 187, 204, 95*factorBlue);
   final color kGlare2 = color(144, 187, 204, 50*factorBlue);
-  
+
   EyeMotion(Pixels p, Settings s) {
     super(p, s, JAVA2D, DrawType.MirrorSides);
   }
@@ -43,7 +45,7 @@ class EyeMotion extends Drawer {
   String getName() { return "Eye Motion"; }
   String getCustom1Label() { return "Trippy";}
   String getCustom2Label() { return "Height";}
-  
+
   void setup() {
     touchX = (int)(0.585 * width);
     touchY = (int)(0.366 * height);
@@ -53,41 +55,54 @@ class EyeMotion extends Drawer {
     mx = MINX;
     my = MINY;
   }
-  
+
   void setEyeLimits(float scale) {
-    
+
     float percent = 1.0 - scale * 0.2;
-    
+
     MINX = (int)(276 * percent);
     MINY = (int)(210 * percent);
-    
+
     percent = 1.0 + scale * 0.2;
-    
+
     MAXX = (int)(340 * percent);
     MAXY = (int)(235 * percent);
   }
-  
+
+  void wiimoteAccel(float x, float y, float z, float pitch, float roll, float tilt) {
+    float height = (float) (1.0 - pitch/Math.PI);
+    settings.setParam(settings.keyCustom2, height);
+    setTouch(1, (float) (1.0 - Math.abs(roll) / Math.PI), height);
+    settings.setParam(settings.keySpeed, 0.80f);
+  }
+
+  void wiimoteButtons(int buttons) {
+    if ((buttons & Wiimote.BUTTON_B) != 0) {
+      readyToBlink = true;
+    }
+  }
+
   void draw() {
-    
+
     translateX = 60;
     translateY = (int)map(settings.getParam(settings.keyCustom2), 0.0, 1.0, 80, -80);
 
     trippy = settings.getParam(settings.keyCustom1);
     setEyeLimits(trippy);
-    
+
     float speed = settings.getParam(settings.keySpeed);
 
     float MAX_SECONDS_TO_FOCUS = 3.0;
     float MIN_SECONDS_TO_FOCUS = 0.05;
     float totalSecondsForMovement = secondsForSpeed(MIN_SECONDS_TO_FOCUS, MAX_SECONDS_TO_FOCUS, 1.0-speed);
     easing = 1.0/(totalSecondsForMovement * FRAME_RATE);
-    
+
     pg.scale(SCALE);
     pg.noStroke();
     pg.smooth();
     pg.translate(translateX, translateY);
     pg.background(kBackgroundColor);
-    
+
     handleTouches(touchX, touchY);
     if (mx != lastmx || my != lastmy) {
       lastLookChange = millis();
@@ -98,7 +113,7 @@ class EyeMotion extends Drawer {
     float MAX_SECONDS_BETWEEN_MOVES = 10.0;
     float MIN_SECONDS_BETWEEN_MOVES = 0.01;
     float timeBeforeMoveEyes = secondsForSpeed(MIN_SECONDS_BETWEEN_MOVES, MAX_SECONDS_BETWEEN_MOVES, 1.0 - (trippy * speed));
-    
+
     int timeSinceLastMove = millis() - lastLookChange;
     if ((timeSinceLastMove/1000 > timeBeforeMoveEyes) && (trippy > 0) && settings.isBeat(2)) {
       lastLookChange = millis();
@@ -106,24 +121,24 @@ class EyeMotion extends Drawer {
       touchY = (int)round(random(0, height));
 //      println("time before move:" + timeBeforeMoveEyes + " timeSinceLastMove:" + timeSinceLastMove);
     }
-    
+
     // Eye fill
     pg.fill(kEyeFillColor);
     pg.ellipse(313, 220, 285, 187);
-    
+
     // Iris
     color targetColor = getColor(getNumColors()/2);
     color irisColor = fadeColor(kIrisColor, targetColor, 0.2, 0.8);
     pg.fill(irisColor);
-    
+
     pg.ellipse(mx, my - 10, 192, 179);
-    
+
     // Pupil
     targetColor = getColor(0);
     color pupilColor = fadeColor(kPupilColor, targetColor, 0.6, 0.95);
     pg.fill(pupilColor);
     pg.ellipse(mx, my - 10, 130, 130);
-    
+
     pg.fill(kBackgroundColor); // Color
     pg.beginShape();
     pg.vertex(93, 258);
@@ -137,7 +152,7 @@ class EyeMotion extends Drawer {
     pg.vertex(221, 139);
     pg.vertex(165, 214);
     pg.endShape(CLOSE);
-    
+
     pg.fill(kBackgroundColor); // Color
     pg.beginShape();
     pg.vertex(164, 202);
@@ -156,7 +171,7 @@ class EyeMotion extends Drawer {
     pg.vertex(52, 267);
     pg.vertex(104, 214);
     pg.endShape(CLOSE);
-    
+
     // Eyelid top light blue
     pg.fill(kLidColor); // Color
     pg.beginShape();
@@ -166,7 +181,7 @@ class EyeMotion extends Drawer {
     pg.bezierVertex(427, 183, 378, 122, 308, 122);
     pg.bezierVertex(238, 122, 162, 178, 163, 228);
     pg.endShape();
-    
+
     // Bottom lid light blue
     pg.fill(kLidColor);
     pg.beginShape();
@@ -176,14 +191,14 @@ class EyeMotion extends Drawer {
     pg.bezierVertex(464, 287, 402, 346, 318, 346);
     pg.bezierVertex(234, 346, 169, 300, 166, 226);
     pg.endShape();
-    
+
     float secondsBetweenBlinks = 15.0;
     if (!readyToBlink) {
       readyToBlink = (random(0.0, 1.0) < (1.0/(FRAME_RATE * secondsBetweenBlinks)));
     }
     if (settings.isBeat(1) && readyToBlink){
       readyToBlink = false;
-      
+
       pg.fill(kLidColorDark);
       pg.beginShape();
       pg.vertex(174, 235);
@@ -193,9 +208,9 @@ class EyeMotion extends Drawer {
       pg.bezierVertex(414, 233, 372, 216, 307, 211);
       pg.bezierVertex(242, 205, 176, 235, 174, 235);
       pg.endShape(CLOSE);
-      
+
     }
-    
+
     // Top eye lid dark blue
     pg.fill(kLidColorDark); // Color
     pg.beginShape();
@@ -208,7 +223,7 @@ class EyeMotion extends Drawer {
     pg.bezierVertex(447, 186, 386, 144, 311, 144);
     pg.bezierVertex(237, 144, 176, 186, 176, 237);
     pg.endShape();
-    
+
     // Lower lid
     pg.fill(kLidColorDark); // Color
     pg.beginShape();
@@ -218,7 +233,7 @@ class EyeMotion extends Drawer {
     pg.bezierVertex(444, 290, 384, 329, 311, 329);
     pg.bezierVertex(239, 329, 179, 290, 169, 240);
     pg.endShape();
-    
+
     pg.fill(kLidColor3); // Color
     pg. beginShape();
     pg.vertex(169, 243);
@@ -227,37 +242,37 @@ class EyeMotion extends Drawer {
     pg.bezierVertex(444, 294, 384, 333, 311, 333);
     pg.bezierVertex(239, 333, 179, 294, 169, 243);
     pg.endShape();
-    
+
     // Glare 1
     pg.fill(kGlare1); // Color
     pg.ellipse(266, 175, 33, 30);
-    
+
     // Glare 2
     pg.fill(kGlare1); // Color
     pg.ellipse(253, 205, 13, 21);
 
     pg.fill(kGlare2); // Color
     pg.ellipse(253, 205, 13, 21);
-    
+
 //    pg.stroke(0, 255, 0, 255);
 //    pg.noFill();
 //    pg.rect(MINX, MINY, MAXX - MINX, MAXY-MINY);
-//    
+//
 //    pg.rect(dX, dY, 10, 10);
-  
+
 //    pg.fill(255, 0, 255, 255);
 //    pg.rect(mx, my, 50, 50);
-//  
+//
 //    println("dX:" + dX + " dY:" + dY);
   }
- 
+
   float secondsForSpeed(float min_seconds, float max_seconds, float speed) {
     float time = speed * sqrt(max_seconds - min_seconds);
     time *= time;
     time += min_seconds;
     return time;
   }
-  
+
   void handleTouches(float touchX, float touchY) {
     float targetX = map(touchX, 0, width, (MINX+translateX)*SCALE, (MAXX+translateX)*SCALE);
     float targetY = map(touchY, 0, height, (MINY+translateY)*SCALE, (MAXY+translateY)*SCALE);
@@ -267,31 +282,31 @@ class EyeMotion extends Drawer {
 
     dX = targetX;
     dY = targetY;
-    
+
     if (abs(targetX - mx) > 0.1) {
       mx += (targetX - mx) * easing;
     }
     if (abs(targetY - my) > 0.1) {
       my += (targetY - my) * easing;
-    }    
+    }
   }
 
-  
+
   color fadeColor(color baseColor, color targetColor, float baseTrippy, float fullTrippy) {
     if (trippy < baseTrippy) {
       return baseColor;
     }
-    
+
     if (trippy >= fullTrippy) {
       return targetColor;
     }
-    
+
     float alpha = map(trippy, baseTrippy, fullTrippy, 255, 0);
     color theColor = replaceAlpha(baseColor, alpha);
     theColor = blendColor(targetColor, theColor, BLEND);
     return theColor;
   }
 
-  
-  
+
+
 }
