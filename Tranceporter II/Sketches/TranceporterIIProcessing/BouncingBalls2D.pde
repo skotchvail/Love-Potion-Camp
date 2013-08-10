@@ -1,6 +1,7 @@
 // Visualzation of boucing balls in 2D
 // Custom1: # of balls
 
+import com.qindesign.wii.WiimoteMath;
 import toxi.geom.Vec2D;
 
 class BouncingBalls2D extends Drawer {
@@ -11,6 +12,7 @@ class BouncingBalls2D extends Drawer {
   float startMomentum = 0.5;
   float maxMass = maxRadius*maxRadius;
   float kMaxGravity = 0.025;
+  float kMaxWiimoteGravity = 0.70;
   float kStickiness = 0.000;
   float kFriction   = 0.000;
   float kColorAlpha = 1.0;
@@ -89,14 +91,27 @@ class BouncingBalls2D extends Drawer {
     balls.add(new ball(pos, dpos, radius, col, mass));
   }
 
+  void wiimoteAccel(float x, float y, float z, float pitch, float roll, float tilt) {
+    // Remember, X can exceed the range [-1.0, 1.0]
+    gravity.x = (float) (x/ WiimoteMath.rho(x, y, z) * kMaxWiimoteGravity);
+    gravity.y = (float) (Math.signum(z) * WiimoteMath.mag(kMaxWiimoteGravity, gravity.x));
+  }
+
+  private Float lastAccel;
   void draw() {
 
     colorMode(HSB, 1.0);
     pg.colorMode(HSB, 1.0);
     pg.smooth();
 
-    gravity.x = (settings.getParam(settings.keyCustom2) - 0.5) * 2.0 * kMaxGravity;
-    gravity.y = sqrt(kMaxGravity * kMaxGravity - gravity.x * gravity.x);
+    // Accomodate other controllers changing things
+
+    Float accel = settings.getParam(settings.keyCustom2);
+    if (!accel.equals(lastAccel)) {
+      gravity.x = (settings.getParam(settings.keyCustom2) - 0.5) * 2.0 * kMaxGravity;
+      gravity.y = sqrt(kMaxGravity * kMaxGravity - gravity.x * gravity.x);
+      lastAccel = accel;
+    }
 
     float rawNumBalls = (settings.getParam(settings.keyCustom1) * 20) + 1;
 
