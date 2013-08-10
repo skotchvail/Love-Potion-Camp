@@ -1,10 +1,10 @@
-import TotalControl.*;  // If you don't have the hardware driver, comment out this line
+//import TotalControl.*;  // If you don't have the hardware driver, comment out this line
 
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
-static class TotalControlFake { // If you don't have the hardware driver, rename this class to TotalControl
+static class TotalControl { // If you don't have the hardware driver, rename this class to TotalControl
   static int open(int nStrands,int pixelsPerStrand)
 	{
     return TC_OK;
@@ -273,7 +273,11 @@ class ConcurrentTotalControlConsumer implements TotalControlConsumer, Runnable {
       System.arraycopy(strandMap, 0, myStrandMap, 0, strandMap.length);
     }
 
-    q.put(myPixelData, myStrandMap);
+    try {
+      q.put(myPixelData, myStrandMap);
+    } catch (InterruptedException ex) {
+      Thread.currentThread().interrupt();
+    }
     return 0;
   }
 
@@ -327,6 +331,7 @@ class ConcurrentTotalControlConsumer implements TotalControlConsumer, Runnable {
   class PixelDataAndMapQueue {
     final Lock lock = new ReentrantLock();
     final Condition notEmpty = lock.newCondition();
+    final Condition notFull = lock.newCondition();
 
     private boolean closed;
 
@@ -355,6 +360,7 @@ class ConcurrentTotalControlConsumer implements TotalControlConsumer, Runnable {
 
         PixelDataAndMap retval = this.map;
         this.map = null;
+        notFull.signal();
         return retval;
       } finally {
         lock.unlock();
@@ -368,11 +374,18 @@ class ConcurrentTotalControlConsumer implements TotalControlConsumer, Runnable {
      * @param strandMap the strand map
      * @see #close()
      */
-    void put(color[] pixelData, int[] strandMap) {
+    void put(color[] pixelData, int[] strandMap) throws InterruptedException {
       lock.lock();
       try {
         if (closed) {
           return;
+        }
+
+        while (this.map != null) {
+          notFull.await();
+          if (closed) {
+            return;
+          }
         }
 
         // pixelData changes each frame
@@ -389,6 +402,7 @@ class ConcurrentTotalControlConsumer implements TotalControlConsumer, Runnable {
       try {
         closed = true;
         notEmpty.signal();
+        notFull.signal();
       } finally {
         lock.unlock();
       }
