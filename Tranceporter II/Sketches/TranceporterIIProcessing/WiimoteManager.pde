@@ -1,3 +1,4 @@
+import java.lang.InterruptedException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
@@ -13,7 +14,7 @@ import com.qindesign.wii.WiimoteStatus;
 
 class WiimoteManager {
   /** The retry interval for searching for Wii remotes. */
-  private static final long RETRY_INTERVAL = 10000L;
+  private static final long RETRY_INTERVAL = 5000L;
 
   private ScheduledExecutorService executor = Executors.newScheduledThreadPool(2);
   private OscPacketReceiver oscReceiver;
@@ -46,6 +47,24 @@ class WiimoteManager {
 
             wiimote = new Wiimote(wiiDevice);
             wiimote.requestStatus();
+            wiimote.setLeds(0);
+            wiimote.setLed(1, true);
+            try {
+              Thread.sleep(750);
+              wiimote.setLed(1, false);
+              wiimote.setLed(2, true);
+              Thread.sleep(750);
+              wiimote.setLed(2, false);
+              wiimote.setLed(3, true);
+              Thread.sleep(750);
+              wiimote.setLed(3, false);
+              wiimote.setLed(4, true);
+              Thread.sleep(750);
+              wiimote.setLed(4, false);
+              wiimote.setLed(1, true);
+            } catch (InterruptedException ex) {
+              Thread.currentThread().interrupt();
+            }
             wiimote.setLed(1, true);
             wiimote.requestData(Wiimote.REPORT_BUTTONS_AND_ACCEL, false);
 
@@ -88,7 +107,9 @@ class WiimoteManager {
     public void accelerometer(float x, float y, float z) {
       long time = System.currentTimeMillis();
 
-      if (time - lastTime < 100L) return;
+      if (time - lastTime < 1000/frameRate) {
+        return;
+      }
 
       double roll = Math.abs(WiimoteMath.roll(x, y, z));
       double pitch = WiimoteMath.pitch(x, y, z);
