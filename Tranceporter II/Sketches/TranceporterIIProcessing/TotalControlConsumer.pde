@@ -1,6 +1,5 @@
 import TotalControl.*;  // If you don't have the hardware driver, comment out this line
 
-import java.lang.InterruptedException;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -112,19 +111,48 @@ static final int TC_CBUS_CLOCK = 8;   /* Use hardware for serial clock, not bitb
  TCsetStrandPin(3, TC_FTDI_CTS);
  */
 
-class TotalControlConsumer {
+interface TotalControlConsumer {
+  /**
+   * Sets up the hardware.
+   *
+   * @param numStrands the number of strands
+   * @param pixelsPerStrand the number of pixels per strand
+   * @param useBitBang whether to use bit-bang mode
+   * @return any error code, zero for success
+   * @throws IllegalArgumentException if the number of strands is &gt; 8 or &lt; zero, or if the number of
+   *         pixels per strand is &lt; zero.
+   */
+  int setupHardware(int numStrands, int pixelsPerStrand, boolean useBitBang);
 
-  int lastError;
-  int lastStat;
-  private Thread correctThread;
+  /**
+   * Sends one frame.
+   *
+   * @param pixelData the pixel data
+   * @param strandMap the strand map
+   * @return
+   */
+  int writeOneFrame(color[] pixelData, int[] strandMap);
 
-  synchronized int setupTotalControl(int numStrands, int pixelsPerStrand, boolean useBitBang) {
+  void close();
+}
 
-    assert correctThread == null : "Thread must not yet be set";
-    correctThread = Thread.currentThread();
-    assert correctThread != null: "unable to get the current thread";
+/**
+ * Runs directly.
+ */
+class DefaultTotalControlConsumer implements TotalControlConsumer {
 
-    assert(numStrands <= 8);
+  private int lastError;
+  private int lastStat;
+
+  @Override
+  int setupHardware(int numStrands, int pixelsPerStrand, boolean useBitBang) {
+    if (numStrands < 0 || 8 < numStrands) {
+      throw new IllegalArgumentException("numStrands must be in the range [0, 8]");
+    }
+    if (pixelsPerStrand < 0) {
+      throw new IllegalArgumentException("pixelsPerStrand must be non-negative");
+    }
+
     if (useBitBang && numStrands < 8) {
       numStrands += TC_CBUS_CLOCK;
     }
@@ -159,9 +187,8 @@ class TotalControlConsumer {
     return error;
   }
 
-  synchronized int writeOneFrame(color[] pixelData, int[] strandMap) {
-
-    assert correctThread == Thread.currentThread() : "No longer talking to TotalControl on the correct thread";
+  @Override
+  int writeOneFrame(color[] pixelData, int[] strandMap) {
     //    println("pixelData:" + pixelData.length + " strandMap:" + strandMap.length);
 
     int status = TotalControl.refresh(pixelData, strandMap); // TODO: might be faster if we don't have to send the strandMap each time, but only when it changes
@@ -178,50 +205,86 @@ class TotalControlConsumer {
     return status;
   }
 
-  synchronized void close() {
-    // In general, this won't be called on the correctThread, but synchronized should make this okay
-    correctThread = null;
+  @Override
+  void close() {
     TotalControl.close();
     println("closed TotalControl driver");
   }
-
 }
 
-class TotalControlConcurrent implements Runnable {
+/**
+ * Runs {@link TotalControlConsumer} things on a different thread.
+ */
+class ConcurrentTotalControlConsumer implements TotalControlConsumer, Runnable {
+  private TotalControlConsumer wrapped;
+
   private PixelDataAndMapQueue q;
   private int numStrands;
   private boolean useBitBang;
   private int pixelsPerStrand;
-  TotalControlConsumer totalControlConsumer;
 
-  TotalControlConcurrent(int numStrands, int pixelsPerStrand, boolean useBitBang) {
+  // Avoids having to clone each array
+  private color[] myPixelData;
+  private int[] myStrandMap;
+
+  ConcurrentTotalControlConsumer(TotalControlConsumer wrapped) {
+    this.wrapped = wrapped;
+  }
+
+  /**
+   * Starts the thread to set up the hardware and start reading events.
+   *
+   * @param numStrands the number of strands
+   * @param pixelsPerStrand the number of pixels per strand
+   * @param useBitBang whether to use bit-bang mode
+   * @return 0.
+   */
+  @Override
+  int setupHardware(int numStrands, int pixelsPerStrand, boolean useBitBang) {
     this.numStrands = numStrands;
     this.pixelsPerStrand = pixelsPerStrand;
     this.useBitBang = useBitBang;
+
     q = new PixelDataAndMapQueue();
-
     new Thread(this, "TotalControlConcurrent").start();
+
+    return 0;
   }
 
-  int getLastError() {
-    return totalControlConsumer.lastError;
-  }
+  /**
+   * Queues up one of these events
+   *
+   * @param pixelData the pixel data
+   * @param strandMap the strand map
+   * @return 0.
+   */
+  @Override
+  int writeOneFrame(color[] pixelData, int[] strandMap) {
+    // Use our cached array
 
-  void put(color[] pixelData, int[] strandMap) {
-    try {
-      q.put(pixelData, strandMap);
-    } catch (InterruptedException ex) {
-      Thread.currentThread().interrupt();
+    if (myPixelData == null || myPixelData.length != pixelData.length) {
+      myPixelData = pixelData.clone();
+    } else {
+      System.arraycopy(pixelData, 0, myPixelData, 0, pixelData.length);
     }
+    if (myStrandMap == null || myStrandMap.length != strandMap.length) {
+      myStrandMap = strandMap.clone();
+    } else {
+      System.arraycopy(strandMap, 0, myStrandMap, 0, strandMap.length);
+    }
+
+    q.put(myPixelData, myStrandMap);
+    return 0;
   }
 
+  @Override
   void close() {
     q.close();
   }
 
+  @Override
   public void run() {
-    totalControlConsumer = new TotalControlConsumer();
-    totalControlConsumer.setupTotalControl(numStrands, pixelsPerStrand, useBitBang);
+    wrapped.setupHardware(numStrands, pixelsPerStrand, useBitBang);
 
     while(true) {
       PixelDataAndMap dm;
@@ -233,11 +296,11 @@ class TotalControlConcurrent implements Runnable {
       }
 
       if (dm == null) {
-        totalControlConsumer.close();
+        wrapped.close();
         break;
       }
 
-      totalControlConsumer.writeOneFrame(dm.pixelData, dm.strandMap);
+      wrapped.writeOneFrame(dm.pixelData, dm.strandMap);
     }
     println("exiting Total Control run thread");
   }
@@ -263,7 +326,6 @@ class TotalControlConcurrent implements Runnable {
 
   class PixelDataAndMapQueue {
     final Lock lock = new ReentrantLock();
-    final Condition notFull = lock.newCondition();
     final Condition notEmpty = lock.newCondition();
 
     private boolean closed;
@@ -293,7 +355,6 @@ class TotalControlConcurrent implements Runnable {
 
         PixelDataAndMap retval = this.map;
         this.map = null;
-        notFull.signal();
         return retval;
       } finally {
         lock.unlock();
@@ -301,32 +362,22 @@ class TotalControlConcurrent implements Runnable {
     }
 
     /**
-     * Puts data into the queue, waiting until the queue is empty.  This will do nothing if this is closed.
+     * Puts data into the queue, replacing what's there if it's not empty.  This will do nothing if this is closed.
      *
-     * @param pixelData
-     * @param strandMap
-     * @throws InterruptedException if the current thread was interrupted while waiting.
+     * @param pixelData the pixel data
+     * @param strandMap the strand map
      * @see #close()
      */
-    void put(color[] pixelData, int[] strandMap) throws InterruptedException {
-      // TODO: pass in a param that tells us if it has changed
-
+    void put(color[] pixelData, int[] strandMap) {
       lock.lock();
       try {
         if (closed) {
           return;
         }
 
-        while (this.map != null) {
-          notFull.await();
-          if (closed) {
-            return;
-          }
-        }
-
         // pixelData changes each frame
         // strandMap can change when we are programming the strand.
-        this.map = new PixelDataAndMap(pixelData.clone(), strandMap.clone());
+        this.map = new PixelDataAndMap(pixelData, strandMap);
         notEmpty.signal();
       } finally {
         lock.unlock();
@@ -338,7 +389,6 @@ class TotalControlConcurrent implements Runnable {
       try {
         closed = true;
         notEmpty.signal();
-        notFull.signal();
       } finally {
         lock.unlock();
       }
