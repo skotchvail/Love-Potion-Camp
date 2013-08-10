@@ -70,9 +70,9 @@ class Settings implements OscPacketReceiver {
 
   /** Arguments (all floats): accelX, accelY, accelZ, pitch, roll, tilt */
   static final String keyWiimoteAccel   = "/wiimoteControl/accel";
-
-  /** Arguments: buttons (int). */
+  /** Arguments: buttons (int).*/
   static final String keyWiimoteButtons = "/wiimoteControl/buttons";
+  static final String wiimoteAddressStart = "/wii";
 
   Settings(int numBands) throws IllegalAccessException {
 
@@ -427,7 +427,9 @@ class Settings implements OscPacketReceiver {
 
     Function func = actions.get(addr);
     if (func != null) {
-      println("\naction = " + addr);
+      if (!addr.startsWith(wiimoteAddressStart)) {
+        println("\naction = " + addr);
+      }
       func.function(args);
       return;
     }

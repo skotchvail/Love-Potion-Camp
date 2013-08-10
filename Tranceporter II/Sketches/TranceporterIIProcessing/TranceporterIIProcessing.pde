@@ -563,6 +563,12 @@ class MainClass {
    * @see Wiimote
    */
   void wiimoteButtons(int buttons) {
+    String s = Integer.toBinaryString(buttons);
+    if (s.length() < 13) {
+      s = "0000000000000".substring(s.length()).concat(s);
+    }
+    System.out.println("Wiimote buttons: " + s);
+
     currentMode().wiimoteButtons(buttons);
   }
 
