@@ -6,44 +6,32 @@ class Fire extends Drawer {
   int[][] fire;
 
   // Flame colors
-  color[] palette;
+  color[] palette = new color[140];
   float angle;
   int[] calc1, calc2, calc3, calc4, calc5;
+  int height2;
+  float whichColor = -1;
 
   String getName() { return "Fire"; }
   String getCustom1Label() { return "Which Color";}
   String getCustom2Label() { return "Cluster Size";}
-  boolean oldStyle = false;
 
   Fire(Pixels p, Settings s) {
     super(p, s, JAVA2D, DrawType.MirrorSides);
+    height2 = height - 4;
 
     calc1 = new int[width];
     calc3 = new int[width];
     calc4 = new int[width];
-    calc2 = new int[height];
-    calc5 = new int[height];
+    calc2 = new int[height2];
+    calc5 = new int[height2];
 
-    fire = new int[width][height];
-    palette = new color[256];
+    fire = new int[width][height2];
   }
 
   void setup(){
     colorMode(HSB);
-
-    // Generate the palette
-    for(int x = 0; x < palette.length; x++) {
-      //Hue goes from 0 to 85: red to yellow
-      //Saturation is always the maximum: 255
-      //Lightness is 0..255 for x=0..128, and 255 for x=128..255
-      if (oldStyle) {
-        palette[x] = color(x/3, 255, constrain(x * 3, 0, 255));
-      }
-      else {
-        palette[x] = color(x/3, 255, constrain(x * 5, 0, 255));
-      }
-    }
-
+    
     // Precalculate which pixel values to add during animation loop
     // this speeds up the effect by 10fps
     for (int x = 0; x < width; x++) {
@@ -52,55 +40,77 @@ class Fire extends Drawer {
       calc4[x] = (x + 1) % width;
     }
 
-    for(int y = 0; y < height; y++) {
-      calc2[y] = (y + 1) % height;
-      calc5[y] = (y + 2) % height;
+    for(int y = 0; y < height2; y++) {
+      calc2[y] = (y + 1) % height2;
+      calc5[y] = (y + 2) % height2;
     }
-
-    settings.setParam(settings.keySpeed, 0.6); // set speed to 60%
-    settings.setParam(settings.keyBrightness, 0.6); // set brightness to 60%
   }
 
   void draw() {
 
+    if (whichColor != settings.getParam(settings.keyCustom1)) {
+      whichColor = settings.getParam(settings.keyCustom1);
+      generatePalette();
+    }
+    
     // Randomize the bottom row of the fire buffer
     int clusterSize = round(settings.getParam(settings.keyCustom2)*10) + 1;
     for(int x = 0; x < width; x+=clusterSize) {
       int i = int(random(0, 190));
       for (int x2=x; x2<min(x+clusterSize, width); x2++) {
-        fire[x2][height-1] = i;
+        fire[x2][height2-1] = i;
       }
     }
 
     pg.loadPixels();
     int counter = 0;
     // Do the fire calculations for every pixel, from top to bottom
-    for (int y = 0; y < height; y++) {
+    for (int y = 0; y < height2; y++) {
       for(int x = 0; x < width; x++) {
         // Add pixel values around current pixel
 
-        int fireVal;
-        fireVal = fire[x][y] =
-            ((fire[calc3[x]][calc2[y]]
+        int fireVal =
+            fire[calc3[x]][calc2[y]]
             + fire[calc1[x]][calc2[y]]
             + fire[calc4[x]][calc2[y]]
             + fire[calc1[x]][calc5[y]]
-            ) << 5) / 134;//135; //129;
-
+            ;
+        fireVal *= 0.242; // between 0 and 140, approximately
+        fireVal = constrain(fireVal, 0, palette.length - 1);
+        fire[x][y] = fireVal;
+        
         // Output everything to screen using our palette colors
-        if (counter >= height*width) continue;
-        if (int(settings.getParam(settings.keyCustom1) + 0.5) == 1) {
-          pg.pixels[counter++] = getColor(fireVal*(getNumColors()-1)/256);
-        } else {
-          pg.pixels[counter++] = palette[fireVal];
-        }
+        pg.pixels[counter++] = palette[fireVal];
       }
     }
-    for (int y = height - 1; y < height - 4; y++) {
+    
+    for (int y = height2; y < height; y++) {
       for(int x = 0; x < width; x++) {
-        pg.pixels[y * width + x] = color(255, 200, 0);
+        pg.pixels[y * width + x] = BLACK;
       }
     }
     pg.updatePixels();
   }
+  
+  void generatePalette() {
+    colorMode(HSB);
+
+    int startHue = 0; // Red
+    int endHue = 64; // Yellow
+    if (whichColor > 0.3) {
+      int interval = 40;
+      startHue = (int)map(whichColor, 0.3, 1.0, 0, 255 - interval);
+      endHue = startHue + interval;
+    }
+    
+    int paletteSize = palette.length;
+    int whiteBorder = (int)(paletteSize * 0.6);
+    for(int x = 0; x < whiteBorder; x++) {
+      palette[x] = color(map(x, 0, whiteBorder, startHue, endHue), 255, map(x, 0, whiteBorder * 0.6, 0, 255));
+    }
+    for(int x = whiteBorder; x < paletteSize; x++) {
+      palette[x] = color(endHue, paletteSize - x, 255);
+    }
+  }
+  
 }
