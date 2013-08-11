@@ -43,28 +43,25 @@ class Pixels {
    In order to build up bottleBounds, we see which pixels are surrounded
    by unmapped LEDs
    */
-  boolean surroundingMaskIsWhite(int x, int y) {
-    int offset = y * ledWidth + x;
+  boolean isOutsideBottle(int x, int y, Boolean fromTop) {
 
-    // Hardcoded special cases for the bottle, since not all LEDs are mapped around the curves
-    if (x >= 65 && x <= 70 && y == 7) {
-      return false;
+    // Mask is white outside of the bottle
+    for (int angle = 1; angle <= 3; angle++) {
+      int testY = fromTop ? y - angle : y + angle;
+      for (int testX = x - angle; testX < x + angle; testX++) {
+        if (testX < 0 || testY < 0) {
+          continue;
+        }
+        if (testX >= ledWidth - 1 || testY >= ledHeight - 1) {
+          continue;
+        }
+        int offset = testY * ledWidth + testX;
+        if (maskPixels[offset] == kWhite) {
+          return false;
+        }
+      }
     }
-
-    // Outside Rectange is always border
-    if (x == 0 || y == 0 || x >= ledWidth -1 || y >= ledHeight - 1) {
-      return true;
-    }
-
-    // Border is where there are no LEDs at all in an area
-    if (maskPixels[offset] != kWhite || maskPixels[offset - 1] != kWhite || maskPixels[offset + 1] != kWhite
-        || maskPixels[offset - ledWidth] != kWhite || maskPixels[offset - ledWidth - 1] != kWhite || maskPixels[offset - ledWidth + 1] != kWhite
-        || maskPixels[offset + ledWidth] != kWhite || maskPixels[offset + ledWidth - 1] != kWhite || maskPixels[offset + ledWidth + 1] != kWhite
-        ) {
-      return true;
-    }
-
-    return false;
+    return maskPixels[y * ledWidth + x] != kWhite;
   }
 
   void updateMaskPixels() {
@@ -83,19 +80,28 @@ class Pixels {
       }
 
       // Define a new bottleBounds
+      int maxY = ledHeight - 1;
       bottleBounds = new boolean[ledWidth * ledHeight];
+      for (int y = 0; y <= maxY; y++) {
+        bottleBounds[y * ledWidth + 0] = true;
+        bottleBounds[y * ledWidth + ledWidth - 1] = true;
+        bottleBounds[y * ledWidth + ledWidth / 2] = true;
+      }
+      
       for (int x = 0; x < ledWidth; x++) {
+        bottleBounds[0 * ledWidth + x] = true;
+        bottleBounds[maxY * ledWidth + x] = true;
         for (int y = 0; y < ledHeight / 2; y++) {
           int offset = y * ledWidth + x;
           bottleBounds[offset] = true;
-          if (!surroundingMaskIsWhite(x, y)) {
+          if (!isOutsideBottle(x, y, true)) {
             break;
           }
         }
-        for (int y = ledHeight - 1; y >= ledHeight / 2 ; y--) {
+        for (int y = maxY; y >= ledHeight / 2 ; y--) {
           int offset = y * ledWidth + x;
           bottleBounds[offset] = true;
-          if (!surroundingMaskIsWhite(x, y)) {
+          if (!isOutsideBottle(x, y, false)) {
             break;
           }
         }
