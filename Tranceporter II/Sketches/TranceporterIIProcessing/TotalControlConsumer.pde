@@ -1,5 +1,7 @@
 import TotalControl.*;  // If you don't have the hardware driver, comment out this line
 
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -218,14 +220,12 @@ class DefaultTotalControlConsumer implements TotalControlConsumer {
 class ConcurrentTotalControlConsumer implements TotalControlConsumer, Runnable {
   private TotalControlConsumer wrapped;
 
-  private PixelDataAndMapQueue q;
+  private BlockingQueue<PixelDataAndMap> q;
+  private Thread qThread;
+
   private int numStrands;
   private boolean useBitBang;
   private int pixelsPerStrand;
-
-  // Avoids having to clone each array
-  private color[] myPixelData;
-  private int[] myStrandMap;
 
   ConcurrentTotalControlConsumer(TotalControlConsumer wrapped) {
     this.wrapped = wrapped;
@@ -245,8 +245,9 @@ class ConcurrentTotalControlConsumer implements TotalControlConsumer, Runnable {
     this.pixelsPerStrand = pixelsPerStrand;
     this.useBitBang = useBitBang;
 
-    q = new PixelDataAndMapQueue();
-    new Thread(this, "TotalControlConcurrent").start();
+    q = new ArrayBlockingQueue<PixelDataAndMap>(1);
+    qThread = new Thread(this, "TotalControlConcurrent");
+    qThread.start();
 
     return 0;
   }
@@ -260,21 +261,8 @@ class ConcurrentTotalControlConsumer implements TotalControlConsumer, Runnable {
    */
   @Override
   int writeOneFrame(color[] pixelData, int[] strandMap) {
-    // Use our cached array
-
-    if (myPixelData == null || myPixelData.length != pixelData.length) {
-      myPixelData = pixelData.clone();
-    } else {
-      System.arraycopy(pixelData, 0, myPixelData, 0, pixelData.length);
-    }
-    if (myStrandMap == null || myStrandMap.length != strandMap.length) {
-      myStrandMap = strandMap.clone();
-    } else {
-      System.arraycopy(strandMap, 0, myStrandMap, 0, strandMap.length);
-    }
-
     try {
-      q.put(myPixelData, myStrandMap);
+      q.put(new PixelDataAndMap(pixelData.clone(), strandMap.clone()));
     } catch (InterruptedException ex) {
       Thread.currentThread().interrupt();
     }
@@ -283,28 +271,31 @@ class ConcurrentTotalControlConsumer implements TotalControlConsumer, Runnable {
 
   @Override
   void close() {
-    q.close();
+    qThread.interrupt();
   }
 
   @Override
   public void run() {
     wrapped.setupHardware(numStrands, pixelsPerStrand, useBitBang);
 
-    while(true) {
-      PixelDataAndMap dm;
-      try {
-        dm = q.take();
-      } catch (InterruptedException ex) {
-        Thread.currentThread().interrupt();
-        break;
-      }
+    try {
+      while(true) {
+        PixelDataAndMap dm;
+        try {
+          dm = q.take();
+        } catch (InterruptedException ex) {
+          Thread.currentThread().interrupt();
+          break;
+        }
 
-      if (dm == null) {
-        wrapped.close();
-        break;
-      }
+        if (dm == null) {
+          break;
+        }
 
-      wrapped.writeOneFrame(dm.pixelData, dm.strandMap);
+        wrapped.writeOneFrame(dm.pixelData, dm.strandMap);
+      }
+    } finally {
+      wrapped.close();
     }
     println("exiting Total Control run thread");
   }
@@ -327,87 +318,4 @@ class ConcurrentTotalControlConsumer implements TotalControlConsumer, Runnable {
       this.strandMap = strandMap;
     }
   }
-
-  class PixelDataAndMapQueue {
-    final Lock lock = new ReentrantLock();
-    final Condition notEmpty = lock.newCondition();
-    final Condition notFull = lock.newCondition();
-
-    private boolean closed;
-
-    PixelDataAndMap map;
-
-    /**
-     * Takes a value from the queue, waiting until one is available.  This returns {@code null} if closed.
-     *
-     * @return the latest data, or {@code null} if this structure was closed.
-     * @throws InterruptedException if the current thread was interrupted while waiting.
-     * @see #close()
-     */
-    PixelDataAndMap take() throws InterruptedException {
-      lock.lock();
-      try {
-        if (closed) {
-          return null;
-        }
-
-        while (this.map == null) {
-          notEmpty.await();
-          if (closed) {
-            return null;
-          }
-        }
-
-        PixelDataAndMap retval = this.map;
-        this.map = null;
-        notFull.signal();
-        return retval;
-      } finally {
-        lock.unlock();
-      }
-    }
-
-    /**
-     * Puts data into the queue, replacing what's there if it's not empty.  This will do nothing if this is closed.
-     *
-     * @param pixelData the pixel data
-     * @param strandMap the strand map
-     * @see #close()
-     */
-    void put(color[] pixelData, int[] strandMap) throws InterruptedException {
-      lock.lock();
-      try {
-        if (closed) {
-          return;
-        }
-
-        while (this.map != null) {
-          notFull.await();
-          if (closed) {
-            return;
-          }
-        }
-
-        // pixelData changes each frame
-        // strandMap can change when we are programming the strand.
-        this.map = new PixelDataAndMap(pixelData, strandMap);
-        notEmpty.signal();
-      } finally {
-        lock.unlock();
-      }
-    }
-
-    void close() {
-      lock.lock();
-      try {
-        closed = true;
-        notEmpty.signal();
-        notFull.signal();
-      } finally {
-        lock.unlock();
-      }
-    }
-  }
 }
-
-
