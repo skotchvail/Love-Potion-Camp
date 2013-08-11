@@ -44,6 +44,8 @@ class Fire extends Drawer {
       calc2[y] = (y + 1) % height2;
       calc5[y] = (y + 2) % height2;
     }
+    
+    settings.setParam(settings.keySpeed, 0.0); // speed controls the beat detection
   }
 
   void draw() {
@@ -63,6 +65,8 @@ class Fire extends Drawer {
     }
 
     pg.loadPixels();
+    
+    int beatOffset = (int)(main.beatDetect.beatPos("spectralFlux", 1) * settings.getParam(settings.keySpeed) * 20);
     int counter = 0;
     // Do the fire calculations for every pixel, from top to bottom
     for (int y = 0; y < height2; y++) {
@@ -76,9 +80,15 @@ class Fire extends Drawer {
             + fire[calc1[x]][calc5[y]]
             ;
         fireVal *= 0.242; // between 0 and 140, approximately
+        
         fireVal = constrain(fireVal, 0, palette.length - 1);
         fire[x][y] = fireVal;
-        
+
+        if (fireVal > palette.length * 0.20) {
+          fireVal += beatOffset;
+          fireVal = constrain(fireVal, 0, palette.length - 1);
+        }
+
         // Output everything to screen using our palette colors
         pg.pixels[counter++] = palette[fireVal];
       }
@@ -98,7 +108,7 @@ class Fire extends Drawer {
     int startHue = 0; // Red
     int endHue = 64; // Yellow
     if (whichColor > 0.3) {
-      int interval = 40;
+      int interval = 60;
       startHue = (int)map(whichColor, 0.3, 1.0, 0, 255 - interval);
       endHue = startHue + interval;
     }

@@ -22,6 +22,8 @@ class BeatDetect {
 
   int[] zoneToBand;
 
+  // TODO: should honor keyAudioSensitivity1 - 3
+  
   // int historySize;   // @REVIEW may be unused
   FFT fft;
 
