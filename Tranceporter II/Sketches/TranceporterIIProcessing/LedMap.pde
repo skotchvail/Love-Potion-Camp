@@ -467,7 +467,7 @@ class LedMap {
           }
           return false;
         }
-        println("offset ordinal " + i + " originalPoint " + originalPoint + " to " + point);
+//        println("offset ordinal " + i + " originalPoint " + originalPoint + " to " + point);
         ledProgramCoordinate(whichStrand, i, point);
       }
     }
@@ -724,10 +724,10 @@ class LedMap {
     if (lowestY != 0) {
       println ("ERROR: lowest LED should be Y == 0, instead of " + lowestY);
     }
-    if ((biggestX + 1) * 2 == ledWidth) {
+    if ((biggestX + 1) * 2 != ledWidth) {
       println("ERROR: biggest LED should be X == " + (ledWidth / 2) + " instead of " + biggestX);
     }
-    if (biggestY + 1 == ledHeight) {
+    if (biggestY + 1 != ledHeight) {
       println("ERROR: biggest LED should be Y == " + ledHeight + " instead of " + biggestY);
     }
 

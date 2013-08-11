@@ -15,7 +15,7 @@ import ddf.minim.analysis.FFT;
 
 //ADJUSTABLE PARAMS
 String iPadIP = "10.0.1.8";
-static final int ledWidth = 106 * 2; // Both sides
+static final int ledWidth = 107 * 2; // Both sides
 static final int ledHeight = 59;
 static final int screenPixelSize = 3;
 static final int screenWidth = 950;
