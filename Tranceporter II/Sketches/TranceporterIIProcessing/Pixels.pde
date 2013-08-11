@@ -14,26 +14,11 @@ class Pixels {
   private OBJModel objModel;
   private PGraphics pg3D;
 
-  private Rectangle box2d, box3d, boxLEDs, boxEqualizer;
-
+  private Rectangle box2d, box3d, boxEqualizer;
+  private final color kWhite = color(255);
+  private final color kBackgroundColor = color(12, 49, 81);
+  
   float mappedBottleRotation = 0.8;
-  final int ledSide = 15;
-  final int ledBetween = 2;
-
-  // Simulation for figuring out to program LEDs, not useful in the real world
-  final int[][] ledStrand = {
-  { 0,  7,  8,  9, 10, 11, 12}, //13
-  { 1,  6, 25, 24, 17, 16, 15}, //14
-  { 2,  5, 26, 23, 18, 39, 40},
-  { 3,  4, 27, 22, 19, 38, 41},
-  {30, 29, 28, 21, 20, 37, 42}, //43
-  {31, 32, 33, 34, 35, 36, 44}, //45-50
-  {56, 55, 54, -1, 53, 52, 51},
-  {57, 58, 59, -1, 60, 61, 62},
-  };
-
-  final int ledRows = ledStrand.length;
-  final int ledCols = ledStrand[0].length;
 
   Pixels(PApplet p) {
     objModel = new OBJModel(p, "tranceporter.obj");
@@ -45,11 +30,7 @@ class Pixels {
   void setup() {
     box2d = new Rectangle(10, 10, ledWidth * screenPixelSize, ledHeight * screenPixelSize);
     box3d = new Rectangle(box2d.x * 2 + box2d.width, box2d.y, 360, 180);
-    boxLEDs = new Rectangle(box3d.x,
-                            box3d.y * 2 + box3d.height,
-                            ledCols * ledSide + (ledCols + 1) * ledBetween,
-                            ledRows * ledSide + (ledRows + 1) * ledBetween);
-    boxEqualizer = new Rectangle(boxLEDs.x + boxLEDs.width + box2d.x, boxLEDs.y, boxLEDs.width, boxLEDs.height);
+    boxEqualizer = new Rectangle(box3d.x, box3d.y * 2 + box3d.height, 100, 100);
     pg3D = createGraphics(box3d.width, box3d.height, P3D);
     updateMaskPixels();
   }
@@ -57,8 +38,6 @@ class Pixels {
   void forceUpdateMaskPixels() {
     maskPixels = null;
   }
-
-  final color kWhite = color(255);
 
   /*
    In order to build up bottleBounds, we see which pixels are surrounded
@@ -287,44 +266,16 @@ class Pixels {
     colorMode(RGB, 255);
 
     if (wasDrawing2D || wasDrawing3D || draw2dGrid || draw3dSimulation) {
-      background(color(12, 49, 81)); // Dark blue color
+      background(kBackgroundColor); // Dark blue color
       drawInstructions();
     }
 
-    boolean programStrandSimulation = false; // TODO: get rid of this completely once all strands are programmed
-    if (programStrandSimulation) {
-      color[] pixelData = main.ledMap.pixelData;
-
+    boolean showEqualizer = true;
+    if (showEqualizer) {
       noStroke();
-      fill(27, 114, 188);
-      rect(boxLEDs.x, boxLEDs.y, boxLEDs.width, boxLEDs.height);
+      fill(kBackgroundColor);
+      rect(boxEqualizer.x, boxEqualizer.y, boxEqualizer.width, boxEqualizer.height);
 
-      fill(255);
-      int whichStrand = main.hardwareTestEffect.cursorStrand;
-
-      final int ledInterval = ledSide + ledBetween;
-      for (int x = 0; x < ledCols; x++) {
-        for (int y = 0; y < ledRows; y++) {
-          int whichOridinal = ledStrand[y][x];
-          int ledColor = color(0);
-          if (whichOridinal >= 0) {
-            Point coordinate = main.ledMap.ledGet(whichStrand, whichOridinal);
-            if (coordinate.x >= 0) {
-              int index = coordinate.y * ledWidth + coordinate.x;
-              if (index >= pixelData.length) {
-                continue;
-              }
-              ledColor = pixelData[index];
-            }
-          }
-          fill(ledColor);
-          rect(boxLEDs.x + (x * ledInterval) + ledBetween, boxLEDs.y + (y * ledInterval) + ledBetween, ledSide, ledSide);
-        }
-      }
-      fill(255);
-    }
-
-    if (true) {
       int gap = 3;
       int width = (boxEqualizer.width - gap * (main.NUM_BANDS - 1)) / main.NUM_BANDS;
       int height = (boxEqualizer.height - gap) / 2;
@@ -336,11 +287,10 @@ class Pixels {
           fill(255, 255, 0, 100);
         }
         float rawBand =  main.beatDetect.beatPos("spectralFlux", band);
-//        println("rawBand: " + rawBand);
         float pos1 = rawBand * height;
         rect(boxEqualizer.x + band * (width + gap), boxEqualizer.y + height - pos1, width, pos1);
       }
-
+      
       fill(255);
     }
 
