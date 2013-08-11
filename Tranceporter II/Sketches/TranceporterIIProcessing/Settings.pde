@@ -5,8 +5,12 @@ import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.net.SocketException;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Queue;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 
 import com.qindesign.osc.OscBundle;
 import com.qindesign.osc.OscDatagramClient;
@@ -355,7 +359,7 @@ class Settings implements OscPacketReceiver {
    and then process the events during handleQueuedOSCEvents
    which is called from the main draw
    */
-  private List<OscMessage> oscMessages = new ArrayList<OscMessage>();
+  private BlockingQueue<OscMessage> oscMessages = new LinkedBlockingQueue<OscMessage>();
 
   /**
    * Receive an OSC message.
@@ -363,10 +367,8 @@ class Settings implements OscPacketReceiver {
    * @param message the message.
    */
   public void oscMessage(OscMessage message) {
-    synchronized (oscMessages) {
       oscMessages.add(message);
     }
-  }
 
   /**
    * Receive an OSC bundle.
@@ -395,11 +397,8 @@ class Settings implements OscPacketReceiver {
 
   // Call once per draw to process events
   void handleQueuedOSCEvents() {
-    OscMessage[] messages;
-    synchronized (oscMessages) {
-      messages = oscMessages.toArray(new OscMessage[oscMessages.size()]);
-      oscMessages.clear();
-    }
+    Queue<OscMessage> messages = new LinkedList<OscMessage>();
+    oscMessages.drainTo(messages);
 
     for (OscMessage message : messages) {
       handleOscEvent(message);
