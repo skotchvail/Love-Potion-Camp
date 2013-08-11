@@ -85,7 +85,7 @@ class Fire extends Drawer {
             + fire[calc1[x]][calc2[y]]
             + fire[calc4[x]][calc2[y]]
             + fire[calc1[x]][calc5[y]]
-            ) << 5) / 135; //129;
+            ) << 5) / 134;//135; //129;
 
         // Output everything to screen using our palette colors
         if (counter >= height*width) continue;
