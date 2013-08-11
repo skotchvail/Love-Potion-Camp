@@ -39,7 +39,7 @@ class EyeMotion extends Drawer {
   final color kGlare2 = color(144, 187, 204, 50*factorBlue);
 
   EyeMotion(Pixels p, Settings s) {
-    super(p, s, JAVA2D, DrawType.MirrorSides);
+    super(p, s, JAVA2D, DrawType.RepeatingSides);
   }
 
   String getName() { return "Eye Motion"; }
