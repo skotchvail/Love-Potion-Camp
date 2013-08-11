@@ -48,6 +48,14 @@
 		E09481F515DB497B009DA376 /* TotalControlConsumer.pde */ = {isa = PBXFileReference; explicitFileType = sourcecode.java; path = TotalControlConsumer.pde; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.java; };
 		E0A5030715E20BB00066A5E4 /* FastPlasma.pde */ = {isa = PBXFileReference; explicitFileType = sourcecode.java; path = FastPlasma.pde; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.java; };
 		E0BD413215D8CA7000FFE2E7 /* EyeMotion.pde */ = {isa = PBXFileReference; explicitFileType = sourcecode.java; path = EyeMotion.pde; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.java; };
+		E0BFE60017B80BC40017B56D /* strand1.csv */ = {isa = PBXFileReference; lastKnownFileType = text; name = strand1.csv; path = Sketches/TranceporterIIProcessing/data/strand1.csv; sourceTree = "<group>"; };
+		E0BFE60117B80BC40017B56D /* strand2.csv */ = {isa = PBXFileReference; lastKnownFileType = text; name = strand2.csv; path = Sketches/TranceporterIIProcessing/data/strand2.csv; sourceTree = "<group>"; };
+		E0BFE60217B80BC40017B56D /* strand3.csv */ = {isa = PBXFileReference; lastKnownFileType = text; name = strand3.csv; path = Sketches/TranceporterIIProcessing/data/strand3.csv; sourceTree = "<group>"; };
+		E0BFE60317B80BC40017B56D /* strand4.csv */ = {isa = PBXFileReference; lastKnownFileType = text; name = strand4.csv; path = Sketches/TranceporterIIProcessing/data/strand4.csv; sourceTree = "<group>"; };
+		E0BFE60417B80BC40017B56D /* strand5.csv */ = {isa = PBXFileReference; lastKnownFileType = text; name = strand5.csv; path = Sketches/TranceporterIIProcessing/data/strand5.csv; sourceTree = "<group>"; };
+		E0BFE60517B80BC40017B56D /* strand6.csv */ = {isa = PBXFileReference; lastKnownFileType = text; name = strand6.csv; path = Sketches/TranceporterIIProcessing/data/strand6.csv; sourceTree = "<group>"; };
+		E0BFE60617B80BC40017B56D /* strand7.csv */ = {isa = PBXFileReference; lastKnownFileType = text; name = strand7.csv; path = Sketches/TranceporterIIProcessing/data/strand7.csv; sourceTree = "<group>"; };
+		E0BFE60717B80BC40017B56D /* strand8.csv */ = {isa = PBXFileReference; lastKnownFileType = text; name = strand8.csv; path = Sketches/TranceporterIIProcessing/data/strand8.csv; sourceTree = "<group>"; };
 		E0F13A0C15DF215300F69CDA /* LedMap.pde */ = {isa = PBXFileReference; explicitFileType = sourcecode.java; lineEnding = 0; path = LedMap.pde; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.java; };
 /* End PBXFileReference section */
 
@@ -55,6 +63,7 @@
 		E02F9B1B15C37AD1003EDFDA = {
 			isa = PBXGroup;
 			children = (
+				E0BFE5FF17B80BA90017B56D /* Data */,
 				E09481EB15DB35F9009DA376 /* p9813 */,
 				E058EA7715D494A400843748 /* ImportingSketches.md */,
 				E058EA7815D494A400843748 /* README.md */,
@@ -126,6 +135,21 @@
 				E09481F415DB3629009DA376 /* TotalControl.c */,
 			);
 			name = p9813;
+			sourceTree = "<group>";
+		};
+		E0BFE5FF17B80BA90017B56D /* Data */ = {
+			isa = PBXGroup;
+			children = (
+				E0BFE60017B80BC40017B56D /* strand1.csv */,
+				E0BFE60117B80BC40017B56D /* strand2.csv */,
+				E0BFE60217B80BC40017B56D /* strand3.csv */,
+				E0BFE60317B80BC40017B56D /* strand4.csv */,
+				E0BFE60417B80BC40017B56D /* strand5.csv */,
+				E0BFE60517B80BC40017B56D /* strand6.csv */,
+				E0BFE60617B80BC40017B56D /* strand7.csv */,
+				E0BFE60717B80BC40017B56D /* strand8.csv */,
+			);
+			name = Data;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */

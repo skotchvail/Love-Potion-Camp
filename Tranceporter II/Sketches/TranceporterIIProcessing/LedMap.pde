@@ -718,10 +718,10 @@ class LedMap {
 //    ledMapDump(2, 7); //set which strands you want to dump
 
     println("" + lowestX + " <= x <= " + biggestX + ", " + lowestY + " <= y <= " + biggestY);
-    if (lowestX == 0) {
+    if (lowestX != 0) {
       println("ERROR: lowest LED should be X == 0, instead of " + lowestX);
     }
-    if (lowestY == 0) {
+    if (lowestY != 0) {
       println ("ERROR: lowest LED should be Y == 0, instead of " + lowestY);
     }
     if ((biggestX + 1) * 2 == ledWidth) {
