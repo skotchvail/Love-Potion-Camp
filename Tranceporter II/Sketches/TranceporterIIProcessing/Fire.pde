@@ -9,7 +9,6 @@ class Fire extends Drawer {
   color[] palette;
   float angle;
   int[] calc1, calc2, calc3, calc4, calc5;
-  int height2;
 
   String getName() { return "Fire"; }
   String getCustom1Label() { return "Which Color";}
@@ -19,15 +18,13 @@ class Fire extends Drawer {
   Fire(Pixels p, Settings s) {
     super(p, s, JAVA2D, DrawType.MirrorSides);
 
-    height2 = height - 3;
-
     calc1 = new int[width];
     calc3 = new int[width];
     calc4 = new int[width];
-    calc2 = new int[height2];
-    calc5 = new int[height2];
+    calc2 = new int[height];
+    calc5 = new int[height];
 
-    fire = new int[width][height2];
+    fire = new int[width][height];
     palette = new color[256];
   }
 
@@ -55,9 +52,9 @@ class Fire extends Drawer {
       calc4[x] = (x + 1) % width;
     }
 
-    for(int y = 0; y < height2; y++) {
-      calc2[y] = (y + 1) % height2;
-      calc5[y] = (y + 2) % height2;
+    for(int y = 0; y < height; y++) {
+      calc2[y] = (y + 1) % height;
+      calc5[y] = (y + 2) % height;
     }
 
     settings.setParam(settings.keySpeed, 0.6); // set speed to 60%
@@ -71,14 +68,14 @@ class Fire extends Drawer {
     for(int x = 0; x < width; x+=clusterSize) {
       int i = int(random(0, 190));
       for (int x2=x; x2<min(x+clusterSize, width); x2++) {
-        fire[x2][height2-1] = i;
+        fire[x2][height-1] = i;
       }
     }
 
     pg.loadPixels();
     int counter = 0;
     // Do the fire calculations for every pixel, from top to bottom
-    for (int y = 0; y < height2; y++) {
+    for (int y = 0; y < height; y++) {
       for(int x = 0; x < width; x++) {
         // Add pixel values around current pixel
 
@@ -99,7 +96,7 @@ class Fire extends Drawer {
         }
       }
     }
-    for (int y = height2 - 1; y < height - 4; y++) {
+    for (int y = height - 1; y < height - 4; y++) {
       for(int x = 0; x < width; x++) {
         pg.pixels[y * width + x] = color(255, 200, 0);
       }
