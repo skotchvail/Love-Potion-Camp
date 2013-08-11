@@ -1,22 +1,27 @@
 import TotalControl.*;  // If you don't have the hardware driver, comment out this line
 
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 static class TotalControlFake { // If you don't have the hardware driver, rename this class to TotalControl
   static int open(int nStrands,int pixelsPerStrand)
 	{
     return TC_OK;
 	}
-  
+
   public static int setGamma()
 	{
     return TC_OK;
 	}
-  
+
 	public static int setGamma(float g)
 	{
     return TC_OK;
 	}
-  
+
 	public static int setGamma(
                              int rMin,int rMax,float rGamma,
                              int gMin,int gMax,float gGamma,
@@ -24,16 +29,16 @@ static class TotalControlFake { // If you don't have the hardware driver, rename
 	{
     return TC_OK;
 	}
-  
+
 	public static void initStats()
 	{
 	}
-  
+
 	public static int refresh(int[] pixels, int[] remap)
 	{
     return TC_OK;
 	}
-  
+
   public static int setStrandPin(int strand,short bit)
 	{
     return TC_OK;
@@ -42,11 +47,11 @@ static class TotalControlFake { // If you don't have the hardware driver, rename
 	public static void close()
 	{
 	}
-  
+
 	public static void printStats()
 	{
 	}
-  
+
 	public static void printError(int status)
 	{
 	}
@@ -92,39 +97,68 @@ static final int TC_CBUS_CLOCK = 8;   /* Use hardware for serial clock, not bitb
 
 
 /*
- 
+
  From https://github.com/PaintYourDragon/p9813
- 
+
  In the call to TCopen(), the number of strands should be set to 8, or,
  if using fewer than 8 strands but the high-speed mode is still desired,
  add TC_CBUS_CLOCK to the number of strands, e.g.:
- 
+
  status = TCopen(3 + TC_CBUS_CLOCK, 100);
- 
+
  Secondly, if using more than the default three strands (or if a different
  order or combination of pins is desired), TCsetStrandPin() should be used
  to assign FTDI pins to strand data lines, e.g.:
- 
+
  TCsetStrandPin(3, TC_FTDI_CTS);
  */
 
-class TotalControlConsumer {
-  
-  int lastError;
-  int lastStat;
-  private Thread correctThread;
-  
-  synchronized int setupTotalControl(int numStrands, int pixelsPerStrand, boolean useBitBang) {
-    
-    assert correctThread == null : "Thread must not yet be set";
-    correctThread = Thread.currentThread();
-    assert correctThread != null: "unable to get the current thread";
-    
-    assert(numStrands <= 8);
+interface TotalControlConsumer {
+  /**
+   * Sets up the hardware.
+   *
+   * @param numStrands the number of strands
+   * @param pixelsPerStrand the number of pixels per strand
+   * @param useBitBang whether to use bit-bang mode
+   * @return any error code, zero for success
+   * @throws IllegalArgumentException if the number of strands is &gt; 8 or &lt; zero, or if the number of
+   *         pixels per strand is &lt; zero.
+   */
+  int setupHardware(int numStrands, int pixelsPerStrand, boolean useBitBang);
+
+  /**
+   * Sends one frame.
+   *
+   * @param pixelData the pixel data
+   * @param strandMap the strand map
+   * @return
+   */
+  int writeOneFrame(color[] pixelData, int[] strandMap);
+
+  void close();
+}
+
+/**
+ * Runs directly.
+ */
+class DefaultTotalControlConsumer implements TotalControlConsumer {
+
+  private int lastError;
+  private int lastStat;
+
+  @Override
+  int setupHardware(int numStrands, int pixelsPerStrand, boolean useBitBang) {
+    if (numStrands < 0 || 8 < numStrands) {
+      throw new IllegalArgumentException("numStrands must be in the range [0, 8]");
+    }
+    if (pixelsPerStrand < 0) {
+      throw new IllegalArgumentException("pixelsPerStrand must be non-negative");
+    }
+
     if (useBitBang && numStrands < 8) {
       numStrands += TC_CBUS_CLOCK;
     }
-    
+
     if (useBitBang) {
       TotalControl.setStrandPin(0, TC_FTDI_TX);
       TotalControl.setStrandPin(1, TC_FTDI_RX);
@@ -135,14 +169,14 @@ class TotalControlConsumer {
       TotalControl.setStrandPin(6, TC_FTDI_DCD);
       TotalControl.setStrandPin(7, TC_FTDI_RI);
     }
-    
+
     int error = TotalControl.open(numStrands, pixelsPerStrand);
     if (error != 0) {
       println("could not open, retrying");
       TotalControl.close();
       error = TotalControl.open(numStrands, pixelsPerStrand);
     }
-    
+
     if(error != 0) {
       TotalControl.printError(lastError);
       //exit();
@@ -151,15 +185,14 @@ class TotalControlConsumer {
       println("success: TotalControl.open(" + numStrands + ", " + pixelsPerStrand + ")");
     }
     TotalControl.setGamma(main.DEFAULT_GAMMA);
-    
+
     return error;
   }
-  
-  synchronized int writeOneFrame(color[] pixelData, int[] strandMap) {
-    
-    assert correctThread == Thread.currentThread() : "No longer talking to TotalControl on the correct thread";
+
+  @Override
+  int writeOneFrame(color[] pixelData, int[] strandMap) {
     //    println("pixelData:" + pixelData.length + " strandMap:" + strandMap.length);
-    
+
     int status = TotalControl.refresh(pixelData, strandMap); // TODO: might be faster if we don't have to send the strandMap each time, but only when it changes
     if(status != lastError) {
       lastError = status;
@@ -173,126 +206,116 @@ class TotalControlConsumer {
     }
     return status;
   }
-  
-  synchronized void close() {
-    // In general, this won't be called on the correctThread, but synchronized should make this okay
-    correctThread = null;
+
+  @Override
+  void close() {
     TotalControl.close();
     println("closed TotalControl driver");
   }
-  
 }
 
-class TotalControlConcurrent implements Runnable {
-  private PixelDataAndMapQueue q;
+/**
+ * Runs {@link TotalControlConsumer} things on a different thread.
+ */
+class ConcurrentTotalControlConsumer implements TotalControlConsumer, Runnable {
+  private TotalControlConsumer wrapped;
+
+  private BlockingQueue<PixelDataAndMap> q;
+  private Thread qThread;
+
   private int numStrands;
   private boolean useBitBang;
   private int pixelsPerStrand;
-  TotalControlConsumer totalControlConsumer;
-  
-  TotalControlConcurrent(int numStrands, int pixelsPerStrand, boolean useBitBang) {
+
+  ConcurrentTotalControlConsumer(TotalControlConsumer wrapped) {
+    this.wrapped = wrapped;
+  }
+
+  /**
+   * Starts the thread to set up the hardware and start reading events.
+   *
+   * @param numStrands the number of strands
+   * @param pixelsPerStrand the number of pixels per strand
+   * @param useBitBang whether to use bit-bang mode
+   * @return 0.
+   */
+  @Override
+  int setupHardware(int numStrands, int pixelsPerStrand, boolean useBitBang) {
     this.numStrands = numStrands;
     this.pixelsPerStrand = pixelsPerStrand;
     this.useBitBang = useBitBang;
-    q = new PixelDataAndMapQueue();
-    
-    new Thread(this, "TotalControlConcurrent").start();
+
+    q = new ArrayBlockingQueue<PixelDataAndMap>(1);
+    qThread = new Thread(this, "TotalControlConcurrent");
+    qThread.start();
+
+    return 0;
   }
-  
-  PixelDataAndMapQueue getQueue() {
-    return q;
+
+  /**
+   * Queues up one of these events
+   *
+   * @param pixelData the pixel data
+   * @param strandMap the strand map
+   * @return 0.
+   */
+  @Override
+  int writeOneFrame(color[] pixelData, int[] strandMap) {
+    try {
+      q.put(new PixelDataAndMap(pixelData.clone(), strandMap.clone()));
+    } catch (InterruptedException ex) {
+      Thread.currentThread().interrupt();
+    }
+    return 0;
   }
-  
-  int getLastError() {
-    return totalControlConsumer.lastError;
-  }
-  
-  void put(color[] pixelData, int[] strandMap) {
-    q.put(pixelData, strandMap);
-  }
-  
+
+  @Override
   void close() {
-    q.close();
+    qThread.interrupt();
   }
-  
+
+  @Override
   public void run() {
-    totalControlConsumer = new TotalControlConsumer();
-    totalControlConsumer.setupTotalControl(numStrands, pixelsPerStrand, useBitBang);
-    
-    while(true) {
-      PixelDataAndMap dm = q.get();
-      if (dm == null) {
-        totalControlConsumer.close();
-        break;
+    wrapped.setupHardware(numStrands, pixelsPerStrand, useBitBang);
+
+    try {
+      while(true) {
+        PixelDataAndMap dm;
+        try {
+          dm = q.take();
+        } catch (InterruptedException ex) {
+          Thread.currentThread().interrupt();
+          break;
+        }
+
+        if (dm == null) {
+          break;
+        }
+
+        wrapped.writeOneFrame(dm.pixelData, dm.strandMap);
       }
-      
-      totalControlConsumer.writeOneFrame(dm.pixelData, dm.strandMap);
+    } finally {
+      wrapped.close();
     }
     println("exiting Total Control run thread");
   }
-  
+
+  /**
+   * Encapsulates the pixel data and strand map.
+   */
   class PixelDataAndMap {
     color[] pixelData;
     int[] strandMap;
-  }
-  
-  class PixelDataAndMapQueue {
-    
-    PixelDataAndMap n;
-    boolean valueSet = false;
-    boolean needToClose = false;
-    
-    synchronized PixelDataAndMap get() {
-      if(!valueSet) {
-        try {
-          wait();
-        } catch(InterruptedException e) {
-          System.out.println("InterruptedException caught");
-        }
-      }
-      if (needToClose) {
-        notify();
-        return null;
-      }
-      
-      PixelDataAndMap result = n;
-      assert(result != null) : "get() has nothing to get";
-      n = null;
-      valueSet = false;
-      notify();
-      return result;
-    }
-    
-    synchronized void put(color[] pixelData, int[] strandMap) {
-      PixelDataAndMap newDM = new PixelDataAndMap();
-      newDM.pixelData = pixelData.clone(); // pixelData changes each frame
-      newDM.strandMap = strandMap.clone(); // strandMap can change when we are programming the strand.
-      // TODO: pass in a param that tells us if it has changed
-      if(valueSet)
-        try {
-          wait();
-        } catch(InterruptedException e) {
-          System.out.println("InterruptedException caught");
-        }
-      assert (this.n == null) : "pixel data should always be null before writing";
-      this.n = newDM;
-      valueSet = true;
-      notify();
-    }
-    
-    synchronized void close() {
-      if(valueSet)
-        try {
-          wait();
-        } catch(InterruptedException e) {
-          System.out.println("InterruptedException caught");
-        }
-      assert (this.n == null) : "pixel data should always be null before writing";
-      needToClose = true;
-      valueSet = true;
-      notify();
+
+    /**
+     * Creates a new object and stores the given arguments.
+     *
+     * @param pixelData the pixel data
+     * @param strandMap the strand map
+     */
+    PixelDataAndMap(color[] pixelData, int[] strandMap) {
+      this.pixelData = pixelData;
+      this.strandMap = strandMap;
     }
   }
 }
-
-
