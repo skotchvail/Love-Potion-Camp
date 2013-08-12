@@ -7,6 +7,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.prefs.Preferences;
 
+import com.qindesign.wii.Wiimote;
 import ddf.minim.AudioBuffer;
 import ddf.minim.AudioInput;
 import ddf.minim.AudioOutput;
@@ -574,7 +575,11 @@ class MainClass {
 //    }
 //    System.out.println("Wiimote buttons: " + s);
 
-    currentMode().wiimoteButtons(buttons);
+    if ((buttons & Wiimote.BUTTON_RIGHT) != 0) {
+      newEffect();
+    } else {
+      currentMode().wiimoteButtons(buttons);
+    }
   }
 
   void mouseClicked() {
