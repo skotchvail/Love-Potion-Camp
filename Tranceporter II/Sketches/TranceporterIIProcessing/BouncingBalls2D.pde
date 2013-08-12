@@ -83,7 +83,7 @@ class BouncingBalls2D extends Drawer {
   // true if pos is outside of bottle
   boolean outOfBounds(Vec2D pos) {
     int offset = ((int)pos.y * ledWidth + (int)pos.x);
-  
+
     return (offset >= p.bottleBounds.length || offset < 0 || p.bottleBounds[offset]);
   }
 
@@ -104,9 +104,11 @@ class BouncingBalls2D extends Drawer {
   }
 
   void wiimoteAccel(float x, float y, float z, float pitch, float roll, float tilt) {
-    // Remember, X can exceed the range [-1.0, 1.0]
-    gravity.x = -(float) (x/ WiimoteMath.rho(x, y, z) * kMaxWiimoteGravity);
-    gravity.y = (float) (Math.signum(z) * WiimoteMath.mag(kMaxWiimoteGravity, gravity.x));
+    if (isSlosh) {
+      // Remember, X can exceed the range [-1.0, 1.0]
+      gravity.x = -(float) (x/ WiimoteMath.rho(x, y, z) * kMaxWiimoteGravity);
+      gravity.y = (float) (Math.signum(z) * WiimoteMath.mag(kMaxWiimoteGravity, gravity.x));
+    }
   }
 
   private Float lastAccel;
@@ -249,7 +251,7 @@ class BouncingBalls2D extends Drawer {
 
     Vec2D normalOffBoundary(Vec2D pos) {
       Vec2D center = new Vec2D(50, 30);
-      
+
       if (pos.x > 77 && pos.y > 31) {
         center.set(-1000, 40);
       }
@@ -259,11 +261,11 @@ class BouncingBalls2D extends Drawer {
       else if (pos.x > 20 && pos.y > 32) {
         center.set(62, 7);
       }
-      
+
       Vec2D vector = center.sub(pos).getNormalized();
       return vector;
     }
-    
+
     void update(Vec2D gravity) {
       oldPos = pos.copy(); // TODO: consider getting rid of oldPos
       dpos.scaleSelf(1.0 - kFriction);
@@ -290,7 +292,7 @@ class BouncingBalls2D extends Drawer {
     }
 
     void getOutOfBoundary() {
-      
+
       // TODO: consider getting rid of this method
       if (!outOfBounds(pos)) {
         return;
@@ -310,7 +312,7 @@ class BouncingBalls2D extends Drawer {
         }
         pos = oldPos;
       }
-      
+
       if (false) {
         Vec2D vector = normalOffBoundary(pos);
         int offset = ((int)pos.y * ledWidth + (int)pos.x);
@@ -326,7 +328,7 @@ class BouncingBalls2D extends Drawer {
       }
 
     }
-    
+
     void checkForCollision(ball b) {
       Vec2D diffPos = this.pos.sub(b.pos);
       float properDistance = this.radius + b.radius;
