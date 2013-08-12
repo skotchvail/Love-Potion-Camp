@@ -7,8 +7,6 @@ import toxi.geom.Vec2D;
 class BouncingBalls2D extends Drawer {
   ArrayList<ball> balls = new ArrayList();
   float maxRadius = 2.1, minRadius = 1.1;
-  Vec2D bounds;
-  Vec2D centerOfBox;
   float startMomentum = 0.5;
   float maxMass = maxRadius*maxRadius;
   float kMaxGravity = 0.025;
@@ -18,7 +16,7 @@ class BouncingBalls2D extends Drawer {
   float kColorAlpha = 1.0;
   float minHue = 0.0;
   float maxHue = 1.0;
-  float baseRadius = 1.0;
+  float baseRadius = 1.3;
   Vec2D gravity;
   int beatAssign;
   PImage imageLove;
@@ -66,8 +64,6 @@ class BouncingBalls2D extends Drawer {
     colorMode(HSB, 1.0);
     pg.colorMode(HSB, 1.0);
     pg.smooth();
-    bounds = new Vec2D(width, height);
-    centerOfBox = bounds.scale(0.5);
     settings.setParam(settings.keyCustom1, numBallsSlider);
     reset();
   }
@@ -82,8 +78,14 @@ class BouncingBalls2D extends Drawer {
 
   // true if pos is outside of bottle
   boolean outOfBounds(Vec2D pos) {
+    if (pos.x < 0 || pos.x >= ledWidth / 2) {
+      return true;
+    }
+    if (pos.y < 0 || pos.y >= height) {
+      return true;
+    }
+    
     int offset = ((int)pos.y * ledWidth + (int)pos.x);
-
     return (offset >= p.bottleBounds.length || offset < 0 || p.bottleBounds[offset]);
   }
 
@@ -93,7 +95,7 @@ class BouncingBalls2D extends Drawer {
     color col = color(mass/maxMass, 0.5, 1.0, kColorAlpha);
     Vec2D pos;
     while (true) {
-      pos = new Vec2D(random(0, bounds.x), random(0, ledHeight / 3));
+      pos = new Vec2D(random(0, ledWidth / 2 - 1), random(0, ledHeight / 3));
       if (!outOfBounds(pos)) {
         break;
       }
@@ -118,8 +120,7 @@ class BouncingBalls2D extends Drawer {
     pg.colorMode(HSB, 1.0);
     pg.smooth();
 
-    // Accomodate other controllers changing things
-
+    // Accommodate other controllers changing things
     Float accel = settings.getParam(settings.keyCustom2);
     if (!accel.equals(lastAccel)) {
       gravity.x = (settings.getParam(settings.keyCustom2) - 0.5) * 2.0 * kMaxGravity;
@@ -143,12 +144,13 @@ class BouncingBalls2D extends Drawer {
       ball.update(gravity);
     }
     for (int i=0; i<balls.size(); i++) {
-      for (int j=i+1; j<balls.size(); j++) {
-        balls.get(i).checkForCollision(balls.get(j));
+      ball ball = balls.get(i);
+      if (outOfBounds(ball.pos)) {
+        continue;
       }
-    }
-    for(ball ball: balls) {
-      ball.getOutOfBoundary();
+      for (int j=i+1; j<balls.size(); j++) {
+        ball.checkForCollision(balls.get(j));
+      }
     }
 
     pg.background(0);
@@ -249,17 +251,32 @@ class BouncingBalls2D extends Drawer {
       return mass * dpos.magnitude();
     }
 
+    boolean aboveLine(Vec2D p1, Vec2D p2, Vec2D point) {
+      Vec2D v1 = p1.sub(p2);
+      Vec2D v2 = p2.sub(point);
+      float result = v1.cross(v2);
+      return result < 0;
+    }
+    
     Vec2D normalOffBoundary(Vec2D pos) {
-      Vec2D center = new Vec2D(50, 30);
+      Vec2D center = new Vec2D(60, 25);
 
-      if (pos.x > 77 && pos.y > 31) {
+      
+      if (pos.x > 89 && pos.y > 29) {
+        Vec2D topLeftCorner = new Vec2D(89, 45);
+        Vec2D bottomRightCorner = new Vec2D(ledHeight, ledWidth / 2);
         center.set(-1000, 40);
+        if (pos.x > topLeftCorner.x && pos.y > topLeftCorner.y) {
+          if (aboveLine(topLeftCorner, bottomRightCorner, pos)) {
+            center.set(98, -1000);
+          }
+        }
       }
-      else if (pos.x > 57 && pos.y > 32) {
-        center.set(65, 13);
-      }
-      else if (pos.x > 20 && pos.y > 32) {
-        center.set(62, 7);
+      else if (pos.x < 20) {
+        center.set(33, 22);
+        if (pos.y > 30) {
+          center.set(12, -1000);
+        }
       }
 
       Vec2D vector = center.sub(pos).getNormalized();
@@ -280,53 +297,16 @@ class BouncingBalls2D extends Drawer {
         dpos.y = delta * vector.y;
 
         // Move towards getting out of the boundary, so we don't get stuck there
-        int offset = ((int)pos.y * ledWidth + (int)pos.x);
-        while (offset >= p.bottleBounds.length || offset < 0 || p.bottleBounds[offset]) {
-          pos.addSelf(vector.scale(0.4));
-          offset = ((int)pos.y * ledWidth + (int)pos.x);
+        for (int count = 0; count < 10; count++) {
+          pos.addSelf(vector.scale(0.2));
+          if (!outOfBounds(pos)) {
+            break;
+          }
         }
       }
 
       dpos.addSelf(gravity.scale(0.5));
       pos.addSelf(dpos);
-    }
-
-    void getOutOfBoundary() {
-
-      // TODO: consider getting rid of this method
-      if (!outOfBounds(pos)) {
-        return;
-      }
-
-      if (false) {
-        assert !outOfBounds(oldPos) : " old position cannot be out of bounds";
-        int increments = 4;
-        Vec2D vector = pos.sub(oldPos);
-        for (int i = increments; i > 0; i--) {
-          float fraction = i / (increments + 1.0);
-          Vec2D newPos = oldPos.add(vector.scale(fraction));
-          if (!outOfBounds(newPos)) {
-            pos = newPos;
-            break;
-          }
-        }
-        pos = oldPos;
-      }
-
-      if (false) {
-        Vec2D vector = normalOffBoundary(pos);
-        int offset = ((int)pos.y * ledWidth + (int)pos.x);
-        int count = 0;
-        while (offset >= p.bottleBounds.length || offset < 0 || p.bottleBounds[offset]) {
-          pos.addSelf(vector.scale(0.4));
-          offset = ((int)pos.y * ledWidth + (int)pos.x);
-          count++;
-          if (count > 5) {
-            break;
-          }
-        }
-      }
-
     }
 
     void checkForCollision(ball b) {
@@ -365,7 +345,6 @@ class BouncingBalls2D extends Drawer {
       pg.fill(col);
       pg.ellipseMode(CENTER);
       float beatRadius = radius * (baseRadius + (settings.isBeat(whichBeat)?1.0:0.0));
-      //float beatRadius = radius * 2;
       pg.ellipse(pos.x, pos.y, beatRadius, beatRadius); // port side
       pg.ellipse(ledWidth - pos.x, pos.y, beatRadius, beatRadius); // startboard side
     }
