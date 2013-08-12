@@ -99,7 +99,12 @@ void setup() {
 }
 
 void draw() {
-  main.draw();
+  try {
+    main.draw();
+  } catch (RuntimeException ex) {
+    ex.printStackTrace();
+    main.newEffect();
+  }
 }
 
 void mouseClicked() {
