@@ -93,7 +93,7 @@ class BouncingBalls2D extends Drawer {
 
   void wiimoteAccel(float x, float y, float z, float pitch, float roll, float tilt) {
     // Remember, X can exceed the range [-1.0, 1.0]
-    gravity.x = (float) (x/ WiimoteMath.rho(x, y, z) * kMaxWiimoteGravity);
+    gravity.x = -(float) (x/ WiimoteMath.rho(x, y, z) * kMaxWiimoteGravity);
     gravity.y = (float) (Math.signum(z) * WiimoteMath.mag(kMaxWiimoteGravity, gravity.x));
   }
 
