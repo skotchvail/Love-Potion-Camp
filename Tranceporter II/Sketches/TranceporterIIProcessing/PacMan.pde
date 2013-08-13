@@ -5,9 +5,9 @@ class PacMan extends Drawer {
   private int buttons;
   private int releasedButtons;
 
-  private final int centerX = width/2;
+  private final int centerX = (int) (width * 0.55);
   private final int centerY = (int) (height * 0.55);
-  private final int diameter = (int)(Math.min(width, height) * 0.65);
+  private final int diameter = (int) (min(width, height) * 0.65);
   private float desiredFrameRate;
 
   // Ball State
