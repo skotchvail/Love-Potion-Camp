@@ -202,6 +202,7 @@ class MainClass {
         new EyeMotion(display, settings),         //2, 1
         new Heart(display, settings),             //2, 2
         new CircularPong(display, settings),      //2, 3
+        new PacMan(display, settings),            //2, 4
 
       },
       //column 3 (Hidden from GUI)
