@@ -76,6 +76,8 @@ class CircularPong extends Drawer {
     ballSpeedX = 0;
     ballSpeedY = 0;
 
+    rollAngle = HALF_PI;
+
     state = START;
   }
 
@@ -116,7 +118,6 @@ class CircularPong extends Drawer {
         if (outOfBounds(ballX, ballY)) {
           reset();
         } else if (collision(ballX, ballY)) {
-          System.out.println("Collision!");
           ballSpeedX = -ballSpeedX;
           ballSpeedY = -ballSpeedY;
         }
