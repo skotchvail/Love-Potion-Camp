@@ -111,7 +111,7 @@ class WiimoteManager {
         return;
       }
 
-      double roll = Math.abs(WiimoteMath.roll(x, y, z));
+      double roll = WiimoteMath.roll(x, y, z);
       double pitch = WiimoteMath.pitch(x, y, z);
       double tilt = WiimoteMath.tilt(x, y, z);
 
