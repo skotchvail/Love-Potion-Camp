@@ -203,9 +203,13 @@ class MainClass {
         new Heart(display, settings),             //2, 2
 
       },
-      //column 3 (Hidden from GUI)
+      //column 3
       {
-        hardwareTestEffect,      //3, 0
+
+      },
+      //column 4 (Hidden from GUI)
+      {
+        hardwareTestEffect,      //4, 0
       },
 
     };
