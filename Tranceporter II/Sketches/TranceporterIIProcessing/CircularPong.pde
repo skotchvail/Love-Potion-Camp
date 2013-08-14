@@ -85,12 +85,12 @@ class CircularPong extends Drawer {
   }
 
   @Override
-  void wiimoteConnected(Wiimote wiimote) {
+  void wiimoteConnected(String path) {
     demoMode = false;
   }
 
   @Override
-  void wiimoteDisconnected(Wiimote wiimote) {
+  void wiimoteDisconnected(String path) {
     demoMode = true;
   }
 

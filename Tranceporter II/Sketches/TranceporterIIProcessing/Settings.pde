@@ -76,9 +76,9 @@ class Settings implements OscPacketReceiver {
   static final String keyWiimoteAccel   = "/wiimoteControl/accel";
   /** Arguments: buttons (int).  See {@link Wiimote}. */
   static final String keyWiimoteButtons = "/wiimoteControl/buttons";
-  /** Arguments: Wiimote */
+  /** Arguments: Wiimote.path (String) */
   static final String keyWiimoteConnected = "/wiimoteControl/connected";
-  /** Arguments: Wiimote */
+  /** Arguments: Wiimote.path (String) */
   static final String keyWiimoteDisconnected = "/wiimoteControl/disconnected";
   static final String wiimoteAddressStart = "/wii";
 
@@ -176,11 +176,11 @@ class Settings implements OscPacketReceiver {
       }});
     actions.put(keyWiimoteConnected, new Function() {
       public void function(Object[] args) {
-        main.wiimoteConnected((Wiimote) args[0]);
+        main.wiimoteConnected((String) args[0]);
       }});
     actions.put(keyWiimoteDisconnected, new Function() {
       public void function(Object[] args) {
-        main.wiimoteDisconnected((Wiimote) args[0]);
+        main.wiimoteDisconnected((String) args[0]);
       }});
 
     paramGlobalMap = new HashMap<String, Float>();

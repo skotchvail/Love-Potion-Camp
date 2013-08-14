@@ -4,7 +4,9 @@ import java.lang.Object;
 import java.lang.Override;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.prefs.Preferences;
 
 import com.qindesign.wii.Wiimote;
@@ -155,7 +157,7 @@ class MainClass {
   PaletteManager pm;
   Settings settings;
   WiimoteManager wiimoteManager;
-  private Map<String, Wiimote> connectedWiimotes = new HashMap<String, Wiimote>();
+  private Set<String> connectedWiimotes = new HashSet<String>();
 
   MainClass() throws Exception {
     pm = new PaletteManager();
@@ -275,8 +277,8 @@ class MainClass {
 
     Drawer mode = currentMode();
     mode.justEnteredSketch();
-    for (Wiimote wiimote : connectedWiimotes.values()) {
-      mode.wiimoteConnected(wiimote);
+    for (String path : connectedWiimotes) {
+      mode.wiimoteConnected(path);
     }
 
     println("Done setup");
@@ -536,8 +538,8 @@ class MainClass {
 
     Drawer mode = currentMode();
     mode.justEnteredSketch();
-    for (Wiimote wiimote : connectedWiimotes.values()) {
-      mode.wiimoteConnected(wiimote);
+    for (String path : connectedWiimotes) {
+      mode.wiimoteConnected(path);
     }
   }
 
@@ -564,17 +566,17 @@ class MainClass {
   /**
    * A Wiimote was detected.
    */
-  void wiimoteConnected(Wiimote wiimote) {
-    connectedWiimotes.put(wiimote.getDeviceInfo().path, wiimote);
-    currentMode().wiimoteConnected(wiimote);
+  void wiimoteConnected(String path) {
+    connectedWiimotes.add(path);
+    currentMode().wiimoteConnected(path);
   }
 
   /**
-   * A Wiimote connection was lost.  The given {@link Wiimote} object will have been closed.
+   * A Wiimote connection was lost.
    */
-  void wiimoteDisconnected(Wiimote wiimote) {
-    connectedWiimotes.remove(wiimote.getDeviceInfo().path);
-    currentMode().wiimoteDisconnected(wiimote);
+  void wiimoteDisconnected(String path) {
+    connectedWiimotes.remove(path);
+    currentMode().wiimoteDisconnected(path);
   }
 
   /**

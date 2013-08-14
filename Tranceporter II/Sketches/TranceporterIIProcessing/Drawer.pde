@@ -143,15 +143,15 @@ class Drawer {
   /**
    * This will be called with any connected wiimotes after {@link #justEnteredSketch()}.
    *
-   * @see MainClass#wiimoteConnected(Wiimote)
+   * @see MainClass#wiimoteConnected(String)
    */
-  void wiimoteConnected(Wiimote wiimote) {
+  void wiimoteConnected(String path) {
   }
 
   /**
    * @see MainClass#wiimoteDisconnected()
    */
-  void wiimoteDisconnected(Wiimote wiimote) {
+  void wiimoteDisconnected(String path) {
   }
 
   /**
