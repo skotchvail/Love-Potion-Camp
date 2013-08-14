@@ -62,9 +62,6 @@ class CircularPong extends Drawer {
   void wiimoteButtons(int buttons) {
     this.releasedButtons = this.buttons & ~buttons;
     this.buttons = buttons;
-    if (releasedButtons != 0) {
-      System.out.println("releasedButtons = " + Integer.toBinaryString(releasedButtons));
-    }
   }
 
   @Override
