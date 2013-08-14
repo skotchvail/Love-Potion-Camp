@@ -184,7 +184,7 @@ class Settings implements OscPacketReceiver {
       }});
 
     paramGlobalMap = new HashMap<String, Float>();
-    setParam(keyGlobalAutoChangeSpeed, 1.0);
+    setParam(keyGlobalAutoChangeSpeed, prefs.getFloat(keyGlobalAutoChangeSpeed, 1.0f));
     updateSketchesFromPrefs();
    }
 
@@ -460,6 +460,7 @@ class Settings implements OscPacketReceiver {
 
         if (addr.equals(keyGlobalAutoChangeSpeed)) {
           assert(new Float(getParam(keyGlobalAutoChangeSpeed)).equals(f));
+          prefs.setFloat(keyGlobalAutoChangeSpeed, f);
           updateLabelForAutoChanger();
         }
       }
