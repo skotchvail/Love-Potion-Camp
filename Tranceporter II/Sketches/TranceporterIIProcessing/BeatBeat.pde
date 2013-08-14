@@ -1,7 +1,7 @@
 
-class Grid extends Drawer
+class BeatBeat extends Drawer
 {
-  Grid(Pixels p, Settings s) {
+  BeatBeat(Pixels p, Settings s) {
     super(p, s, P2D, DrawType.MirrorSides);
   }
 
@@ -13,7 +13,7 @@ class Grid extends Drawer
   
   String getName()
   {
-    return "BeatBeat";
+    return "Beat Beat";
   }
   
   void setup()

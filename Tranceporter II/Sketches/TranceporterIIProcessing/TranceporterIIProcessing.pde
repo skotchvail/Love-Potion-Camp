@@ -210,7 +210,7 @@ class MainClass {
       },
       //column 3
       {
-        new Grid(display, settings),              //3, 0
+        new BeatBeat(display, settings),              //3, 0
       },
       //column 4 (Hidden from GUI)
       {

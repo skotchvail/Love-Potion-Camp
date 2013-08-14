@@ -50,7 +50,7 @@
 		E09481F415DB3629009DA376 /* TotalControl.c */ = {isa = PBXFileReference; indentWidth = 4; lastKnownFileType = sourcecode.c.c; name = TotalControl.c; path = ../../common/p9813/processing/TotalControl.c; sourceTree = "<group>"; tabWidth = 4; };
 		E09481F515DB497B009DA376 /* TotalControlConsumer.pde */ = {isa = PBXFileReference; explicitFileType = sourcecode.java; path = TotalControlConsumer.pde; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.java; };
 		E0A5030715E20BB00066A5E4 /* FastPlasma.pde */ = {isa = PBXFileReference; explicitFileType = sourcecode.java; path = FastPlasma.pde; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.java; };
-		E0ABF87517BB25C9000F056D /* Grid.pde */ = {isa = PBXFileReference; explicitFileType = sourcecode.java; path = Grid.pde; sourceTree = "<group>"; };
+		E0ABF87517BB25C9000F056D /* BeatBeat.pde */ = {isa = PBXFileReference; explicitFileType = sourcecode.java; path = BeatBeat.pde; sourceTree = "<group>"; };
 		E0BD413215D8CA7000FFE2E7 /* EyeMotion.pde */ = {isa = PBXFileReference; explicitFileType = sourcecode.java; path = EyeMotion.pde; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.java; };
 		E0BFE60017B80BC40017B56D /* strand1.csv */ = {isa = PBXFileReference; lastKnownFileType = text; name = strand1.csv; path = Sketches/TranceporterIIProcessing/data/strand1.csv; sourceTree = "<group>"; };
 		E0BFE60117B80BC40017B56D /* strand2.csv */ = {isa = PBXFileReference; lastKnownFileType = text; name = strand2.csv; path = Sketches/TranceporterIIProcessing/data/strand2.csv; sourceTree = "<group>"; };
@@ -96,7 +96,7 @@
 				E0BD413215D8CA7000FFE2E7 /* EyeMotion.pde */,
 				E0A5030715E20BB00066A5E4 /* FastPlasma.pde */,
 				E02F9B5215C37B19003EDFDA /* Fire.pde */,
-				E0ABF87517BB25C9000F056D /* Grid.pde */,
+				E0ABF87517BB25C9000F056D /* BeatBeat.pde */,
 				E03AFC1115CF02680088360C /* HardwareTest.pde */,
 				E078182B15D5EE55008D537F /* Heart.pde */,
 				E0F13A0C15DF215300F69CDA /* LedMap.pde */,
