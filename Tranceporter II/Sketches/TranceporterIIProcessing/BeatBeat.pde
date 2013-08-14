@@ -94,9 +94,11 @@ class BeatBeat extends Drawer
     
     pg.loadPixels();
 
-    float power = noise(random(width), random(height), frameCount);
+    int fCount = frameCount % 9000;
+    
+    float power = noise(random(width), random(height), fCount);
     power = cos(power) * TWO_PI;
-    float v = cos(noise(random(width), random(height), frameCount*.01))*TWO_PI;
+    float v = cos(noise(random(width), random(height), fCount*.01))*TWO_PI;
     float scale = 1.0;
     dThing = constrain(dThing, 80.0 * scale, 100.0 * scale);
     
@@ -106,12 +108,12 @@ class BeatBeat extends Drawer
     {
       for(int x = 0; x < width; x++)
       {
-        float base = noise(cos(x * 0.008 * scale2), sin(y * 0.007 * scale2), frameCount *.04)*TWO_PI;
+        float base = noise(cos(x * 0.008 * scale2), sin(y * 0.007 * scale2), fCount *.04)*TWO_PI;
         float total = 0.0;
         for(float i = dThing; i >= 1; i = 1/2.0)
         {
-          float n = noise(x, y, frameCount*.04) * .1;
-          total += noise(cos(x/dThing), sin(y/dThing), frameCount * 0.005) * (dThing * 0.0001);
+          float n = noise(x, y, fCount*.04) * .1;
+          total += noise(cos(x/dThing), sin(y/dThing), fCount * 0.005) * (dThing * 0.0001);
           power = base * n;
         }
         float turbulence = 128.0 * total / dThing;
