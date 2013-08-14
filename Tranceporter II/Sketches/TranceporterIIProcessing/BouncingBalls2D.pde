@@ -37,7 +37,14 @@ class BouncingBalls2D extends Drawer {
     }
   }
   String getCustom1Label() { return "# Balls";}
-  String getCustom2Label() { return "Acceleration";}
+  String getCustom2Label() {
+    if (isSlosh) {
+      return "Acceleration";
+    }
+    else {
+      return "Size";
+    }
+  }
 
   void setup() {
 
@@ -115,13 +122,20 @@ class BouncingBalls2D extends Drawer {
 
   private Float lastAccel;
   void draw() {
-
+    
+    if (!isSlosh) {
+      baseRadius = 1.3 * settings.getParam(settings.keyCustom2) * 4 + 0.4;
+    }
+    
     colorMode(HSB, 1.0);
     pg.colorMode(HSB, 1.0);
     pg.smooth();
 
     // Accommodate other controllers changing things
     Float accel = settings.getParam(settings.keyCustom2);
+    if (!isSlosh) {
+      accel = 0.5;
+    }
     if (!accel.equals(lastAccel)) {
       gravity.x = (settings.getParam(settings.keyCustom2) - 0.5) * 2.0 * kMaxGravity;
       gravity.y = sqrt(kMaxGravity * kMaxGravity - gravity.x * gravity.x);

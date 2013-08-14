@@ -123,14 +123,14 @@ class DroppingParticles extends Drawer {
       speed *= speed;
       vel.add(PVector.mult(acc, speed));
       loc.add(vel);
-      timer -= 1.0;
+      timer -= 1.4;
     }
     
     // Method to display
     void render() {
       pg.ellipseMode(CENTER);
       pg.stroke(replaceAlpha(strokeColor, timer));
-      pg.fill(100, timer);
+      pg.fill(200, timer);
       pg.ellipse(loc.x, loc.y, r, r);
     }
     
