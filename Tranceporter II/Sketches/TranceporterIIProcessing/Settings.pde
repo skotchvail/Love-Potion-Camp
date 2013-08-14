@@ -30,7 +30,7 @@ class Settings implements OscPacketReceiver {
     }
   }
 
-  private boolean[][] whichModes = new boolean[4][5];
+  private boolean[][] whichModes = new boolean[4][6];
   private color[] palette;
   private boolean[] isBeat;
   private Map<String, Float> paramMap; // Values of controls specific to any Sketch
