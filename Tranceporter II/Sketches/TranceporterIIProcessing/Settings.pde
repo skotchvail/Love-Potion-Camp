@@ -460,7 +460,7 @@ class Settings implements OscPacketReceiver {
 
         if (addr.equals(keyGlobalAutoChangeSpeed)) {
           assert(new Float(getParam(keyGlobalAutoChangeSpeed)).equals(f));
-          prefs.setFloat(keyGlobalAutoChangeSpeed, f);
+          prefs.putFloat(keyGlobalAutoChangeSpeed, f);
           updateLabelForAutoChanger();
         }
       }
