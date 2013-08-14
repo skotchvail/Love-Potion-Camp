@@ -74,8 +74,12 @@ class Settings implements OscPacketReceiver {
 
   /** Arguments (all floats): accelX, accelY, accelZ, pitch, roll, tilt */
   static final String keyWiimoteAccel   = "/wiimoteControl/accel";
-  /** Arguments: buttons (int).*/
+  /** Arguments: buttons (int).  See {@link Wiimote}. */
   static final String keyWiimoteButtons = "/wiimoteControl/buttons";
+  /** Arguments: Wiimote */
+  static final String keyWiimoteConnected = "/wiimoteControl/connected";
+  /** Arguments: Wiimote */
+  static final String keyWiimoteDisconnected = "/wiimoteControl/disconnected";
   static final String wiimoteAddressStart = "/wii";
 
   Settings(int numBands) throws IllegalAccessException {
@@ -169,6 +173,14 @@ class Settings implements OscPacketReceiver {
         if (args.length >= 1 && args[0] instanceof Integer) {
           main.wiimoteButtons((Integer) args[0]);
         }
+      }});
+    actions.put(keyWiimoteConnected, new Function() {
+      public void function(Object[] args) {
+        main.wiimoteConnected((Wiimote) args[0]);
+      }});
+    actions.put(keyWiimoteDisconnected, new Function() {
+      public void function(Object[] args) {
+        main.wiimoteDisconnected((Wiimote) args[0]);
       }});
 
     paramGlobalMap = new HashMap<String, Float>();

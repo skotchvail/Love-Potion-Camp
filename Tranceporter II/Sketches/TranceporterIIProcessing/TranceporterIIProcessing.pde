@@ -155,6 +155,7 @@ class MainClass {
   PaletteManager pm;
   Settings settings;
   WiimoteManager wiimoteManager;
+  private Map<String, Wiimote> connectedWiimotes = new HashMap<String, Wiimote>();
 
   MainClass() throws Exception {
     pm = new PaletteManager();
@@ -271,7 +272,12 @@ class MainClass {
     frameRate(FRAME_RATE);
 
     settings.sendEntireGUIToIPad();
-    currentMode().justEnteredSketch();
+
+    Drawer mode = currentMode();
+    mode.justEnteredSketch();
+    for (Wiimote wiimote : connectedWiimotes.values()) {
+      mode.wiimoteConnected(wiimote);
+    }
 
     println("Done setup");
   }
@@ -527,7 +533,12 @@ class MainClass {
     assert(settings.palette != null);
     settings.sendControlValuesForThisSketchToIPad();
     getMode(oldEffect).justExitedSketch();
-    currentMode().justEnteredSketch();
+
+    Drawer mode = currentMode();
+    mode.justEnteredSketch();
+    for (Wiimote wiimote : connectedWiimotes.values()) {
+      mode.wiimoteConnected(wiimote);
+    }
   }
 
   void switchToDrawer(Drawer whichDrawer) {
@@ -548,6 +559,22 @@ class MainClass {
       println("Touch" + touchNum + " at " + nf(x, 1, 2) + " " + nf(y, 1, 2));
     }
     currentMode().setTouch(touchNum, x, y);
+  }
+
+  /**
+   * A Wiimote was detected.
+   */
+  void wiimoteConnected(Wiimote wiimote) {
+    connectedWiimotes.put(wiimote.getDeviceInfo().path, wiimote);
+    currentMode().wiimoteConnected(wiimote);
+  }
+
+  /**
+   * A Wiimote connection was lost.  The given {@link Wiimote} object will have been closed.
+   */
+  void wiimoteDisconnected(Wiimote wiimote) {
+    connectedWiimotes.remove(wiimote.getDeviceInfo().path);
+    currentMode().wiimoteDisconnected(wiimote);
   }
 
   /**

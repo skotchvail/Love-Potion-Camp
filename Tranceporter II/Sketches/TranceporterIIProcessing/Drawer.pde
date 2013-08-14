@@ -4,6 +4,7 @@
 
 import java.util.Iterator;
 
+import com.qindesign.wii.Wiimote;
 import toxi.geom.Vec2D;
 
 class Drawer {
@@ -137,6 +138,20 @@ class Drawer {
     if (touches.size() > 100) {
       touches.remove(0);
     }
+  }
+
+  /**
+   * This will be called with any connected wiimotes after {@link #justEnteredSketch()}.
+   *
+   * @see MainClass#wiimoteConnected(Wiimote)
+   */
+  void wiimoteConnected(Wiimote wiimote) {
+  }
+
+  /**
+   * @see MainClass#wiimoteDisconnected()
+   */
+  void wiimoteDisconnected(Wiimote wiimote) {
   }
 
   /**
@@ -278,6 +293,20 @@ class Drawer {
     return settingsBackup;
   }
 
+  /**
+   * Checks whether the given coordinates are outside the bottle.
+   */
+  boolean outOfBounds(float x, float y) {
+    if (x < 0 || width <= x) {
+      return true;
+    }
+    if (y < 0 || height <= y) {
+      return true;
+    }
+
+    int offset = (int)y * width + (int)x;
+    return offset < 0 || p.bottleBounds.length <= offset || p.bottleBounds[offset];
+  }
 }
 
 class TouchInfo

@@ -70,6 +70,7 @@ class WiimoteManager {
 
             // Start the event loop and wait for it to be finished
 
+            oscReceiver.oscMessage(new OscMessage(Settings.keyWiimoteConnected, new Object[] { wiimote }));
             Future eventLoopFuture = executor.submit(wiimote.getEventLoop(wiimoteListener));
             eventLoopFuture.get();
           }
@@ -79,6 +80,7 @@ class WiimoteManager {
       } finally {
         if (wiimote != null) {
           wiimote.close();
+          oscReceiver.oscMessage(new OscMessage(Settings.keyWiimoteDisconnected, new Object[] { wiimote }));
         }
         hid.close();
       }
