@@ -104,7 +104,7 @@ class BeatBeat extends Drawer
       loadImageWithScale("airplane-symbol.png", 0.6),
       loadImageWithScale("aperture_science.png", 0.6),
       loadImageWithScale("bicycle.png", 0.6),
-      loadImageWithScale("bikini.png", 0.6),
+      loadImageWithScale("bikini.png", 0.5),
       loadImageWithScale("boombox-hi.png", 0.6),
       loadImageWithScale("boombox_linda_kim_01.svg.hi.png", 0.6),
       loadImageWithScale("clean-tooth.png", 0.4),
