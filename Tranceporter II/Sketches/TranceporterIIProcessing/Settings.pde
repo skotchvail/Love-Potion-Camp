@@ -450,6 +450,15 @@ class Settings implements OscPacketReceiver {
       if (f != null) {
         paramMap.put(addr, f);
         println("Set " + addr + " to " + f);
+        
+        if (addr.equals(keyCustom1)) {
+          sendMessageToIPad(keyCustom1Label, main.currentMode().getCustom1Label());
+          println("sent custom 1");
+        }
+        else if (addr.equals(keyCustom2)) {
+          sendMessageToIPad(keyCustom2Label, main.currentMode().getCustom2Label());
+          println("sent custom 2");
+        }
       }
     }
     else if (keyGlobalNames.contains(addr)) {

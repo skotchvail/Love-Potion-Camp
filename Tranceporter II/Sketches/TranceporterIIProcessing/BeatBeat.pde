@@ -17,7 +17,19 @@ class BeatBeat extends Drawer
   int lastImageSwitchTime;
   int lastWordSwitchTime;
   String words[][];
-  String fonts[];
+  String fonts[] = {
+    "LobsterTwo-BoldItalic-16.vlw",
+    "SpinCycleOT-16.vlw",
+    "Days-16.vlw",
+    "TrajanPro3-Bold-16.vlw",
+  };
+
+  String themes[] = {
+    "Wedding",
+    "Postive",
+    "Mixed",
+    "Roll Call",
+  };
   
 //	"KaushanScript-Regular-16.vlw",
 //  "LobsterTwo-BoldItalic-16.vlw", // Wedding
@@ -33,13 +45,21 @@ class BeatBeat extends Drawer
   String currentFont;
   String displayText = "";
   
+  
+  int getTheme() {
+    int theme = int(settings.getParam(settings.keyCustom2) * themes.length);
+    return constrain(theme, 0, themes.length - 1);
+  }
+  
   String getName()
   {
     return "Beat Beat";
   }
 
   String getCustom1Label() { return "Word Duration";}
-  String getCustom2Label() { return "Theme";}
+  String getCustom2Label() {
+    return themes[getTheme()];
+  }
 
   void setup()
   {
@@ -78,15 +98,8 @@ class BeatBeat extends Drawer
       combinedWords,
       rollcallWords,
     };
-    
-    fonts = new String[] {
-      "LobsterTwo-BoldItalic-16.vlw",
-      "SpinCycleOT-16.vlw",
-      "Days-16.vlw",
-      "TrajanPro3-Bold-16.vlw",
-    };
-    
     assert(fonts.length == words.length);
+    assert(fonts.length == themes.length);
   }
   
   void fixupStrings(String[] strings) {
@@ -137,9 +150,16 @@ class BeatBeat extends Drawer
     float offset3 = sin((float)frameCount / 30);
     float offset4 = cos((float)frameCount / 70);
   
-    drawImage(new Vec2D(30 - offset1 * 10, 22 + offset4 * 5), 0.5 + main.beatDetect.beatPos("spectralFlux", 2) * 0.1);
-    drawImage(new Vec2D(46 + offset2 * 4, 29 + offset3 * 3), 0.7 + main.beatDetect.beatPos("spectralFlux", 1) * 0.1);
-    drawImage(new Vec2D(65 - offset4 * 2, 21 + offset2 * 2), 0.3 + main.beatDetect.beatPos("spectralFlux", 0) * 0.05);
+    float beat0 = main.beatDetect.beatPos("spectralFlux", 0) * 0.05;
+    float beat1 = main.beatDetect.beatPos("spectralFlux", 1) * 0.1;
+    float beat2 = main.beatDetect.beatPos("spectralFlux", 2) * 0.1;
+    if (settings.getParam(settings.keyCustom2) == 0) { // Wedding
+      beat2 = beat1 = beat0 = 0;
+    }
+
+    drawImage(new Vec2D(30 - offset1 * 10, 22 + offset4 * 5), 0.5 + beat2);
+    drawImage(new Vec2D(46 + offset2 *  4, 29 + offset3 * 3), 0.7 + beat1);
+    drawImage(new Vec2D(65 - offset4 *  2, 21 + offset2 * 2), 0.3 + beat0);
     
     // Mirror on the starboard side
     pg.loadPixels();
@@ -235,12 +255,17 @@ class BeatBeat extends Drawer
       }
     }
     
+    int theme = getTheme();
     if (switchImage) {
-      whichImage = images[(int)random(0, images.length)];
+      if (theme == 0) { // Wedding
+        whichImage = images[0];
+      }
+      else {
+        whichImage = images[(int)random(0, images.length)];
+      }
       lastImageSwitchTime = millis();
     }
     else if (switchWord) {
-      int theme = int(settings.getParam(settings.keyCustom2) * (words.length - 1));
       String fontSelected = fonts[theme];
       if (currentFont != fontSelected) {
         currentFont = fontSelected;
