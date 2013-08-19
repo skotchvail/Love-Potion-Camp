@@ -7,37 +7,80 @@ class BeatBeat extends Drawer
 
   Vec2D center;
   float waveDistance;
-  PImage images[] = new PImage[4];
+  PImage images[];
   PImage whichImage;
   int displayMode;
   PFont font;
   int halfWidth;
+  boolean showWords;
+  float wordAlpha;
+  int lastImageSwitchTime;
+  int lastWordSwitchTime;
+  String words[][];
+  
+//	"KaushanScript-Regular-16.vlw",
+//  "LobsterTwo-BoldItalic-16.vlw", // Wedding
+//  "CaviarDreams-BoldItalic-16.vlw",
+//	"RomanSD-16.vlw",
+//  "Days-16.vlw", // Very legible
+//  "SpinCycleOT-16.vlw", // Hippy Space Love
+//  "DrawveticaMini-16.vlw",
+//  "TamilMN-Bold-16.vlw", // legible
+//  "KannadaSangamMN-Bold-16.vlw",
+//  "TrajanPro3-Bold-16.vlw", // Classy
+  
+  String currentFont;
+  String displayText = "";
   
   String getName()
   {
     return "Beat Beat";
   }
-  
+
+  String getCustom1Label() { return "Word Duration";}
+  String getCustom2Label() { return "Theme";}
+
   void setup()
   {
     halfWidth = width / 2;
     
-    images[0] = loadImageWithScale("Heart.png", 1.0);
-    images[1] = loadImageWithScale("Star.png", 0.6);
-    images[2] = loadImageWithScale("Carrot.png", 0.4);
-    images[3] = loadImageWithScale("Crossbones.png", 0.6);
+    images = new PImage[] {
+      loadImageWithScale("Heart.png", 1.0),
+      loadImageWithScale("Star.png", 0.6),
+      loadImageWithScale("Carrot.png", 0.4),
+      loadImageWithScale("Crossbones.png", 0.6)
+    };
     
     whichImage = images[0];
     
     center = new Vec2D(halfWidth / 2.0, height / 2.0);
     waveDistance = 0;
     
+    lastImageSwitchTime = lastWordSwitchTime = millis();
+    String weddingWords[] = loadStrings("words.wedding.txt");
+    fixupStrings(weddingWords);
+    String positiveWords[] = loadStrings("words.positve.txt");
+    fixupStrings(positiveWords);
+    String negativeWords[] = loadStrings("words.negative.txt");
+    fixupStrings(negativeWords);
     
-    // The font must be located in the sketch's
-    // "data" directory to load successfully
-    font = loadFont("Cochin-BoldItalic-16.vlw");
+    String[] combinedWords = new String[positiveWords.length + negativeWords.length];
+    System.arraycopy(positiveWords, 0, combinedWords, 0, positiveWords.length);
+    System.arraycopy(negativeWords, 0, combinedWords, positiveWords.length, negativeWords.length);
+    
+    words = new String[][] {
+      weddingWords,
+      positiveWords,
+      combinedWords,
+    };
   }
 
+  void fixupStrings(String[] strings) {
+    for (int i = 0; i < strings.length; i++) {
+      strings[i] = strings[i].replaceAll("\\\\n","\n");
+    }
+  }
+  
   PImage loadImageWithScale(String name, float scale) {
     PImage image = loadImage(name);
     image.resize((int)(image.width * scale), 0);
@@ -46,6 +89,12 @@ class BeatBeat extends Drawer
   
   void drawImage(Vec2D location, float scale)
   {
+    if (wordAlpha > 0.75) {
+      return; // Don't show images when word is almost visible
+    }
+    
+    pg.tint(255, map(wordAlpha, 0, 0.75, 255, 10));
+    
     float scaledWidth = whichImage.width * scale;
     float scaledHeight = whichImage.height * scale;
     pg.textureMode(NORMAL);
@@ -60,11 +109,6 @@ class BeatBeat extends Drawer
   
   void draw()
   {
-    
-    if (frameCount % 276 == 0) {
-      whichImage = images[(int)random(0, images.length)];
-    }
-    
     if (displayMode == 0) {
       backgroundDots();
     }
@@ -79,11 +123,9 @@ class BeatBeat extends Drawer
     float offset3 = sin((float)frameCount / 30);
     float offset4 = cos((float)frameCount / 70);
   
-    if (true) {
-      drawImage(new Vec2D(30 - offset1 * 10, 22 + offset4 * 5), 0.5 + main.beatDetect.beatPos("spectralFlux", 2) * 0.1);
-      drawImage(new Vec2D(46 + offset2 * 4, 29 + offset3 * 3), 0.7 + main.beatDetect.beatPos("spectralFlux", 1) * 0.1);
-      drawImage(new Vec2D(65 - offset4 * 2, 21 + offset2 * 2), 0.3 + main.beatDetect.beatPos("spectralFlux", 0) * 0.05);
-    }
+    drawImage(new Vec2D(30 - offset1 * 10, 22 + offset4 * 5), 0.5 + main.beatDetect.beatPos("spectralFlux", 2) * 0.1);
+    drawImage(new Vec2D(46 + offset2 * 4, 29 + offset3 * 3), 0.7 + main.beatDetect.beatPos("spectralFlux", 1) * 0.1);
+    drawImage(new Vec2D(65 - offset4 * 2, 21 + offset2 * 2), 0.3 + main.beatDetect.beatPos("spectralFlux", 0) * 0.05);
     
     // Mirror on the starboard side
     pg.loadPixels();
@@ -97,20 +139,100 @@ class BeatBeat extends Drawer
     }
     pg.updatePixels();
 
-    if (false) {
+    if (wordAlpha > 0) {
       assert(font != null);
       pg.textFont(font);
-      pg.textSize(16);
-      pg.fill(saturation(backgroundColor) > 240 ? BLACK: WHITE);
+      pg.textSize(font.getSize());
+      pg.fill(saturation(backgroundColor) > 240 ? BLACK: WHITE, wordAlpha * 255);
       pg.textAlign(CENTER, CENTER);
-      String text = "Foo Love";
-      pg.text(text, 64, 39);
-      pg.text(text, 150, 39);
+      pg.textLeading((font.ascent() + font.descent()) * font.getSize() + 1);
+      float xOffset = (offset2 * 3);
+      float yOffset = (offset1 * -3);
+      pg.text(displayText, 64 + xOffset, 37 + yOffset);
+      pg.text(displayText, 150 + xOffset, 37 + yOffset);
     }
     
-//    println("brightness: " + brightness(backgroundColor) + " hue: " + hue(backgroundColor) + " saturation:  " + saturation(backgroundColor));
-    
     // Post drawing activities
+    pickWordsOrImages();
+    pickBackground();
+  }
+
+  void pickWordsOrImages() {
+    final float kWordToImageSpeed = 0.04;
+    if (showWords && wordAlpha < 1.0) {
+      wordAlpha = min(wordAlpha + kWordToImageSpeed, 1.0);
+    }
+    else if (!showWords && wordAlpha > 0) {
+      wordAlpha = max(wordAlpha - kWordToImageSpeed, 0);
+    }
+    
+    float wordDurationPercent = settings.getParam(settings.keyCustom1);
+//    wordDurationPercent = 1.0; // TEMP
+    int timeWord = int(20 * 1000 * wordDurationPercent);
+    int timeImages = int(25 * 1000 * (1.0 - wordDurationPercent));
+//    timeWord = 1500; // TEMP
+
+    boolean switchImage = false;
+    boolean switchWord = false;
+    if (wordDurationPercent < 0.1) {
+      showWords = false;
+    }
+    else if (wordDurationPercent > 0.9) {
+      showWords = true;
+    }
+    else {
+      showWords = (millis() % (timeWord + timeImages)) < timeWord;
+    }
+
+    if (!showWords) {
+      if (wordAlpha == 1.0) {
+        switchImage = true;
+      }
+      else if (wordAlpha == 0.0){
+        float imageDuration = timeImages / 2;
+        if (imageDuration < 8 * 1000) {
+          imageDuration = timeImages;
+        }
+        if (millis() - lastImageSwitchTime > imageDuration) {
+          switchImage = true;
+        }
+      }
+    }
+    else {
+      if (wordAlpha == 0.0) {
+        switchWord = true;
+        println("a");
+      }
+      else if (wordAlpha == 1.0) {
+        if (millis() - lastWordSwitchTime > timeWord) {
+          switchWord = true;
+        }
+      }
+    }
+    
+    if (switchImage) {
+      whichImage = images[(int)random(0, images.length)];
+      lastImageSwitchTime = millis();
+    }
+    else if (switchWord) {
+      int theme = int(settings.getParam(settings.keyCustom2) * (words.length - 1));
+      
+      String fontSelected = "SpinCycleOT-16.vlw";
+      if (theme == 0) {
+        fontSelected = "LobsterTwo-BoldItalic-16.vlw";
+      }
+      if (currentFont != fontSelected) {
+        currentFont = fontSelected;
+        font = loadFont(currentFont);
+      }
+      
+      String whichWords[] = words[theme];
+      displayText = whichWords[(int)random(0, whichWords.length)];
+      lastWordSwitchTime = millis();
+    }
+  }
+  
+  void pickBackground() {
     if (waveDistance >= 0) {
       waveDistance += 1.9;
     }

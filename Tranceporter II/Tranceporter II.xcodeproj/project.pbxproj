@@ -7,6 +7,9 @@
 	objects = {
 
 /* Begin PBXFileReference section */
+		E00C3E4917C1A05E00B9A7FF /* words.wedding.txt */ = {isa = PBXFileReference; lastKnownFileType = text; name = words.wedding.txt; path = Sketches/TranceporterIIProcessing/data/words.wedding.txt; sourceTree = "<group>"; };
+		E00C3ED417C1A0BE00B9A7FF /* words.negative.txt */ = {isa = PBXFileReference; lastKnownFileType = text; name = words.negative.txt; path = Sketches/TranceporterIIProcessing/data/words.negative.txt; sourceTree = "<group>"; };
+		E00C3ED517C1A0BE00B9A7FF /* words.positve.txt */ = {isa = PBXFileReference; lastKnownFileType = text; name = words.positve.txt; path = Sketches/TranceporterIIProcessing/data/words.positve.txt; sourceTree = "<group>"; };
 		E00ECDCE15D0D8290099F4BF /* Smoke.pde */ = {isa = PBXFileReference; explicitFileType = sourcecode.java; path = Smoke.pde; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.java; };
 		E02C5673172C6B9C00FB5A13 /* DrawType.java */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.java; path = DrawType.java; sourceTree = "<group>"; };
 		E02F9B2815C37B19003EDFDA /* AlienBlob.pde */ = {isa = PBXFileReference; explicitFileType = sourcecode.java; lineEnding = 0; path = AlienBlob.pde; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.java; };
@@ -51,7 +54,7 @@
 		E09481F515DB497B009DA376 /* TotalControlConsumer.pde */ = {isa = PBXFileReference; explicitFileType = sourcecode.java; path = TotalControlConsumer.pde; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.java; };
 		E0A5030715E20BB00066A5E4 /* FastPlasma.pde */ = {isa = PBXFileReference; explicitFileType = sourcecode.java; path = FastPlasma.pde; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.java; };
 		E0ABF87517BB25C9000F056D /* BeatBeat.pde */ = {isa = PBXFileReference; explicitFileType = sourcecode.java; path = BeatBeat.pde; sourceTree = "<group>"; };
-		E0BD413215D8CA7000FFE2E7 /* EyeMotion.pde */ = {isa = PBXFileReference; explicitFileType = sourcecode.java; path = EyeMotion.pde; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.java; };
+		E0BD413215D8CA7000FFE2E7 /* EyeMotion.pde */ = {isa = PBXFileReference; explicitFileType = sourcecode.java; path = EyeMotion.pde; sourceTree = "<group>"; };
 		E0BFE60017B80BC40017B56D /* strand1.csv */ = {isa = PBXFileReference; lastKnownFileType = text; name = strand1.csv; path = Sketches/TranceporterIIProcessing/data/strand1.csv; sourceTree = "<group>"; };
 		E0BFE60117B80BC40017B56D /* strand2.csv */ = {isa = PBXFileReference; lastKnownFileType = text; name = strand2.csv; path = Sketches/TranceporterIIProcessing/data/strand2.csv; sourceTree = "<group>"; };
 		E0BFE60217B80BC40017B56D /* strand3.csv */ = {isa = PBXFileReference; lastKnownFileType = text; name = strand3.csv; path = Sketches/TranceporterIIProcessing/data/strand3.csv; sourceTree = "<group>"; };
@@ -156,6 +159,9 @@
 				E0BFE60517B80BC40017B56D /* strand6.csv */,
 				E0BFE60617B80BC40017B56D /* strand7.csv */,
 				E0BFE60717B80BC40017B56D /* strand8.csv */,
+				E00C3ED417C1A0BE00B9A7FF /* words.negative.txt */,
+				E00C3ED517C1A0BE00B9A7FF /* words.positve.txt */,
+				E00C3E4917C1A05E00B9A7FF /* words.wedding.txt */,
 			);
 			name = Data;
 			sourceTree = "<group>";
