@@ -69,7 +69,24 @@ class BeatBeat extends Drawer
       loadImageWithScale("Heart.png", 1.0),
       loadImageWithScale("Star.png", 0.6),
       loadImageWithScale("Carrot.png", 0.4),
-      loadImageWithScale("Crossbones.png", 0.6)
+      loadImageWithScale("symbols_tattoo_design_prev_4.png", 0.6),
+      loadImageWithScale("Star-burst.png", 0.6),
+      loadImageWithScale("corn.chicken.png", 0.6),
+      loadImageWithScale("corn.png", 0.6),
+      loadImageWithScale("corn.fish.png", 0.6),
+      loadImageWithScale("devil.dancing.png", 0.6),
+      loadImageWithScale("flames.png", 0.6),
+      loadImageWithScale("earthsymbol.png", 0.6),
+      loadImageWithScale("moon-symbol-decrescent.png", 0.6),
+      loadImageWithScale("anan_lg.png", 0.6),
+      loadImageWithScale("transsymbol.png", 0.6),
+      loadImageWithScale("devil.dance.png", 0.6),
+      loadImageWithScale("infinity-symbol-vector.png", 0.6),
+      loadImageWithScale("fire symbol.png", 0.6),
+      loadImageWithScale("Star-circle.png", 0.6),
+      loadImageWithScale("athterisk_red_large.png", 0.6),
+      loadImageWithScale("king_luffy_symbol.png", 0.6),
+      loadImageWithScale("rocket.png", 0.6),
     };
     
     whichImage = images[0];
