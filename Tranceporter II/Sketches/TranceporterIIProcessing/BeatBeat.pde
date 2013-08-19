@@ -281,6 +281,7 @@ class BeatBeat extends Drawer
     }
     else if (wordDurationPercent > 0.9) {
       showWords = true;
+      timeWord = 1500;
     }
     else {
       showWords = (millis() % (timeWord + timeImages)) < timeWord;
