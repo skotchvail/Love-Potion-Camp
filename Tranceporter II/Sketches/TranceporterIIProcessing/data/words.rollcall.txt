@@ -33,13 +33,13 @@ Gosia
 Margo
 Noah
 Shawn
-Wendy
-Leyla
+Fwendy
+Big\nTrouble
 Queen\nBee
 Isa
 Stina
 Elisabeth
-John L
+Tigger
 Jed
 Bruce
 Scar
@@ -53,7 +53,7 @@ Michael
 David
 Joe
 Elizabeth
-Alistair
+Maplejuice
 Pauline
 Craig
 Kathleen
@@ -77,7 +77,7 @@ Lee
 Christine
 Mark
 Caleb
-Kevin
+ZERO
 Liuyin
 Stacy
 Karen
@@ -93,3 +93,7 @@ John R
 Gregory\nR
 Liat
 Dougie\nFresh
+Whipped\nCream
+BB
+Mimi
+Catalicious
