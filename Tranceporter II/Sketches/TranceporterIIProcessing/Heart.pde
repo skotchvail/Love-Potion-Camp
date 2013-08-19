@@ -15,6 +15,9 @@ class Heart extends Drawer
     return "Heart";
   }
   
+  String getCustom1Label() { return "Horizontal";}
+  String getCustom2Label() { return "Vertical";}
+
   
   void setup()
   {
@@ -22,6 +25,10 @@ class Heart extends Drawer
     for (int i = 0; i < numFrames; i++) {
       images[i]  = loadImage("split_" + i + "beatnhrt_upd_408.gif");
     }
+    
+    settings.setParam(settings.keyCustom1, 0.52);
+    settings.setParam(settings.keyCustom2, 0.73);
+
   }
   
   void draw()
@@ -33,7 +40,7 @@ class Heart extends Drawer
     // JJ - LOOK AT POSITIONING......
     //   pg.image(images[frame], (4.0*width - (images[frame].width*scalex)), (height*5.0 - (images[frame].height*scalex))/2);
     
-    pg.translate(0,12);
+    pg.translate(settings.getParam(settings.keyCustom2) * 40, settings.getParam(settings.keyCustom1) * 40);
     pg.rotate(-PI/4);
     pg.image(images[frame], 0 - width/3, 0);
     
