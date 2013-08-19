@@ -3,13 +3,13 @@ Love\nPotion
 Bottle
 Skotch
 Bill'der
-Jenny Up
+Jenny\nUp
 Corn
-Dr. Mike
+Dr.\nMike
 Pemmy
 Danger\nDave
-Quietstorm
-Double\bD
+Quiet\nstorm
+Double\nD
 Julia
 Lonnie
 Suebie
@@ -21,7 +21,7 @@ John Y
 Dust\nBunny
 Jen Jen
 Ann
-Onomatopoeia
+Onoma-\ntopoeia
 Nicole
 Tracy
 Andre
@@ -82,13 +82,13 @@ Stacy
 Karen
 Leslie
 Elaine
-Burningmax
+Burning\nmax
 Barbara
 Jessica
 Carlie
 Court
 Sassanova
 John R
-Gregory R
+Gregory\nR
 Liat
 Dougie\nFresh
