@@ -44,3 +44,5 @@ Guilt
 Dark
 Old
 Flee
+Monster
+Drag
