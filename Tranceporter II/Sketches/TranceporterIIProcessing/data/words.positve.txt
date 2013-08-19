@@ -42,7 +42,7 @@ Cycle
 Rest
 Charge
 Yes\nYes
-Comic
+Comet
 Firm
 Youth
 Expert
@@ -52,7 +52,7 @@ Open
 Home
 Grace
 Unique
-Go
+Go Go
 Soul
 Spirit
 Trance
@@ -70,7 +70,9 @@ Touch
 See
 Feel
 Hear
-Smell
+Listen
+Sound
+Scent
 Light
 Beat
 Fly
