@@ -17,6 +17,7 @@ class BeatBeat extends Drawer
   int lastImageSwitchTime;
   int lastWordSwitchTime;
   String words[][];
+  String fonts[];
   
 //	"KaushanScript-Regular-16.vlw",
 //  "LobsterTwo-BoldItalic-16.vlw", // Wedding
@@ -63,6 +64,9 @@ class BeatBeat extends Drawer
     fixupStrings(positiveWords);
     String negativeWords[] = loadStrings("words.negative.txt");
     fixupStrings(negativeWords);
+    String rollcallWords[] = loadStrings("words.rollcall.txt");
+    fixupStrings(rollcallWords);
+
     
     String[] combinedWords = new String[positiveWords.length + negativeWords.length];
     System.arraycopy(positiveWords, 0, combinedWords, 0, positiveWords.length);
@@ -72,9 +76,19 @@ class BeatBeat extends Drawer
       weddingWords,
       positiveWords,
       combinedWords,
+      rollcallWords,
     };
+    
+    fonts = new String[] {
+      "LobsterTwo-BoldItalic-16.vlw",
+      "SpinCycleOT-16.vlw",
+      "Days-16.vlw",
+      "TrajanPro3-Bold-16.vlw",
+    };
+    
+    assert(fonts.length == words.length);
   }
-
+  
   void fixupStrings(String[] strings) {
     for (int i = 0; i < strings.length; i++) {
       strings[i] = strings[i].replaceAll("\\\\n","\n");
@@ -141,11 +155,8 @@ class BeatBeat extends Drawer
 
     if (wordAlpha > 0) {
       assert(font != null);
-      pg.textFont(font);
-      pg.textSize(font.getSize());
+      
       pg.fill(saturation(backgroundColor) > 240 ? BLACK: WHITE, wordAlpha * 255);
-      pg.textAlign(CENTER, CENTER);
-      pg.textLeading((font.ascent() + font.descent()) * font.getSize() + 1);
       float xOffset = (offset2 * 3);
       float yOffset = (offset1 * -3);
       pg.text(displayText, 64 + xOffset, 37 + yOffset);
@@ -157,6 +168,21 @@ class BeatBeat extends Drawer
     pickBackground();
   }
 
+  
+  void scaleFontToFit()
+  {
+    pg.textFont(font);
+    float width = halfWidth * 0.6;
+    float fontSize = font.getSize();
+    float fWidth = pg.textWidth(displayText);
+    if(fWidth > width) {
+      fontSize = ((float)width / fWidth) * fontSize;
+    }
+    pg.textSize(fontSize);
+    pg.textLeading((font.ascent() + font.descent()) * fontSize + 1);
+    pg.textAlign(CENTER, CENTER);
+  }
+  
   void pickWordsOrImages() {
     final float kWordToImageSpeed = 0.04;
     if (showWords && wordAlpha < 1.0) {
@@ -201,7 +227,6 @@ class BeatBeat extends Drawer
     else {
       if (wordAlpha == 0.0) {
         switchWord = true;
-        println("a");
       }
       else if (wordAlpha == 1.0) {
         if (millis() - lastWordSwitchTime > timeWord) {
@@ -216,11 +241,7 @@ class BeatBeat extends Drawer
     }
     else if (switchWord) {
       int theme = int(settings.getParam(settings.keyCustom2) * (words.length - 1));
-      
-      String fontSelected = "SpinCycleOT-16.vlw";
-      if (theme == 0) {
-        fontSelected = "LobsterTwo-BoldItalic-16.vlw";
-      }
+      String fontSelected = fonts[theme];
       if (currentFont != fontSelected) {
         currentFont = fontSelected;
         font = loadFont(currentFont);
@@ -228,6 +249,7 @@ class BeatBeat extends Drawer
       
       String whichWords[] = words[theme];
       displayText = whichWords[(int)random(0, whichWords.length)];
+      scaleFontToFit();
       lastWordSwitchTime = millis();
     }
   }
