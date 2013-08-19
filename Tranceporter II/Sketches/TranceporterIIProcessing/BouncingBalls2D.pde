@@ -21,7 +21,9 @@ class BouncingBalls2D extends Drawer {
   int beatAssign;
   PImage imageLove;
   boolean isSlosh;
-  float logoY = height * 0.45;
+  float logoY;
+  PFont font;
+  boolean useImageLogo;
 
   BouncingBalls2D(Pixels p, Settings s, boolean isSlosh) {
     super(p, s, P2D, DrawType.TwoSides);
@@ -62,8 +64,10 @@ class BouncingBalls2D extends Drawer {
       maxHue = 0.76;
       baseRadius = 2.0;
 
+      font = loadFont("RomanSD-16.vlw");
+      
       imageLove = loadImage("Logo Love Potion.png");
-      imageLove.resize(round(imageLove.width * 0.047), 0);
+      imageLove.resize(round(imageLove.width * 0.08), 0);
     }
 
     gravity = new Vec2D(0, kMaxGravity);
@@ -81,6 +85,7 @@ class BouncingBalls2D extends Drawer {
     for(int i=0; i<balls.size();i++) {
       addBall();
     }
+    logoY = height * 0.52;
   }
 
   // true if pos is outside of bottle
@@ -180,37 +185,55 @@ class BouncingBalls2D extends Drawer {
       if (speed > kLevel4) {
         float deltaY = map(speed * speed, kLevel4 * kLevel4, 1, 0, 2.5);
         logoY -= deltaY;
-        if (logoY < -imageLove.height) {
-          logoY = height + imageLove.height / 2;
+        float textHeight = 10;
+        if (useImageLogo) {
+          textHeight = imageLove.height;
+        }
+        if (logoY < -textHeight) {
+          useImageLogo = !useImageLogo;
+          logoY = height + textHeight / 2;
         }
       }
 
       if (speed > kLevel2) {
-        float x = 48 - imageLove.width/2;
-        // pg.image doesn't draw on fractional boundaries, so I am using textures instead
-        // to get smooth movement
-        // pg.image(imageLove, x, y);
-
-        pg.tint(1.0, map(speed, kLevel2, kLevel3, 0, 1));
-
-        pg.beginShape();
-        pg.texture(imageLove);
-        pg.vertex(x, logoY, 0, 0);
-        pg.vertex(x + imageLove.width, logoY, imageLove.width, 0);
-        pg.vertex(x + imageLove.width, logoY + imageLove.height, imageLove.width, imageLove.height);
-        pg.vertex(x, logoY + imageLove.height, 0, imageLove.height);
-        pg.endShape();
-
-        x += ledWidth / 2;
-        pg.beginShape();
-        pg.texture(imageLove);
-        pg.vertex(x, logoY, 0, 0);
-        pg.vertex(x + imageLove.width, logoY, imageLove.width, 0);
-        pg.vertex(x + imageLove.width, logoY + imageLove.height, imageLove.width, imageLove.height);
-        pg.vertex(x, logoY + imageLove.height, 0, imageLove.height);
-        pg.endShape();
-
-        pg.noTint();
+        if (useImageLogo) {
+          float x = 58 - imageLove.width/2;
+          // pg.image doesn't draw on fractional boundaries, so I am using textures instead
+          // to get smooth movement
+          // pg.image(imageLove, x, y);
+          
+          pg.tint(1.0, map(speed, kLevel2, kLevel3, 0, 1));
+          
+          pg.beginShape();
+          pg.texture(imageLove);
+          pg.vertex(x, logoY, 0, 0);
+          pg.vertex(x + imageLove.width, logoY, imageLove.width, 0);
+          pg.vertex(x + imageLove.width, logoY + imageLove.height, imageLove.width, imageLove.height);
+          pg.vertex(x, logoY + imageLove.height, 0, imageLove.height);
+          pg.endShape();
+          
+          x += ledWidth / 2;
+          pg.beginShape();
+          pg.texture(imageLove);
+          pg.vertex(x, logoY, 0, 0);
+          pg.vertex(x + imageLove.width, logoY, imageLove.width, 0);
+          pg.vertex(x + imageLove.width, logoY + imageLove.height, imageLove.width, imageLove.height);
+          pg.vertex(x, logoY + imageLove.height, 0, imageLove.height);
+          pg.endShape();
+          
+          pg.noTint();
+        }
+        else {
+          pg.fill(WHITE);
+          pg.textFont(font);
+          float fontSize = font.getSize();
+          pg.textSize(fontSize);
+          pg.textLeading((font.ascent() + font.descent()) * fontSize + 2);
+          pg.textAlign(CENTER, CENTER);
+          String displayText = "Love\nPotion";
+          pg.text(displayText, 60, logoY);
+          pg.text(displayText, 160, logoY);
+        }
       }
 
     }
