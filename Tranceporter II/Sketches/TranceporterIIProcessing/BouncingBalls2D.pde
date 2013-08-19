@@ -58,7 +58,7 @@ class BouncingBalls2D extends Drawer {
       minRadius = 2.1;
       kMaxGravity = 0.20;
       kStickiness = 0.002;
-      kFriction   = 0.080;
+      kFriction   = 0.035;
       kColorAlpha = 0.4;
       minHue = 0.53;
       maxHue = 0.76;
