@@ -2,7 +2,7 @@ Amphora
 Love\nPotion
 Bottle
 Skotch
-JC
+JC\nBreeze
 Bill'der
 Jenny\nUp
 Corn
@@ -14,14 +14,14 @@ Julia
 Lonnie
 Suebie
 Dan O
-Amar
+Amarr-\nrrrr
 Peter\nPie
 Demi
 Jenneral
 Vegas
 John Y
 Dust\nBunny
-Jen Jen
+Jen\nJen
 Ann
 Onoma-\ntopoeia
 Nicole
@@ -29,9 +29,9 @@ Tracers
 Body\nRoll
 Limor
 Sirius
-Korrie
+Special\nK
 Gosia
-TATAS
+Tatas
 Noah
 Shawn
 Fwendy
@@ -41,7 +41,7 @@ Isa
 Stina
 Elisabeth
 Tigger
-Fancy Pants
+Fancy\nPants
 Bruce 'o\nDesert
 Scar
 Ben
@@ -54,7 +54,7 @@ Michael
 David
 Joe
 Elizabeth
-Maplejuice
+Maple\nJuice
 Pauline
 Craig
 Kathleen
@@ -89,9 +89,9 @@ Burning\nmax
 Barbara
 Jessica
 Carlie
-Courtopolis
-Sassanova
-John R
+Courto-\npolis
+Sassa-\nnova
+John\nR
 Gregory\nR
 Liat
 The\nWinner
@@ -99,9 +99,9 @@ Dougie\nFresh
 Whipped\nCream
 BB
 Mimi
-Catalicious
-Ozymandias
-Just Heather
+Cata-\nlicious
+Ozyman-\ndias
+Just\nHeather
 zero
 Igua
 SlapJack
@@ -110,3 +110,5 @@ Wolverine
 Stupid\nHead
 Ocean's\nPudding
 Tef
+Posh
+Spanky\nSunshine
