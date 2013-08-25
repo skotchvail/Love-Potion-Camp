@@ -136,10 +136,10 @@ class CircularPong extends Drawer {
         float newRollAngle = rollAngle + deltaAngle;
         if (abs(angleDiff(targetRollAngle, newRollAngle)) > HALF_PADDLE_SPAN) {
           rollAngle = newRollAngle;
-          rollAngle += randomGaussian()*BALL_DIA/arenaRadius;
+          rollAngle += randomGaussian()*BALL_DIA/2/arenaRadius;
         } else {
           rollAngle = targetRollAngle;
-          rollAngle += randomGaussian()*BALL_RADIUS/2/arenaRadius;
+          rollAngle += randomGaussian()*BALL_RADIUS/4/arenaRadius;
         }
 
         // Add some noise
