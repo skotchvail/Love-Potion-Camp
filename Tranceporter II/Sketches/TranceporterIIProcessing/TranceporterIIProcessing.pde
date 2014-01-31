@@ -220,7 +220,7 @@ class MainClass {
     };
 
     settings.initOSC();
-    wiimoteManager.setup();
+    //wiimoteManager.setup();
     pm.init(applet);
 
     whichEffect.column = prefs.getInt("whichEffect.column", 1);
