@@ -26,14 +26,6 @@ class PacMan extends Drawer {
   }
 
   @Override
-  void wiimoteAccel(float x, float y, float z, float pitch, float roll, float tilt) {
-  }
-
-  @Override
-  void wiimoteButtons(int buttons) {
-  }
-
-  @Override
   void justEnteredSketch() {
     this.myFrameRate = round(frameRate) * 2;
   }

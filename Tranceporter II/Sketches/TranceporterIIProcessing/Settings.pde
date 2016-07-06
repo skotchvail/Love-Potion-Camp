@@ -72,16 +72,6 @@ class Settings implements OscPacketReceiver {
   static final String keyGlobalAutoChangeSpeed = "/sketches/autoChange";
   static final String keyGlobalAutoChangeSpeedLabel = "/sketches/autoChange_label";
 
-  /** Arguments (all floats): accelX, accelY, accelZ, pitch, roll, tilt */
-  static final String keyWiimoteAccel   = "/wiimoteControl/accel";
-  /** Arguments: buttons (int).  See {@link Wiimote}. */
-  static final String keyWiimoteButtons = "/wiimoteControl/buttons";
-  /** Arguments: Wiimote.path (String) */
-  static final String keyWiimoteConnected = "/wiimoteControl/connected";
-  /** Arguments: Wiimote.path (String) */
-  static final String keyWiimoteDisconnected = "/wiimoteControl/disconnected";
-  static final String wiimoteAddressStart = "/wii";
-
   Settings(int numBands) throws IllegalAccessException {
 
     //get the list of key constants
@@ -156,32 +146,6 @@ class Settings implements OscPacketReceiver {
         public void function() {
           main.currentMode().manualFlash = true;
         }});
-
-    actions.put(keyWiimoteAccel, new Function() {
-      public void function(Object[] args) {
-        if (args.length < 6) return;
-
-        double x = 1.0 - Math.abs((Float) args[4])/Math.PI;
-        double y = ((Float) args[3])/Math.PI;
-
-        main.wiimoteAccel(
-            (Float) args[0], (Float) args[1], (Float) args[2],
-            (Float) args[3], (Float) args[4], (Float) args[5]);
-      }});
-    actions.put(keyWiimoteButtons, new Function() {
-      public void function(Object[] args) {
-        if (args.length >= 1 && args[0] instanceof Integer) {
-          main.wiimoteButtons((Integer) args[0]);
-        }
-      }});
-    actions.put(keyWiimoteConnected, new Function() {
-      public void function(Object[] args) {
-        main.wiimoteConnected((String) args[0]);
-      }});
-    actions.put(keyWiimoteDisconnected, new Function() {
-      public void function(Object[] args) {
-        main.wiimoteDisconnected((String) args[0]);
-      }});
 
     paramGlobalMap = new HashMap<String, Float>();
     setParam(keyGlobalAutoChangeSpeed, prefs.getFloat(keyGlobalAutoChangeSpeed, 1.0f));
@@ -438,9 +402,6 @@ class Settings implements OscPacketReceiver {
 
     Function func = actions.get(addr);
     if (func != null) {
-      if (!addr.startsWith(wiimoteAddressStart)) {
-        println("\naction = " + addr);
-      }
       func.function(args);
       return;
     }

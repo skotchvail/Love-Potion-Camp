@@ -9,7 +9,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.prefs.Preferences;
 
-import com.qindesign.wii.Wiimote;
 import ddf.minim.AudioBuffer;
 import ddf.minim.AudioInput;
 import ddf.minim.AudioOutput;
@@ -156,13 +155,10 @@ class MainClass {
 
   PaletteManager pm;
   Settings settings;
-  WiimoteManager wiimoteManager;
-  private Set<String> connectedWiimotes = new HashSet<String>();
 
   MainClass() throws Exception {
     pm = new PaletteManager();
     settings = new Settings(NUM_BANDS);
-    wiimoteManager = new WiimoteManager(settings);
   }
 
   void setup(PApplet applet) {
@@ -204,8 +200,7 @@ class MainClass {
         new Paint(display, settings),             //2, 0
         new EyeMotion(display, settings),         //2, 1
         new Heart(display, settings),             //2, 2
-        new CircularPong(display, settings),      //2, 3
-        new PacMan(display, settings),            //2, 4
+        new PacMan(display, settings),            //2, 3
 
       },
       //column 3
@@ -220,7 +215,6 @@ class MainClass {
     };
 
     settings.initOSC();
-    //wiimoteManager.setup();
     pm.init(applet);
 
     whichEffect.column = prefs.getInt("whichEffect.column", 1);
@@ -277,9 +271,6 @@ class MainClass {
 
     Drawer mode = currentMode();
     mode.justEnteredSketch();
-    for (String path : connectedWiimotes) {
-      mode.wiimoteConnected(path);
-    }
 
     println("Done setup");
   }
@@ -538,9 +529,6 @@ class MainClass {
 
     Drawer mode = currentMode();
     mode.justEnteredSketch();
-    for (String path : connectedWiimotes) {
-      mode.wiimoteConnected(path);
-    }
   }
 
   void switchToDrawer(Drawer whichDrawer) {
@@ -561,60 +549,6 @@ class MainClass {
       println("Touch" + touchNum + " at " + nf(x, 1, 2) + " " + nf(y, 1, 2));
     }
     currentMode().setTouch(touchNum, x, y);
-  }
-
-  /**
-   * A Wiimote was detected.
-   */
-  void wiimoteConnected(String path) {
-    connectedWiimotes.add(path);
-    currentMode().wiimoteConnected(path);
-  }
-
-  /**
-   * A Wiimote connection was lost.
-   */
-  void wiimoteDisconnected(String path) {
-    connectedWiimotes.remove(path);
-    currentMode().wiimoteDisconnected(path);
-  }
-
-  /**
-   * A Wiimote just sent accelerometer data.  The angular values are computed from the X,Y,Z parameters.
-   *
-   * @param x acceleration in X, in the range -1.0f&ndash;1.0f
-   * @param y acceleration in Y, in the range -1.0f&ndash;1.0f
-   * @param z acceleration in Z, in the range -1.0f&ndash;1.0f
-   * @param pitch the pitch, in the range [0 (pointing up), &pi; (pointing down)]
-   * @param roll the roll, in the range [&pi; (top pointing left), 0 (top pointing right)] for the top pointing up,
-   *             and [-&pi; (top pointing left), 0 (top pointing right)] for the top pointing down
-   * @param tilt the tilt, in the range [-&pi;/2 (pointing down), &pi;/2 (pointing up)], where zero is flat; this
-   *        assumes the roll is at &pi/2;, i.e. "flat" and just tilting around the X-axis
-   * @see WiimoteMath
-   */
-  void wiimoteAccel(float x, float y, float z, float pitch, float roll, float tilt) {
-    currentMode().wiimoteAccel(x, y, z, pitch, roll, tilt);
-  }
-
-  /**
-   * Buttons have changed on a Wiimote.  This is only called when there is a change in state.  Individual buttons
-   * can be examined by using the button masks in {@link Wiimote}.
-   *
-   * @param buttons the buttons state
-   * @see Wiimote
-   */
-  void wiimoteButtons(int buttons) {
-//    String s = Integer.toBinaryString(buttons);
-//    if (s.length() < 13) {
-//      s = "0000000000000".substring(s.length()).concat(s);
-//    }
-//    System.out.println("Wiimote buttons: " + s);
-
-    if ((buttons & Wiimote.BUTTON_RIGHT) != 0) {
-      newEffect();
-    } else {
-      currentMode().wiimoteButtons(buttons);
-    }
   }
 
   void mouseClicked() {

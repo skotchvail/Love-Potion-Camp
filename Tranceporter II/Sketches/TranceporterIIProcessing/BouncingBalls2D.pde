@@ -1,7 +1,6 @@
 // Visualzation of boucing balls in 2D
 // Custom1: # of balls
 
-import com.qindesign.wii.WiimoteMath;
 import toxi.geom.Vec2D;
 
 class BouncingBalls2D extends Drawer {
@@ -10,7 +9,6 @@ class BouncingBalls2D extends Drawer {
   float startMomentum = 0.5;
   float maxMass = maxRadius*maxRadius;
   float kMaxGravity = 0.025;
-  float kMaxWiimoteGravity = 0.70;
   float kStickiness = 0.000;
   float kFriction   = 0.000;
   float kColorAlpha = 1.0;
@@ -115,14 +113,6 @@ class BouncingBalls2D extends Drawer {
     Vec2D dpos = new Vec2D(random(-1, 1), random(-1, 1));
     dpos = dpos.normalizeTo(startMomentum/mass);
     balls.add(new ball(pos, dpos, radius, col, mass));
-  }
-
-  void wiimoteAccel(float x, float y, float z, float pitch, float roll, float tilt) {
-    if (isSlosh) {
-      // Remember, X can exceed the range [-1.0, 1.0]
-      gravity.x = -(float) (x/ WiimoteMath.rho(x, y, z) * kMaxWiimoteGravity);
-      gravity.y = (float) (Math.signum(z) * WiimoteMath.mag(kMaxWiimoteGravity, gravity.x));
-    }
   }
 
   private Float lastAccel;
